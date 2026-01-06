@@ -25,7 +25,7 @@
     {
       "name": "enhancedcombathud",
       "type": "module",
-      "manifest": "https://theripper93.com/modules/enhancedcombathud/module.json"
+      "manifest": "https://raw.githubusercontent.com/theripper93/enhancedcombathud/master/module.json"
     }
   ],
   "url": "https://github.com/DonHuberto/enhancedcombathud-l5r5e",
