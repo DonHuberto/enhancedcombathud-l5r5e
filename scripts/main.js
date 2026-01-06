@@ -5,8 +5,23 @@ import { L5R5eHUD } from "./hud.js";
 /* -------------------------------------------------------------
  * Register the L5R5e HUD with Enhanced Combat HUD
  * ------------------------------------------------------------- */
-Hooks.once("init", () => {
-    console.log("EnhancedCombatHUD-L5R5e | Initializing L5R5e HUD");
+Hooks.once("ready", () => {
+    console.log("EnhancedCombatHUD-L5R5e | Ready hook fired");
+
+    // Ensure Enhanced Combat HUD is active
+    const ech = game.modules.get("enhancedcombathud");
+    if (!ech || !ech.active) {
+        console.error("EnhancedCombatHUD-L5R5e | ERROR: Enhanced Combat HUD module is not active!");
+        return;
+    }
+
+    // Ensure the global object exists
+    if (typeof EnhancedCombatHUD === "undefined") {
+        console.error("EnhancedCombatHUD-L5R5e | ERROR: EnhancedCombatHUD global object is missing!");
+        return;
+    }
+
+    console.log("EnhancedCombatHUD-L5R5e | Registering HUD with EnhancedCombatHUD");
 
     EnhancedCombatHUD.registerSystem("l5r5e", {
         label: "Legend of the Five Rings 5e",
@@ -26,7 +41,6 @@ Hooks.on("renderEnhancedCombatHUD", (app, html) => {
         const name = $el.data("tooltip");
         const description = $el.data("description");
 
-        // Foundry's built-in tooltip system
         $el.tooltipster({
             theme: "tooltipster-shadow",
             content: `
