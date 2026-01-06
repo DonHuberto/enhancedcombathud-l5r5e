@@ -1,0 +1,94 @@
+<div class="l5r5e-hud">
+
+  <!-- ========================= -->
+  <!--   ACTOR AVATAR + EFFECTS  -->
+  <!-- ========================= -->
+  <div class="actor-panel">
+
+    <!-- Avatar -->
+    <div class="avatar-wrapper">
+      <img src="{{actor.img}}" alt="{{actor.name}}" class="avatar-img" />
+
+      <!-- Active Effects -->
+      <div class="active-effects">
+        {{#each effects}}
+        <span class="effect-icon"
+              data-tooltip="{{name}}"
+              data-description="{{description}}">
+          <img src="{{icon}}" alt="{{name}}" />
+        </span>
+        {{/each}}
+      </div>
+    </div>
+
+    <!-- Resources -->
+    <div class="resource-display">
+
+      <div class="resource">
+        <label>Fatigue:</label>
+        <span class="{{fatigueColor}}">
+          {{resources.fatigue.value}} / {{resources.fatigue.max}}
+        </span>
+      </div>
+
+      <div class="resource">
+        <label>Strife:</label>
+        <span class="{{strifeColor}}">
+          {{resources.strife.value}} / {{resources.strife.max}}
+        </span>
+      </div>
+
+      <div class="resource">
+        <label>Void Points:</label>
+        <span>
+          {{resources.voidPoints.value}} / {{resources.voidPoints.max}}
+        </span>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ========================= -->
+  <!--      EQUIPPED WEAPONS     -->
+  <!-- ========================= -->
+  <section class="weapons">
+    {{#each weapons}}
+    <div class="weapon"
+         data-action="toggle-weapon"
+         data-id="{{id}}">
+      <span class="weapon-name">{{name}}</span>
+      <span class="weapon-state">
+        {{#if sheathed}}(Sheathed){{else}}(Ready){{/if}}
+      </span>
+    </div>
+    {{/each}}
+  </section>
+
+  <!-- ========================= -->
+  <!--     SKIRMISH ACTIONS      -->
+  <!-- ========================= -->
+  <section class="actions">
+    {{#each actions}}
+    <div class="action"
+            data-action="skirmish-action"
+            data-id="{{id}}">
+        <img class="action-icon" src="modules/enhancedcombathud-l5r5e/icons/{{id}}.svg" />
+        <span>{{label}}</span>
+    </div>
+    {{/each}}
+  </section>
+
+  <!-- ========================= -->
+  <!--        TECHNIQUES         -->
+  <!-- ========================= -->
+  <section class="techniques">
+    {{#each techniques}}
+    <div class="technique"
+         data-action="use-technique"
+         data-id="{{id}}">
+      {{name}}
+    </div>
+    {{/each}}
+  </section>
+
+</div>

@@ -1,0 +1,34 @@
+{
+  "id": "enhancedcombathud-l5r5e",
+  "title": "Enhanced Combat HUD – L5R5e",
+  "description": "Adds a custom Enhanced Combat HUD for the Legend of the Five Rings 5e system, including weapons, skirmish actions, techniques, resources, and active effects.",
+  "version": "1.0.0",
+  "authors": [
+    {
+      "name": "DonHuberto",
+      "url": "https://github.com/DonHuberto"
+    }
+  ],
+  "compatibility": {
+    "verified": "13"
+  },
+  "esmodules": [
+    "scripts/main.js"
+  ],
+  "styles": [
+    "styles/hud.css"
+  ],
+  "systems": [
+    "l5r5e"
+  ],
+  "dependencies": [
+    {
+      "name": "enhancedcombathud",
+      "type": "module",
+      "manifest": "https://theripper93.com/modules/enhancedcombathud/module.json"
+    }
+  ],
+  "url": "https://github.com/DonHuberto/enhancedcombathud-l5r5e",
+  "manifest": "https://raw.githubusercontent.com/DonHuberto/enhancedcombathud-l5r5e/main/module.json",
+  "download": "https://github.com/DonHuberto/enhancedcombathud-l5r5e/archive/refs/heads/main.zip"
+}
