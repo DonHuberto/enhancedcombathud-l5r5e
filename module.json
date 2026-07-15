@@ -1,34 +1,59 @@
 {
-  "id": "enhancedcombathud-l5r5e",
-  "title": "Enhanced Combat HUD – L5R5e",
-  "description": "Adds a custom Enhanced Combat HUD for the Legend of the Five Rings 5e system, including weapons, skirmish actions, techniques, resources, and active effects.",
-  "version": "1.0.0",
-  "authors": [
-    {
-      "name": "DonHuberto",
-      "url": "https://github.com/DonHuberto"
-    }
-  ],
-  "compatibility": {
-    "verified": "13"
-  },
-  "esmodules": [
-    "scripts/main.js"
-  ],
-  "styles": [
-    "styles/hud.css"
-  ],
-  "systems": [
-    "l5r5e"
-  ],
-  "dependencies": [
-    {
-      "name": "enhancedcombathud",
-      "type": "module",
-      "manifest": "https://raw.githubusercontent.com/theripper93/enhancedcombathud/master/module.json"
-    }
-  ],
-  "url": "https://github.com/DonHuberto/enhancedcombathud-l5r5e",
-  "manifest": "https://raw.githubusercontent.com/DonHuberto/enhancedcombathud-l5r5e/main/module.json",
-  "download": "https://github.com/DonHuberto/enhancedcombathud-l5r5e/archive/refs/heads/main.zip"
+    "id": "enhancedcombathud-l5r5e",
+    "title": "Argon - Character HUD (L5R5E)",
+    "description": "Legend of the Five Rings 5e system adapter for Argon. Provides an always-available character HUD and contextual Intrigue, Duel, Skirmish, and Mass Battle profiles.",
+    "version": "2.0.0",
+    "authors": [
+        {
+            "name": "DonHuberto",
+            "url": "https://github.com/DonHuberto"
+        }
+    ],
+    "compatibility": {
+        "minimum": "14",
+        "verified": "14",
+        "maximum": "14"
+    },
+    "esmodules": [
+        "scripts/main.js"
+    ],
+    "styles": [
+        "styles/hud.css"
+    ],
+    "languages": [
+        {
+            "lang": "en",
+            "name": "English",
+            "path": "languages/en.json"
+        },
+        {
+            "lang": "pl",
+            "name": "Polski",
+            "path": "languages/pl.json"
+        }
+    ],
+    "socket": true,
+    "relationships": {
+        "requires": [
+            {
+                "id": "enhancedcombathud",
+                "type": "module",
+                "compatibility": {
+                    "minimum": "5.0.1"
+                }
+            }
+        ],
+        "systems": [
+            {
+                "id": "l5r5e",
+                "type": "system",
+                "compatibility": {
+                    "minimum": "1.14.101"
+                }
+            }
+        ]
+    },
+    "url": "https://github.com/DonHuberto/enhancedcombathud-l5r5e",
+    "manifest": "https://github.com/DonHuberto/enhancedcombathud-l5r5e/releases/download/v2.0.0/module.json",
+    "download": "https://github.com/DonHuberto/enhancedcombathud-l5r5e/releases/download/v2.0.0/module.zip"
 }

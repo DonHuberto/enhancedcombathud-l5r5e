@@ -1,0 +1,185 @@
+{
+    "enhancedcombathud-l5r5e": {
+        "common": {
+            "confirm": "Potwierdź",
+            "empty": "Brak opisu.",
+            "yes": "Tak",
+            "no": "Nie"
+        },
+        "profiles": {
+            "universal": "Uniwersalny",
+            "intrigue": "Intryga",
+            "duel": "Pojedynek",
+            "skirmish": "Potyczka",
+            "mass_battle": "Bitwa masowa",
+            "select": "Wybierz profil HUD-u",
+            "select_hint": "Profil aktywnego konfliktu"
+        },
+        "resources": {
+            "fatigue": "Zmęczenie",
+            "strife": "Napięcie",
+            "void": "Pustka",
+            "focus": "Skupienie",
+            "vigilance": "Czujność",
+            "fatigue_tooltip": "Aktualne Zmęczenie i Wytrzymałość.",
+            "strife_tooltip": "Aktualne Napięcie i Opanowanie.",
+            "void_tooltip": "Aktualne i maksymalne Punkty Pustki.",
+            "focus_tooltip": "Skupienie określa przygotowaną inicjatywę i limit tajnej deklaracji w pojedynku.",
+            "vigilance_tooltip": "Czujność określa nieprzygotowaną inicjatywę i często przeciwstawia się akcjom Scheme."
+        },
+        "warnings": {
+            "high_strife": "Wysokie Napięcie",
+            "high_strife_tooltip": "Napięcie osiągnęło Opanowanie.",
+            "strife_over_composure": "Ponad Opanowanie",
+            "strife_over_composure_tooltip": "Napięcie przekracza Opanowanie.",
+            "fatigue_over_endurance": "Ponad Wytrzymałość",
+            "fatigue_over_endurance_tooltip": "Zmęczenie przekracza Wytrzymałość.",
+            "no_void": "Brak Punktów Pustki",
+            "no_void_tooltip": "Postać nie ma dostępnych Punktów Pustki.",
+            "compromised": "Compromised",
+            "compromised_tooltip": "System oznacza postać jako Compromised.",
+            "incapacitated": "Incapacitated",
+            "incapacitated_tooltip": "System oznacza postać jako Incapacitated.",
+            "dying": "Dying",
+            "dying_tooltip": "Postać ma stan Dying."
+        },
+        "social": {
+            "rank": "Ranga {value}",
+            "honor_tooltip": "Dokładna wartość Honoru oraz ranga dziesiątek.",
+            "glory_tooltip": "Dokładna wartość Chwały oraz ranga dziesiątek.",
+            "status_tooltip": "Dokładna wartość Statusu oraz ranga dziesiątek.",
+            "ninjo_tooltip": "Pokaż osobiste pragnienie postaci (Ninjō).",
+            "giri_tooltip": "Pokaż obowiązek postaci (Giri)."
+        },
+        "target": {
+            "unknown": "Nieznany cel",
+            "range": "Pasmo zasięgu: {value}",
+            "tn": "TN: {value}",
+            "stance": "Postawa: {value}",
+            "conditions": "Stany: {value}",
+            "weapon_in_range": "Przygotowana broń w zasięgu: {value}"
+        },
+        "drawer": { "title": "Postać L5R" },
+        "skills": {
+            "label": "Umiejętności",
+            "rank": "Ranga",
+            "generic": "Rzut ogólny / własny",
+            "generic_tooltip": "Otwórz systemowy Dice Picker, aby wybrać pierścień, umiejętność, TN, typy akcji, cel, pomoc i Punkt Pustki.",
+            "roll_tooltip": "Otwórz systemowy Dice Picker dla tej umiejętności i wybranego pierścienia.",
+            "categories": { "artisan": "Rzemieślnicze", "martial": "Wojenne", "scholar": "Uczone", "social": "Społeczne", "trade": "Handlowe" }
+        },
+        "peculiarities": {
+            "label": "Zalety / Wady",
+            "distinction": "Wyróżnienia",
+            "passion": "Pasje",
+            "adversity": "Przeciwności",
+            "anxiety": "Lęki"
+        },
+        "equipment": {
+            "label": "Wyposażenie",
+            "item": "Przedmiot",
+            "state": "Stan",
+            "equipped": "Wyposażony",
+            "readied": "Przygotowany",
+            "stowed": "Schowany",
+            "ready_short": "Got.",
+            "properties": "Właściwości",
+            "grip_1": "Chwyt 1",
+            "grip_2": "Chwyt 2",
+            "current_grip": "Aktualny chwyt",
+            "choose_weapon": "Wybierz broń",
+            "open_sheet": "Otwórz arkusz przedmiotu"
+        },
+        "techniques": {
+            "label": "Techniki",
+            "type": "Typ",
+            "availability": "Dostępność",
+            "available": "Można rzucić przez systemowy Dice Picker.",
+            "informational_only": "Tylko informacyjnie: brak strukturalnych danych umiejętności.",
+            "context_unknown": "Kontekst nie jest zapisany w przedmiocie; przed rzutem sprawdź legalność.",
+            "action_types": "Typy akcji",
+            "activation": "Aktywacja",
+            "conflict": "Konflikt",
+            "target": "Cel",
+            "range": "Zasięg",
+            "void_cost": "Koszt Pustki",
+            "effects": "Efekty",
+            "opportunity": "Okazja",
+            "types": {
+                "kata": "Kata", "kiho": "Kihō", "inversion": "Inwersja", "invocation": "Inwokacja", "ritual": "Rytuał", "shuji": "Shūji", "maho": "Mahō", "ninjutsu": "Ninjutsu", "mantra": "Mantra", "school_ability": "Zdolność szkoły", "mastery_ability": "Zdolność mistrzowska", "title_ability": "Zdolność tytułu", "specificity": "Własna"
+            }
+        },
+        "effects": {
+            "no_description": "Brak dostępnego opisu mechanicznego.",
+            "remaining": "Pozostało: {value}",
+            "rounds": "Czas trwania: {value} rund"
+        },
+        "unmask": {
+            "label": "Unmask",
+            "confirm": "Wykonać Unmask i usunąć całe aktualne Napięcie? Nie zużywa to zwykłej akcji.",
+            "description": "Forma Unmasking (opcjonalnie)",
+            "description_hint": "Dodaj krótki opis narracyjny do karty czatu.",
+            "default_message": "Postać wykonuje Unmask.",
+            "strife_removed": "Usunięte Napięcie"
+        },
+        "actions": {
+            "availability": "Dostępność",
+            "available": "Dostępne",
+            "generic_roll": { "label": "Własny rzut", "tooltip": "Otwiera systemowy Dice Picker bez zastępowania silnika Roll and Keep." },
+            "assist": { "label": "Assist", "tooltip": "Otwiera test Support dla wybranego celu." },
+            "calming_breath": { "label": "Calming Breath", "tooltip": "W konflikcie usuwa po 1 Zmęczenia i/lub Napięcia, gdy wartość przekracza połowę progu. Zużywa akcję, w tym dopuszczalną dodatkową akcję postawy Wody." },
+            "challenge": { "label": "Challenge", "tooltip": "Otwiera test Scheme przeciw aktualnemu celowi." },
+            "center": { "label": "Center", "tooltip": "Wybierz umiejętność, wykonaj systemowy rzut w Pustce i zapisz końcowe zatrzymane kości pojedynku.", "skill": "Umiejętność Center" },
+            "predict": { "label": "Predict", "tooltip": "Tajnie zadeklaruj przewidywany pierścień przeciwnika. Do ujawnienia zapisywany jest tylko skrót kryptograficzny.", "ring": "Przewidywany pierścień", "committed": "Tajne przewidywanie zostało zadeklarowane.", "result": "Trafne" },
+            "prepare_item": { "label": "Prepare Item", "tooltip": "Przygotowuje albo chowa broń przez aktualizację dokumentu Item." },
+            "strike": { "label": "Strike", "tooltip": "Wykonuje Strike przygotowaną bronią przez systemowy Dice Picker jako akcję Attack." },
+            "guard": { "label": "Guard", "tooltip": "Otwiera test Tactics Support i śledzi Guard w tej turze." },
+            "maneuver": { "label": "Maneuver", "tooltip": "Otwiera test Fitness Move i śledzi akcję niezależnie od darmowego ruchu." },
+            "wait": { "label": "Wait", "tooltip": "Zapisuje warunek wyzwalający i zużywa zwykłą akcję.", "condition": "Warunek wyzwalający" },
+            "custom_action": { "label": "Akcja własna", "tooltip": "Otwiera konfigurowalny test systemowy dla wyjątkowej akcji." },
+            "persuade": { "label": "Persuade", "tooltip": "Otwiera test Scheme. TN pochodzi z najwyższej Czujności celów i pozostaje ukryty, jeśli statystyki celu nie są jawne." },
+            "assault": { "label": "Assault", "tooltip": "Otwiera test Attack dla wybranego kontekstu bitwy masowej." },
+            "rally": { "label": "Rally", "tooltip": "Otwiera test Command Support dla wybranego kontekstu bitwy masowej." },
+            "reinforce": { "label": "Reinforce", "tooltip": "Otwiera test Labor lub Tactics Support dla wybranego kontekstu bitwy masowej." },
+            "staredown": { "label": "Staredown", "tooltip": "Dodaje obowiązkowe Napięcie rundy, tajnie deklaruje bid do Skupienia i ujawnia poprawne deklaracje równocześnie.", "bid": "Tajny bid", "committed": "Tajny bid został zadeklarowany." },
+            "concede": { "label": "Concede", "tooltip": "Poddaje pojedynek po potwierdzeniu.", "confirm": "Poddać ten pojedynek?" },
+            "free_movement": { "label": "Darmowy ruch", "tooltip": "Oznacza darmowy ruch w tej turze jako zużyty." }
+        },
+        "notifications": {
+            "core_missing": "Argon - Combat HUD (CORE) nie jest aktywny.",
+            "no_permission": "Nie masz uprawnień do zmiany tej postaci lub przedmiotu.",
+            "dice_picker_unavailable": "API systemowego Dice Pickera L5R jest niedostępne.",
+            "technique_informational": "{name} nie ma strukturalnych danych rzutu; otwarto arkusz techniki.",
+            "weapon_not_readied": "Broń {name} nie jest przygotowana.",
+            "no_target": "Nie wybrano prawidłowego celu.",
+            "no_active_gm": "Do rozstrzygnięcia tego ukrytego testu wymagany jest aktywny MG.",
+            "no_weapon": "Brak odpowiedniej broni.",
+            "no_readied_weapon": "Wymagana jest przygotowana broń.",
+            "strike_conflict_only": "Strike jest dostępny tylko w profilu konfliktowym; otwarto arkusz przedmiotu.",
+            "conflict_only": "Ta akcja jest dostępna tylko podczas aktywnego konfliktu.",
+            "no_action": "W tej turze nie pozostała odpowiednia akcja.",
+            "finishing_blow_available": "Finishing Blow jest teraz dostępne.",
+            "movement_used": "Darmowy ruch został już wykorzystany.",
+            "calming_breath_no_effect": "Ani Zmęczenie, ani Napięcie nie przekracza połowy swojego progu.",
+            "duel_participants": "Staredown wymaga co najmniej dwóch uczestników typu character.",
+            "bid_already_committed": "Bid w tej rundzie został już zadeklarowany.",
+            "favorite_added": "Przypięto {name} do HUD-u.",
+            "favorite_removed": "Usunięto {name} z ulubionych HUD-u."
+        },
+        "chat": {
+            "weapon_readied": "Przygotowano broń {name}.",
+            "weapon_stowed": "Schowano broń {name}."
+        },
+        "trackers": {
+            "configure": "Skonfiguruj tracker profilu",
+            "selection_required": "Istnieje kilka powiązanych rekordów; wybierz właściwy kontekst.",
+            "intrigue": {
+                "title": "Social Objective", "configure": "Skonfiguruj Social Objective", "objective": "Cel", "target": "Adresat", "targets": "Wybrane cele", "status_relation": "Relacja Statusu (postać / cel)", "momentum": "Momentum", "gained": "Uzyskane Momentum", "difficulty": "Trudność", "hidden_tn": "Ukryj TN przed graczami",
+                "objectives": { "appeal": "Appeal to a Person or Group", "discern": "Discern Someone’s Qualities", "discredit": "Discredit Someone", "rumor": "Spread a Rumor", "custom": "Własny cel" }
+            },
+            "duel": { "title": "Pojedynek", "configure": "Skonfiguruj pojedynek", "round": "Runda", "base_initiative": "Inicjatywa bazowa", "conditions": "Warunki", "target": "Cel pojedynku", "allowed_weapons": "Dozwolona broń", "staredown_strife": "Obowiązkowe Napięcie Staredown", "bid": "Zadeklarowany bid", "temporary_initiative": "Inicjatywa tymczasowa", "center": "Kości Center / wygaśnięcie", "predict": "Predict zadeklarowane / trafne", "finishing_blow": "Finishing Blow", "conceded": "Poddano pojedynek" },
+            "skirmish": { "title": "Potyczka", "action": "Dostępna akcja", "movement": "Darmowy ruch", "water_action": "Dodatkowa akcja Wody", "target_range": "Pasmo zasięgu celu", "weapon_range": "Zasięg przygotowanej broni", "weapon_in_range": "Przygotowana broń obejmuje cel", "maneuver": "Maneuver", "guard": "Guard", "wait": "Warunek Wait" },
+            "mass_battle": { "title": "Bitwa masowa", "configure": "Skonfiguruj bitwę masową", "select_army": "Wybierz armię", "select_cohort": "Wybierz kohortę", "army": "Armia", "cohort": "Kohorta", "cohort_readiness": "Kohorta: straty/siła; panika/dyscyplina", "casualties": "Casualties / Strength", "panic": "Panic / Discipline", "commander": "Dowódca", "leader": "Przywódca kohorty", "position": "Pozycja", "fortification": "Fortyfikacja (Trudność, redukcja Attrition)", "objective": "Strategic Objective", "momentum": "Momentum" }
+        }
+    }
+}

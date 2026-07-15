@@ -1,164 +1,345 @@
-/* ============================================================
-   ROOT HUD CONTAINER
-   ============================================================ */
-.l5r5e-hud {
-    display: flex;
-    flex-direction: row;
-    gap: 12px;
-    padding: 8px;
-    font-family: var(--font-primary);
-    color: var(--color-text-light-primary);
+.extended-combat-hud .portrait-hud:has(.l5r5e-portrait-panel) {
+    min-height: 610px;
+    min-width: 520px;
+    overflow: visible;
 }
 
-/* ============================================================
-   ACTOR PANEL (LEFT SIDE)
-   ============================================================ */
-.actor-panel {
+.extended-combat-hud .portrait-hud:has(.l5r5e-portrait-panel) .portrait-hud-image {
+    height: 285px;
+    mask-image: linear-gradient(to bottom, #000 58%, transparent 100%);
+}
+
+.extended-combat-hud .portrait-hud:has(.l5r5e-portrait-panel) .player-details {
+    max-width: calc(100% - 55px);
+}
+
+.extended-combat-hud .l5r5e-portrait-panel {
+    align-self: flex-end;
+    background: linear-gradient(155deg, rgb(26 18 19 / 94%), rgb(59 27 25 / 91%));
+    border: 1px solid rgb(196 151 92 / 58%);
+    box-shadow: 0 0 18px rgb(0 0 0 / 75%);
+    color: #f2e8d5;
+    display: grid;
+    gap: 0.45rem;
+    grid-template-columns: 1fr 1fr;
+    max-height: 390px;
+    overflow: auto;
+    padding: 0.65rem;
+    position: relative;
+    width: 100%;
+    z-index: 2;
+}
+
+.extended-combat-hud .l5r5e-resource-grid,
+.extended-combat-hud .l5r5e-rings,
+.extended-combat-hud .l5r5e-warnings,
+.extended-combat-hud .l5r5e-social-values,
+.extended-combat-hud .l5r5e-ninjo-giri {
+    display: flex;
+    gap: 0.3rem;
+}
+
+.extended-combat-hud .l5r5e-resource-grid,
+.extended-combat-hud .l5r5e-rings,
+.extended-combat-hud .l5r5e-warnings,
+.extended-combat-hud .l5r5e-armor-summary,
+.extended-combat-hud .l5r5e-target,
+.extended-combat-hud .l5r5e-profile-tracker {
+    grid-column: 1 / -1;
+}
+
+.extended-combat-hud .l5r5e-resource-grid {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
+.extended-combat-hud .l5r5e-resource {
+    background: linear-gradient(to right, rgb(145 54 42 / 42%) calc(var(--l5r5e-resource, 0) * 100%), rgb(10 10 10 / 50%) 0);
+    border: 1px solid rgb(216 182 126 / 35%);
     display: flex;
     flex-direction: column;
-    align-items: center;
-    min-width: 140px;
-    gap: 8px;
+    min-width: 0;
+    padding: 0.25rem;
+    text-align: center;
 }
 
-/* ============================================================
-   AVATAR + EFFECTS
-   ============================================================ */
-.avatar-wrapper {
+.extended-combat-hud .l5r5e-resource-label {
+    color: #d9c5a6;
+    font-size: 0.64rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.extended-combat-hud .l5r5e-resource-value {
+    font-family: var(--font-serif);
+    font-size: 1.1rem;
+}
+
+.extended-combat-hud .l5r5e-social-values {
+    justify-content: stretch;
+}
+
+.extended-combat-hud .l5r5e-social-value {
+    align-items: baseline;
+    background: rgb(0 0 0 / 28%);
+    border-bottom: 1px solid rgb(196 151 92 / 50%);
+    display: grid;
+    flex: 1;
+    grid-template-columns: 1fr auto;
+    padding: 0.25rem 0.35rem;
+}
+
+.extended-combat-hud .l5r5e-social-value small {
+    color: #baa889;
+    font-size: 0.58rem;
+    grid-column: 1 / -1;
+}
+
+.extended-combat-hud .l5r5e-ninjo-giri {
+    justify-content: flex-end;
     position: relative;
-    width: 120px;
-    height: 120px;
 }
 
-.avatar-img {
-    width: 100%;
+.extended-combat-hud .l5r5e-social-secret button,
+.extended-combat-hud .l5r5e-ring,
+.extended-combat-hud .l5r5e-armor-row {
+    background: rgb(19 12 13 / 78%);
+    border: 1px solid rgb(196 151 92 / 45%);
+    color: #f2e8d5;
+}
+
+.extended-combat-hud .l5r5e-social-secret button {
     height: 100%;
-    border-radius: 6px;
-    object-fit: cover;
-    border: 2px solid rgba(255, 255, 255, 0.15);
+    padding: 0.25rem 0.45rem;
 }
 
-/* Active effects row */
-.active-effects {
+.extended-combat-hud .l5r5e-social-secret button:hover,
+.extended-combat-hud .l5r5e-ring:hover,
+.extended-combat-hud .l5r5e-armor-row:hover {
+    border-color: #dfbd7d;
+    box-shadow: 0 0 8px rgb(223 189 125 / 35%);
+}
+
+.extended-combat-hud .l5r5e-social-secret {
+    position: relative;
+}
+
+.extended-combat-hud .l5r5e-social-popover {
+    background: #181011;
+    border: 1px solid #c4975c;
+    bottom: calc(100% + 0.35rem);
+    box-shadow: 0 5px 20px #000;
+    color: #f2e8d5;
+    left: 50%;
+    max-height: 220px;
+    min-width: 260px;
+    overflow: auto;
+    padding: 0.75rem;
     position: absolute;
-    top: -6px;
-    left: 0;
-    width: 100%;
+    transform: translateX(-50%);
+    z-index: 20;
+}
+
+.extended-combat-hud .l5r5e-rings {
+    justify-content: center;
+}
+
+.extended-combat-hud .l5r5e-ring {
+    align-items: center;
     display: flex;
-    gap: 4px;
-    justify-content: flex-start;
+    font-size: 1rem;
+    gap: 0.25rem;
+    justify-content: center;
+    min-height: 32px;
+    min-width: 54px;
+    padding: 0.2rem 0.45rem;
+}
+
+.extended-combat-hud .l5r5e-ring i {
+    font-size: 1.35rem;
+}
+
+.extended-combat-hud .l5r5e-ring.selected {
+    background: linear-gradient(145deg, #72372f, #2d1415);
+    border-color: #f0cf89;
+    box-shadow: inset 0 0 8px rgb(240 207 137 / 40%), 0 0 7px rgb(240 207 137 / 30%);
+}
+
+.extended-combat-hud .l5r5e-warnings {
     flex-wrap: wrap;
 }
 
-.effect-icon img {
-    width: 22px;
-    height: 22px;
-    border-radius: 4px;
-    border: 1px solid rgba(255, 255, 255, 0.25);
-    background: rgba(0, 0, 0, 0.4);
-    cursor: pointer;
+.extended-combat-hud .l5r5e-warning {
+    background: #702b27;
+    border: 1px solid #e89b81;
+    color: #fff2df;
+    font-size: 0.7rem;
+    padding: 0.15rem 0.35rem;
 }
 
-/* ============================================================
-   RESOURCES (Fatigue, Strife, Void Points)
-   ============================================================ */
-.resource-display {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
+.extended-combat-hud .l5r5e-warning-dying,
+.extended-combat-hud .l5r5e-warning-incapacitated,
+.extended-combat-hud .l5r5e-warning-fatigue_over_endurance,
+.extended-combat-hud .l5r5e-warning-strife_over_composure {
+    animation: l5r5e-pulse-warning 1.8s ease-in-out infinite;
+}
+
+.extended-combat-hud .l5r5e-armor-summary {
+    max-height: 74px;
+    overflow: auto;
+}
+
+.extended-combat-hud .l5r5e-armor-row {
+    align-items: center;
+    display: grid;
+    gap: 0.35rem;
+    grid-template-columns: 28px 1fr auto auto;
+    margin-bottom: 0.2rem;
+    padding: 0.2rem;
+    text-align: left;
     width: 100%;
-    text-align: center;
 }
 
-.resource {
+.extended-combat-hud .l5r5e-armor-row img,
+.extended-combat-hud .l5r5e-target img {
+    border: 0;
+    height: 28px;
+    object-fit: cover;
+    width: 28px;
+}
+
+.extended-combat-hud .l5r5e-resistance {
+    border-radius: 2px;
+    font-weight: 700;
+    padding: 0.1rem 0.3rem;
+}
+
+.extended-combat-hud .l5r5e-resistance.physical {
+    background: #4b4338;
+}
+
+.extended-combat-hud .l5r5e-resistance.supernatural {
+    background: #433250;
+}
+
+.extended-combat-hud .l5r5e-armor-properties {
+    color: #c9bfae;
+    grid-column: 2 / -1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.extended-combat-hud .l5r5e-target {
+    align-items: center;
+    background: rgb(0 0 0 / 28%);
+    border-left: 3px solid #a7764d;
     display: flex;
-    justify-content: space-between;
-    font-size: 13px;
-    padding: 2px 4px;
+    gap: 0.45rem;
+    padding: 0.3rem;
 }
 
-/* Color logic classes */
-.green {
-    color: #4CAF50;
+.extended-combat-hud .l5r5e-target-info {
+    display: grid;
+    flex: 1;
+    grid-template-columns: 1fr 1fr 1fr;
 }
 
-.yellow {
-    color: #FFC107;
+.extended-combat-hud .l5r5e-target-info strong {
+    grid-column: 1 / -1;
 }
 
-.red {
-    color: #F44336;
+.extended-combat-hud .l5r5e-target-range-valid {
+    color: #8fc9a0;
 }
 
-/* ============================================================
-   WEAPONS SECTION
-   ============================================================ */
-.weapons {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    min-width: 160px;
+.extended-combat-hud .l5r5e-target-range-invalid {
+    color: #e29898;
 }
 
-.weapon {
-    display: flex;
-    justify-content: space-between;
-    padding: 4px 6px;
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 4px;
-    cursor: pointer;
-    transition: background 0.15s ease;
+.extended-combat-hud .l5r5e-profile-tracker {
+    background: rgb(5 4 4 / 35%);
+    border-top: 1px solid rgb(196 151 92 / 45%);
+    padding: 0.35rem;
 }
 
-.weapon:hover {
-    background: rgba(255, 255, 255, 0.12);
+.extended-combat-hud .l5r5e-profile-tracker h4 {
+    color: #e4c996;
+    margin: 0 0 0.2rem;
 }
 
-.weapon-name {
-    font-weight: 500;
+.extended-combat-hud .l5r5e-profile-tracker dl,
+.argon-l5r5e-chat-card dl {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    margin: 0;
 }
 
-/* ============================================================
-   SKIRMISH ACTIONS
-   ============================================================ */
-.actions {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    min-width: 140px;
+.extended-combat-hud .l5r5e-profile-tracker dt,
+.extended-combat-hud .l5r5e-profile-tracker dd,
+.argon-l5r5e-chat-card dt,
+.argon-l5r5e-chat-card dd {
+    border-bottom: 1px dotted rgb(196 151 92 / 25%);
+    margin: 0;
+    padding: 0.1rem 0.25rem;
 }
 
-.action {
-    padding: 4px 6px;
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 4px;
-    cursor: pointer;
-    text-align: center;
-    transition: background 0.15s ease;
+.extended-combat-hud .action-element.l5r5e-disabled {
+    cursor: not-allowed;
+    filter: grayscale(1) brightness(0.55);
 }
 
-.action:hover {
-    background: rgba(255, 255, 255, 0.12);
+.extended-combat-hud .action-element.l5r5e-finishing-blow {
+    animation: l5r5e-finishing-blow 1.1s ease-in-out infinite alternate;
+    outline: 2px solid #f2c85b;
 }
 
-/* ============================================================
-   TECHNIQUES
-   ============================================================ */
-.techniques {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    min-width: 180px;
+.extended-combat-hud .feature-element.l5r5e-readied {
+    box-shadow: inset 0 0 0 3px #d6b466;
 }
 
-.technique {
-    padding: 4px 6px;
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 4px;
-    cursor: pointer;
-    transition: background 0.15s ease;
+.extended-combat-hud .feature-element.l5r5e-favorite:after {
+    color: #f1cf62;
+    content: "★";
+    font-size: 1.2rem;
+    position: absolute;
+    right: 0.2rem;
+    text-shadow: 0 1px 2px #000;
+    top: 0.1rem;
 }
 
-.technique:hover {
-    background: rgba(255, 255, 255, 0.12);
+.extended-combat-hud .feature-element.l5r5e-informational {
+    filter: grayscale(0.8) brightness(0.72);
+}
+
+.extended-combat-hud .hidden,
+.l5r5e-social-popover.hidden {
+    display: none !important;
+}
+
+.l5r5e-tooltip .ech-tooltip-body {
+    max-height: 42vh;
+    overflow: auto;
+}
+
+.argon-l5r5e-chat-card {
+    border: 1px solid #8a5c43;
+    padding: 0.6rem;
+}
+
+.argon-l5r5e-chat-card h3 {
+    border-bottom: 1px solid #8a5c43;
+    color: #6b1f1d;
+    margin-top: 0;
+}
+
+@keyframes l5r5e-pulse-warning {
+    50% { box-shadow: 0 0 9px #e84d38; }
+}
+
+@keyframes l5r5e-finishing-blow {
+    from { filter: brightness(0.9); }
+    to { filter: brightness(1.45) drop-shadow(0 0 8px #f2c85b); }
 }

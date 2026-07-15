@@ -1,0 +1,262 @@
+{
+    "enhancedcombathud-l5r5e": {
+        "common": {
+            "confirm": "Confirm",
+            "empty": "No description provided.",
+            "yes": "Yes",
+            "no": "No"
+        },
+        "profiles": {
+            "universal": "Universal",
+            "intrigue": "Intrigue",
+            "duel": "Duel",
+            "skirmish": "Skirmish",
+            "mass_battle": "Mass Battle",
+            "select": "Select HUD profile",
+            "select_hint": "Profile for the active conflict"
+        },
+        "resources": {
+            "fatigue": "Fatigue",
+            "strife": "Strife",
+            "void": "Void",
+            "focus": "Focus",
+            "vigilance": "Vigilance",
+            "fatigue_tooltip": "Current Fatigue and Endurance.",
+            "strife_tooltip": "Current Strife and Composure.",
+            "void_tooltip": "Current and maximum Void Points.",
+            "focus_tooltip": "Focus determines prepared initiative and limits the secret duel bid.",
+            "vigilance_tooltip": "Vigilance determines unprepared initiative and often opposes Scheme actions."
+        },
+        "warnings": {
+            "high_strife": "High Strife",
+            "high_strife_tooltip": "Strife has reached Composure.",
+            "strife_over_composure": "Over Composure",
+            "strife_over_composure_tooltip": "Strife exceeds Composure.",
+            "fatigue_over_endurance": "Over Endurance",
+            "fatigue_over_endurance_tooltip": "Fatigue exceeds Endurance.",
+            "no_void": "No Void Points",
+            "no_void_tooltip": "The character has no Void Points available.",
+            "compromised": "Compromised",
+            "compromised_tooltip": "The system reports the character as Compromised.",
+            "incapacitated": "Incapacitated",
+            "incapacitated_tooltip": "The system reports the character as Incapacitated.",
+            "dying": "Dying",
+            "dying_tooltip": "The character has the Dying condition."
+        },
+        "social": {
+            "rank": "Rank {value}",
+            "honor_tooltip": "Exact Honor value and its tens rank.",
+            "glory_tooltip": "Exact Glory value and its tens rank.",
+            "status_tooltip": "Exact Status value and its tens rank.",
+            "ninjo_tooltip": "Show the character's personal desire (Ninjō).",
+            "giri_tooltip": "Show the character's duty (Giri)."
+        },
+        "target": {
+            "unknown": "Unknown target",
+            "range": "Range band: {value}",
+            "tn": "TN: {value}",
+            "stance": "Stance: {value}",
+            "conditions": "Conditions: {value}",
+            "weapon_in_range": "Readied weapon in range: {value}"
+        },
+        "drawer": {
+            "title": "L5R Character"
+        },
+        "skills": {
+            "label": "Skills",
+            "rank": "Rank",
+            "generic": "Generic / Custom Roll",
+            "generic_tooltip": "Open the system Dice Picker to choose ring, skill, TN, action types, target, assistance, and Void Point.",
+            "roll_tooltip": "Open the system Dice Picker for this skill and the currently selected ring.",
+            "categories": {
+                "artisan": "Artisan",
+                "martial": "Martial",
+                "scholar": "Scholar",
+                "social": "Social",
+                "trade": "Trade"
+            }
+        },
+        "peculiarities": {
+            "label": "Advantages / Disadvantages",
+            "distinction": "Distinctions",
+            "passion": "Passions",
+            "adversity": "Adversities",
+            "anxiety": "Anxieties"
+        },
+        "equipment": {
+            "label": "Equipment",
+            "item": "Item",
+            "state": "State",
+            "equipped": "Equipped",
+            "readied": "Readied",
+            "stowed": "Stowed",
+            "ready_short": "Rdy",
+            "properties": "Properties",
+            "grip_1": "Grip 1",
+            "grip_2": "Grip 2",
+            "current_grip": "Current grip",
+            "choose_weapon": "Choose a weapon",
+            "open_sheet": "Open item sheet"
+        },
+        "techniques": {
+            "label": "Techniques",
+            "type": "Type",
+            "availability": "Availability",
+            "available": "May be rolled through the system Dice Picker.",
+            "informational_only": "Informational only: no structured skill metadata.",
+            "context_unknown": "Context is not encoded in the item; verify legality before rolling.",
+            "action_types": "Action types",
+            "activation": "Activation",
+            "conflict": "Conflict",
+            "target": "Target",
+            "range": "Range",
+            "void_cost": "Void cost",
+            "effects": "Effects",
+            "opportunity": "Opportunity",
+            "types": {
+                "kata": "Kata",
+                "kiho": "Kihō",
+                "inversion": "Inversion",
+                "invocation": "Invocation",
+                "ritual": "Ritual",
+                "shuji": "Shūji",
+                "maho": "Mahō",
+                "ninjutsu": "Ninjutsu",
+                "mantra": "Mantra",
+                "school_ability": "School Ability",
+                "mastery_ability": "Mastery Ability",
+                "title_ability": "Title Ability",
+                "specificity": "Custom"
+            }
+        },
+        "effects": {
+            "no_description": "No mechanical description is available.",
+            "remaining": "Remaining: {value}",
+            "rounds": "Duration: {value} rounds"
+        },
+        "unmask": {
+            "label": "Unmask",
+            "confirm": "Unmask and remove all current Strife? This does not consume the normal action.",
+            "description": "Form of Unmasking (optional)",
+            "description_hint": "Add a short narrative description for the chat card.",
+            "default_message": "The character unmasks.",
+            "strife_removed": "Strife removed"
+        },
+        "actions": {
+            "availability": "Availability",
+            "available": "Available",
+            "generic_roll": { "label": "Custom Roll", "tooltip": "Open the system Dice Picker without replacing the L5R Roll and Keep engine." },
+            "assist": { "label": "Assist", "tooltip": "Open a Support check for the selected target." },
+            "calming_breath": { "label": "Calming Breath", "tooltip": "During a conflict, remove 1 Fatigue and/or 1 Strife when each value exceeds half its threshold. Uses an action, including the eligible Water stance extra action." },
+            "challenge": { "label": "Challenge", "tooltip": "Open a Scheme check against the current target." },
+            "center": { "label": "Center", "tooltip": "Choose a skill, roll through the system picker in Void, and record the final kept dice for this duel.", "skill": "Skill to center" },
+            "predict": { "label": "Predict", "tooltip": "Commit a secret ring prediction for the targeted opponent. Only a hash is stored until reveal.", "ring": "Predicted ring", "committed": "A secret prediction has been committed.", "result": "Correct" },
+            "prepare_item": { "label": "Prepare Item", "tooltip": "Ready or stow a weapon through an Item document update." },
+            "strike": { "label": "Strike", "tooltip": "Strike with a readied weapon through the system Dice Picker as an Attack action." },
+            "guard": { "label": "Guard", "tooltip": "Open the Tactics Support check and track Guard for this turn." },
+            "maneuver": { "label": "Maneuver", "tooltip": "Open a Fitness Move check and track the action separately from free movement." },
+            "wait": { "label": "Wait", "tooltip": "Record a trigger condition and spend the normal action.", "condition": "Trigger condition" },
+            "custom_action": { "label": "Unique / Custom", "tooltip": "Open a configurable system check for a unique action." },
+            "persuade": { "label": "Persuade", "tooltip": "Open a Scheme check. TN uses the highest targeted Vigilance and remains hidden when the target's data is not observable." },
+            "assault": { "label": "Assault", "tooltip": "Open an Attack check for the selected Mass Battle context." },
+            "rally": { "label": "Rally", "tooltip": "Open a Command Support check for the selected Mass Battle context." },
+            "reinforce": { "label": "Reinforce", "tooltip": "Open a Labor or Tactics Support check for the selected Mass Battle context." },
+            "staredown": { "label": "Staredown", "tooltip": "Apply mandatory round Strife, commit a secret bid up to Focus, and reveal all valid commitments together.", "bid": "Secret bid", "committed": "The secret bid has been committed." },
+            "concede": { "label": "Concede", "tooltip": "Concede the duel after confirmation.", "confirm": "Concede this duel?" },
+            "free_movement": { "label": "Free Movement", "tooltip": "Mark free movement as used for this turn." }
+        },
+        "notifications": {
+            "core_missing": "Argon - Combat HUD (CORE) is not active.",
+            "no_permission": "You do not have permission to update this character or item.",
+            "dice_picker_unavailable": "The L5R system Dice Picker API is unavailable.",
+            "technique_informational": "{name} has no structured roll metadata; its sheet was opened instead.",
+            "weapon_not_readied": "{name} is not readied.",
+            "no_target": "No valid target is selected.",
+            "no_active_gm": "An active GM is required to resolve this hidden check.",
+            "no_weapon": "No matching weapon is available.",
+            "no_readied_weapon": "A readied weapon is required.",
+            "strike_conflict_only": "Strike is available only in a conflict profile; the item sheet was opened.",
+            "conflict_only": "This action is available only during an active conflict.",
+            "no_action": "No eligible action remains for this turn.",
+            "finishing_blow_available": "Finishing Blow is available now.",
+            "movement_used": "Free movement has already been used.",
+            "calming_breath_no_effect": "Neither Fatigue nor Strife exceeds half its threshold.",
+            "duel_participants": "A Staredown requires at least two character combatants.",
+            "bid_already_committed": "A bid was already committed for this round.",
+            "favorite_added": "Pinned {name} to the HUD.",
+            "favorite_removed": "Removed {name} from HUD favorites."
+        },
+        "chat": {
+            "weapon_readied": "Readied {name}.",
+            "weapon_stowed": "Stowed {name}."
+        },
+        "trackers": {
+            "configure": "Configure profile tracker",
+            "selection_required": "Multiple linked records exist; select the intended context.",
+            "intrigue": {
+                "title": "Social Objective",
+                "configure": "Configure Social Objective",
+                "objective": "Objective",
+                "target": "Target",
+                "targets": "Selected targets",
+                "status_relation": "Status relation (self / target)",
+                "momentum": "Momentum",
+                "gained": "Momentum gained",
+                "difficulty": "Difficulty",
+                "hidden_tn": "Hide TN from players",
+                "objectives": {
+                    "appeal": "Appeal to a Person or Group",
+                    "discern": "Discern Someone's Qualities",
+                    "discredit": "Discredit Someone",
+                    "rumor": "Spread a Rumor",
+                    "custom": "Custom Objective"
+                }
+            },
+            "duel": {
+                "title": "Duel",
+                "configure": "Configure Duel",
+                "round": "Round",
+                "base_initiative": "Initiative",
+                "conditions": "Conditions",
+                "target": "Duel target",
+                "allowed_weapons": "Allowed weapons",
+                "staredown_strife": "Mandatory Staredown Strife",
+                "bid": "Declared bid",
+                "temporary_initiative": "Temporary initiative",
+                "center": "Reserved Center dice / expiry",
+                "predict": "Predict committed / correct",
+                "finishing_blow": "Finishing Blow",
+                "conceded": "Conceded"
+            },
+            "skirmish": {
+                "title": "Skirmish",
+                "action": "Action available",
+                "movement": "Free movement",
+                "water_action": "Water extra action",
+                "target_range": "Target range band",
+                "weapon_range": "Readied weapon range",
+                "weapon_in_range": "Readied weapon covers target",
+                "maneuver": "Maneuver",
+                "guard": "Guard",
+                "wait": "Wait condition"
+            },
+            "mass_battle": {
+                "title": "Mass Battle",
+                "configure": "Configure Mass Battle",
+                "select_army": "Select Army",
+                "select_cohort": "Select Cohort",
+                "army": "Army",
+                "cohort": "Cohort",
+                "cohort_readiness": "Cohort casualties/strength; panic/discipline",
+                "casualties": "Casualties / Strength",
+                "panic": "Panic / Discipline",
+                "commander": "Commander",
+                "leader": "Cohort leader",
+                "position": "Position",
+                "fortification": "Fortification (Difficulty, Attrition Reduction)",
+                "objective": "Strategic Objective",
+                "momentum": "Momentum"
+            }
+        }
+    }
+}

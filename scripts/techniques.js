@@ -1,31 +1,178 @@
-// techniques.js
+import { ACTION_ICONS, MODULE_ID, TECHNIQUE_TYPES } from "./config.js";
+import { collectTechniques, getTechniqueType } from "./data.js";
+import { getTechniqueLabel, openTechniqueRoll } from "./rolls.js";
+import { getProfile } from "./state.js";
+import { enrichText, escapeHtml, getSourceLabel, notify } from "./utils.js";
 
-/* -------------------------------------------------------------
- * Extract all techniques known by the actor
- * ------------------------------------------------------------- */
-export function getTechniques(actor) {
-    return actor.items.filter(item =>
-        item.type === "technique"
-    );
+const FAVORITES_FLAG = "favoriteTechniques";
+
+export function getFavoriteTechniqueIds(actor) {
+    return new Set(actor?.getFlag?.(MODULE_ID, FAVORITES_FLAG) ?? []);
 }
 
-/* -------------------------------------------------------------
- * Use a technique (basic chat-card style)
- * ------------------------------------------------------------- */
-export function useTechnique(actor, techniqueId) {
-    const technique = actor.items.get(techniqueId);
-    if (!technique) return;
+export async function toggleFavoriteTechnique(actor, item) {
+    const ids = getFavoriteTechniqueIds(actor);
+    if (ids.has(item.uuid)) ids.delete(item.uuid);
+    else ids.add(item.uuid);
+    await actor.setFlag(MODULE_ID, FAVORITES_FLAG, Array.from(ids));
+    ui.ARGON?.refresh();
+}
 
-    const name = technique.name;
-    const description = technique.system?.description ?? "";
+export function getTechniqueAvailability(item, profile) {
+    const hasRoll = !!String(item?.system?.skill ?? "").trim();
+    if (!hasRoll) return { usable: false, reason: `${MODULE_ID}.techniques.informational_only` };
+    if (profile === "universal" && getTechniqueType(item) !== "ritual") {
+        return { usable: false, uncertain: true, reason: `${MODULE_ID}.techniques.context_unknown` };
+    }
+    return { usable: true, uncertain: false, reason: null };
+}
 
-    ChatMessage.create({
-        speaker: ChatMessage.getSpeaker({ actor }),
-        content: `
-            <div class="l5r-technique-card">
-                <h2>${name}</h2>
-                <div>${description}</div>
-            </div>
-        `
-    });
+function metadataValue(value) {
+    if (value === null || value === undefined || value === "") return null;
+    if (Array.isArray(value)) return value.map(metadataValue).filter(Boolean).join(", ");
+    if (typeof value === "object") {
+        return Object.entries(value)
+            .filter(([, entry]) => entry !== false && entry !== null && entry !== undefined && entry !== "")
+            .map(([key, entry]) => (entry === true ? key : `${key}: ${entry}`))
+            .join(", ");
+    }
+    return String(value);
+}
+
+function localizedSkillList(value) {
+    return String(value ?? "")
+        .split(",")
+        .map((entry) => entry.trim())
+        .filter(Boolean)
+        .map((id) => {
+            const category = CONFIG.l5r5e?.skills?.get(id);
+            const key = category ? `l5r5e.skills.${category}.${id}` : `l5r5e.skills.${id}.title`;
+            const translated = game.i18n.localize(key);
+            return translated === key ? id : translated;
+        })
+        .join(", ");
+}
+
+export async function getTechniqueTooltip(item, actor) {
+    const type = getTechniqueType(item);
+    const profile = getProfile(actor);
+    const availability = getTechniqueAvailability(item, profile);
+    const details = [
+        { label: `${MODULE_ID}.techniques.type`, value: escapeHtml(getTechniqueLabel(type)) },
+        {
+            label: "l5r5e.rings.label",
+            value: escapeHtml(item.system?.ring ? game.i18n.localize(`l5r5e.rings.${item.system.ring}`) : "—"),
+        },
+        { label: "l5r5e.skills.title", value: escapeHtml(localizedSkillList(item.system?.skill) || "—") },
+        { label: "l5r5e.dice.dicepicker.difficulty_title", value: escapeHtml(item.system?.difficulty || "—") },
+        {
+            label: `${MODULE_ID}.techniques.availability`,
+            value: game.i18n.localize(availability.reason ?? `${MODULE_ID}.techniques.available`),
+        },
+    ];
+
+    const optionalDetails = {
+        action_types: item.system?.action_types ?? item.system?.actions,
+        activation: item.system?.activation,
+        conflict: item.system?.conflict_type ?? item.system?.conflict,
+        target: item.system?.target,
+        range: item.system?.range,
+        void_cost: item.system?.void_cost ?? item.system?.void,
+        effects: item.system?.effects,
+        opportunity: item.system?.opportunities ?? item.system?.opportunity,
+    };
+    for (const [key, raw] of Object.entries(optionalDetails)) {
+        const value = metadataValue(raw);
+        if (value) details.push({ label: `${MODULE_ID}.techniques.${key}`, value: escapeHtml(value) });
+    }
+
+    return {
+        title: escapeHtml(item.name),
+        subtitle: escapeHtml(getTechniqueLabel(type)),
+        description: await enrichText(item.system?.description, { relativeTo: item }),
+        details,
+        properties: [],
+        footerText: [getSourceLabel(item)].filter(Boolean),
+    };
+}
+
+export function createTechniqueClasses(ARGON) {
+    class L5R5eTechniqueButton extends ARGON.MAIN.BUTTONS.ItemButton {
+        get hasTooltip() {
+            return true;
+        }
+
+        get isFavorite() {
+            return getFavoriteTechniqueIds(this.actor).has(this.item?.uuid);
+        }
+
+        async getTooltipData() {
+            return getTechniqueTooltip(this.item, this.actor);
+        }
+
+        async _onLeftClick() {
+            const availability = getTechniqueAvailability(this.item, getProfile(this.actor));
+            if (availability.usable) return openTechniqueRoll(this.actor, this.item);
+            notify(availability.reason, "info");
+            return this.item?.sheet?.render(true);
+        }
+
+        async _onRightClick(event) {
+            if (event.shiftKey) {
+                await toggleFavoriteTechnique(this.actor, this.item);
+                notify(
+                    this.isFavorite ? `${MODULE_ID}.notifications.favorite_added` : `${MODULE_ID}.notifications.favorite_removed`,
+                    "info",
+                    { name: this.item.name },
+                );
+                return;
+            }
+            this.item?.sheet?.render(true);
+        }
+
+        async _renderInner() {
+            await super._renderInner();
+            this.element.classList.toggle("l5r5e-favorite", this.isFavorite);
+            this.element.classList.toggle("l5r5e-informational", !getTechniqueAvailability(this.item, getProfile(this.actor)).usable);
+        }
+    }
+
+    class L5R5eTechniquesPanelButton extends ARGON.MAIN.BUTTONS.ButtonPanelButton {
+        get id() {
+            return "l5r5e-techniques";
+        }
+
+        get label() {
+            return `${MODULE_ID}.techniques.label`;
+        }
+
+        get icon() {
+            return ACTION_ICONS.techniques;
+        }
+
+        async _getPanel() {
+            const favorites = getFavoriteTechniqueIds(this.actor);
+            const techniques = collectTechniques(this.actor).sort((a, b) => {
+                const favoriteDiff = Number(favorites.has(b.uuid)) - Number(favorites.has(a.uuid));
+                return favoriteDiff || a.name.localeCompare(b.name, game.i18n.lang);
+            });
+            const categories = [];
+            for (const type of TECHNIQUE_TYPES) {
+                const items = techniques.filter((item) => getTechniqueType(item) === type);
+                if (!items.length) continue;
+                categories.push(
+                    new ARGON.MAIN.BUTTON_PANELS.ACCORDION.AccordionPanelCategory({
+                        label: getTechniqueLabel(type),
+                        buttons: items.map((item) => new L5R5eTechniqueButton({ item })),
+                    }),
+                );
+            }
+            return new ARGON.MAIN.BUTTON_PANELS.ACCORDION.AccordionPanel({
+                id: this.id,
+                accordionPanelCategories: categories,
+            });
+        }
+    }
+
+    return { L5R5eTechniqueButton, L5R5eTechniquesPanelButton };
 }

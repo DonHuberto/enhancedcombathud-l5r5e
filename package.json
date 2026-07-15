@@ -1,0 +1,8 @@
+{
+    "name": "enhancedcombathud-l5r5e",
+    "private": true,
+    "type": "module",
+    "scripts": {
+        "test": "node --test"
+    }
+}
