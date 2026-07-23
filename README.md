@@ -10,7 +10,7 @@ Adapter systemu **Legend of the Five Rings 5e** do modułu **Argon – Combat HU
 
 ## Instalacja lokalna
 
-Umieść katalog `enhancedcombathud-l5r5e` w `Data/modules`, włącz Argon i ten adapter w świecie L5R5e, a następnie przeładuj świat. Gracz powinien mieć przypisaną postać typu `character`; przy włączonym trybie Argon `alwaysOn` HUD może być związany z tą postacią bez zaznaczania tokena.
+Umieść katalog `enhancedcombathud-l5r5e` w `Data/modules`, włącz Argon i ten adapter w świecie L5R5e, a następnie przeładuj świat. HUD obsługuje aktorów `character` i `npc`, jeśli użytkownik jest MG lub ma uprawnienie OWNER; `army` pozostaje poza zakresem.
 
 ## Zakres
 
@@ -28,7 +28,7 @@ Testy obejmują manifest, zgodność kluczy polskiej i angielskiej lokalizacji, 
 
 ## Ręczna weryfikacja w Foundry VTT 14
 
-1. **Universal:** zakończ aktywny Combat, przypisz użytkownikowi postać `character` i włącz `alwaysOn` w Argonie. Sprawdź zasoby, Honor/Glory/Status, Ninjō/Giri, efekty, zmianę pierścienia, Drawer umiejętności, Generic Roll, ekwipunek, techniki i trzy zestawy broni. Actor typu `npc` albo `army` powinien zostać odrzucony przez CORE.
+1. **Universal:** zakończ aktywny Combat, przypisz użytkownikowi postać `character` lub zaznacz jako MG token `npc`. Sprawdź zasoby, efekty, zmianę pierścienia, Drawer umiejętności/grup umiejętności NPC, Generic Roll, ekwipunek, techniki i zestawy broni. Actor typu `army` powinien zostać odrzucony.
 2. **Intrigue:** przed rozpoczęciem walki wybierz w systemowym trackerze Initiative Encounter `intrigue`. Jako GM skonfiguruj Social Objective z przycisku portretu, zaznacz cele i wykonaj Persuade. Na koncie gracza sprawdź, że nieobserwowalna Czujność daje `?`, a Dice Picker otwiera się z ukrytym TN przez aktywnego GM. Po zakończonym udanym rzucie sprawdź Momentum.
 3. **Duel:** wybierz `duel`, zaznacz przeciwnika i skonfiguruj warunki oraz dozwoloną broń. Obaj uczestnicy deklarują Staredown; wartości powinny ujawnić się dopiero po obu zobowiązaniach, a inicjatywa wrócić do bazowej po zmianie rundy. Sprawdź Center po zakończeniu Roll and Keep, Predict po zmianie postawy celu, Concede oraz wyróżniony Strike/Finishing Blow po Compromised albo Unmask przeciwnika.
 4. **Skirmish:** wybierz `skirmish`. Sprawdź akcję, darmowy ruch, dodatkową akcję Wody bez testu, Prepare Item, Guard, Maneuver i Wait. Po zaznaczeniu celu tracker powinien pokazać pasmo zasięgu, zasięg przygotowanej broni i informację, czy broń obejmuje cel.

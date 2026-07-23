@@ -1,6 +1,6 @@
 import { MODULE_ID } from "../config.js";
 import { openDicePicker } from "../rolls.js";
-import { consumeAction, getActionSlot } from "../state.js";
+import { getActionSlot } from "../state.js";
 import { getMassBattleCandidates } from "./tracker.js";
 import { getTargetToken, notify, promptSelect } from "../utils.js";
 
@@ -42,7 +42,7 @@ async function selectContext(actor) {
 }
 
 export async function executeMassBattleAction(actor, actionId) {
-    if (!getActionSlot(actor, { requiresCheck: true })) {
+    if (!getActionSlot(actor, { actionId })) {
         notify(`${MODULE_ID}.notifications.no_action`, "warn");
         return false;
     }
@@ -55,9 +55,10 @@ export async function executeMassBattleAction(actor, actionId) {
     };
     const dialog = openDicePicker(actor, {
         ...(configs[actionId] ?? configs.assault),
+        actionId,
+        rollContext: { actionId },
         target: getTargetToken(),
     });
     if (!dialog) return false;
-    await consumeAction(actor, { requiresCheck: true });
     return true;
 }

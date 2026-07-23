@@ -2,7 +2,13 @@ import { MODULE_ID, PROFILES } from "./config.js";
 
 const PROFILE_FLAG = "profile";
 const ENCOUNTER_FLAG = "encounterType";
-const TURN_FLAG = "turnState";
+const LEGACY_TURN_FLAG = "turnState";
+export const SUPPORTED_ACTOR_TYPES = Object.freeze(["character", "npc"]);
+
+export function canUseActor(actor, user = game.user) {
+    return SUPPORTED_ACTOR_TYPES.includes(actor?.type) &&
+        Boolean(user?.isGM || actor?.testUserPermission?.(user, "OWNER") || actor?.isOwner);
+}
 
 export function getActiveCombat() {
     return game.combat?.started ? game.combat : null;
@@ -21,17 +27,18 @@ export function getSystemEncounterType() {
 }
 
 export function getProfile(actor) {
-    if (actor?.type !== "character") return null;
+    if (!canUseActor(actor)) return null;
     const combat = getActiveCombat();
     if (!combat) return "universal";
-    const override = combat.getFlag(MODULE_ID, PROFILE_FLAG);
-    const snapshot = combat.getFlag(MODULE_ID, ENCOUNTER_FLAG);
-    return normalizeProfile(override ?? snapshot ?? getSystemEncounterType());
+    return normalizeProfile(
+        combat.getFlag(MODULE_ID, PROFILE_FLAG) ??
+        combat.getFlag(MODULE_ID, ENCOUNTER_FLAG) ??
+        getSystemEncounterType(),
+    );
 }
 
 export async function ensureCombatProfileSnapshot(combat = getActiveCombat()) {
-    if (!combat || !game.user?.isGM) return;
-    if (combat.getFlag(MODULE_ID, ENCOUNTER_FLAG)) return;
+    if (!combat || !game.user?.isGM || combat.getFlag(MODULE_ID, ENCOUNTER_FLAG)) return;
     await combat.setFlag(MODULE_ID, ENCOUNTER_FLAG, getSystemEncounterType());
 }
 
@@ -50,80 +57,69 @@ export function getCombatant(actor, combat = getActiveCombat()) {
     return combat.combatants.find((combatant) => combatant.actor?.id === actor.id) ?? null;
 }
 
-export function getTurnKey(combat = getActiveCombat(), actor = null) {
-    if (!combat) return null;
-    const combatant = actor ? getCombatant(actor, combat) : combat.combatant;
-    return `${combat.id}:${combat.round ?? 0}:${combatant?.id ?? combat.turn ?? -1}`;
-}
-
-export function createTurnState(turnKey) {
+export function getTurnState(actor) {
+    const combatant = getCombatant(actor);
+    const core = combatant && game.l5r5e?.turns?.getState(combatant);
+    if (!core) {
+        return {
+            primaryAction: { used: false },
+            freeMovement: { used: false },
+            waterExtraAction: { used: false },
+            actionUsed: false,
+            movementUsed: false,
+            waterActionUsed: false,
+            guard: null,
+            wait: null,
+        };
+    }
     return {
-        turnKey,
-        actionUsed: false,
-        movementUsed: false,
-        waterActionUsed: false,
-        reactionUsed: false,
-        guard: false,
-        maneuver: false,
-        wait: null,
+        ...core,
+        actionUsed: Boolean(core.primaryAction?.used),
+        movementUsed: Boolean(core.freeMovement?.used),
+        waterActionUsed: Boolean(core.waterExtraAction?.used),
+        guard: core.guard ?? (core.primaryAction?.actionId === "guard"),
     };
 }
 
-export function getTurnState(actor) {
-    const combat = getActiveCombat();
-    const combatant = getCombatant(actor, combat);
-    const turnKey = getTurnKey(combat, actor);
-    if (!combatant || !turnKey) return createTurnState(turnKey);
-    const stored = combatant.getFlag(MODULE_ID, TURN_FLAG);
-    return stored?.turnKey === turnKey ? { ...createTurnState(turnKey), ...stored } : createTurnState(turnKey);
+export function getActionDefinition(actionId) {
+    return game.l5r5e?.actionRegistry?.[actionId] ?? null;
 }
 
-export async function updateTurnState(actor, changes) {
+export function getActionSlot(actor, { actionId, requiresCheck, actionTypes } = {}) {
     const combatant = getCombatant(actor);
-    if (!combatant || !combatant.isOwner) return null;
-    const next = { ...getTurnState(actor), ...changes, turnKey: getTurnKey(getActiveCombat(), actor) };
-    await combatant.setFlag(MODULE_ID, TURN_FLAG, next);
-    ui.ARGON?.components?.main?.forEach((component) => component.updateActionUse?.());
-    ui.ARGON?.components?.portrait?.refresh?.();
-    return next;
+    if (!combatant || !game.l5r5e?.turns) return null;
+    const definition = getActionDefinition(actionId);
+    const result = game.l5r5e.turns.reserveAction(getTurnState(actor), {
+        actionId,
+        actionTypes: actionTypes ?? definition?.actionTypes ?? [],
+        requiresCheck: requiresCheck ?? definition?.requiresCheck ?? true,
+        intentId: `availability:${actor.uuid}:${actionId ?? "action"}`,
+    });
+    return result.ok ? result.slot : null;
 }
 
-export function getActionSlot(actor, { requiresCheck = true } = {}) {
-    const combat = getActiveCombat();
-    if (!combat) return null;
-    const state = getTurnState(actor);
-    if (!state.actionUsed) return "actionUsed";
-    if (!requiresCheck && actor.system?.stance === "water" && !state.waterActionUsed) return "waterActionUsed";
-    return null;
+export async function executeImmediateAction(actor, actionId, { mutations = [], turnStateChanges = {} } = {}) {
+    const combatant = getCombatant(actor);
+    const definition = getActionDefinition(actionId);
+    if (!combatant || !definition || !game.l5r5e?.actions?.executeImmediate) return { ok: false, code: "coreApiUnavailable" };
+    return game.l5r5e.actions.executeImmediate(combatant, {
+        context: {
+            actor,
+            actionId,
+            actionTypes: definition.actionTypes,
+            requiresCheck: false,
+            lifecycle: { combat: game.combat },
+        },
+        mutations,
+        turnStateChanges,
+    });
 }
 
-export async function consumeAction(actor, options = {}) {
-    const slot = getActionSlot(actor, options);
-    if (!slot) return false;
-    await updateTurnState(actor, { [slot]: true });
-    return true;
-}
-
-export async function consumeMovement(actor) {
-    const state = getTurnState(actor);
-    if (state.movementUsed) return false;
-    await updateTurnState(actor, { movementUsed: true });
-    return true;
-}
-
-export async function setGuard(actor, active = true) {
-    return updateTurnState(actor, { guard: active });
-}
-
-export async function setWait(actor, condition) {
-    return updateTurnState(actor, { wait: condition || null });
-}
-
-export async function clearTransientCombatState(combat) {
+export async function clearLegacyTurnState(combat) {
     if (!combat || !game.user?.isGM) return;
     const updates = combat.combatants
-        .filter((combatant) => combatant.getFlag(MODULE_ID, TURN_FLAG) !== undefined)
-        .map((combatant) => ({ _id: combatant.id, [`flags.${MODULE_ID}.-=${TURN_FLAG}`]: null }));
+        .filter((combatant) => combatant.getFlag(MODULE_ID, LEGACY_TURN_FLAG) !== undefined)
+        .map((combatant) => ({ _id: combatant.id, [`flags.${MODULE_ID}.-=${LEGACY_TURN_FLAG}`]: null }));
     if (updates.length) await combat.updateEmbeddedDocuments("Combatant", updates);
 }
 
@@ -140,11 +136,13 @@ export async function setCombatContext(key, value) {
 }
 
 export function registerStateHooks() {
-    Hooks.on("combatStart", (combat) => ensureCombatProfileSnapshot(combat));
+    Hooks.on("combatStart", async (combat) => {
+        await ensureCombatProfileSnapshot(combat);
+        await clearLegacyTurnState(combat);
+    });
     Hooks.on("updateCombat", async (combat, changes) => {
         if (changes.active === true || changes.round === 1) await ensureCombatProfileSnapshot(combat);
-        if (changes.active === false) await clearTransientCombatState(combat);
-        if (ui.ARGON?._actor?.type === "character") ui.ARGON.refresh();
+        if (SUPPORTED_ACTOR_TYPES.includes(ui.ARGON?._actor?.type)) ui.ARGON.refresh();
     });
-    Hooks.on("deleteCombat", () => ui.ARGON?._actor?.type === "character" && ui.ARGON.refresh());
+    Hooks.on("deleteCombat", () => SUPPORTED_ACTOR_TYPES.includes(ui.ARGON?._actor?.type) && ui.ARGON.refresh());
 }

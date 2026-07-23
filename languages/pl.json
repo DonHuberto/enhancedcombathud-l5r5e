@@ -143,6 +143,7 @@
             "reinforce": { "label": "Reinforce", "tooltip": "Otwiera test Labor lub Tactics Support dla wybranego kontekstu bitwy masowej." },
             "staredown": { "label": "Staredown", "tooltip": "Dodaje obowiązkowe Napięcie rundy, tajnie deklaruje bid do Skupienia i ujawnia poprawne deklaracje równocześnie.", "bid": "Tajny bid", "committed": "Tajny bid został zadeklarowany." },
             "concede": { "label": "Concede", "tooltip": "Poddaje pojedynek po potwierdzeniu.", "confirm": "Poddać ten pojedynek?" },
+            "end_turn": { "label": "Zakończ turę", "tooltip": "Przechodzi dalej w Combat po zakończeniu działań aktywnego uczestnika. Nie zużywa slotu akcji." },
             "free_movement": { "label": "Darmowy ruch", "tooltip": "Oznacza darmowy ruch w tej turze jako zużyty." }
         },
         "notifications": {
@@ -158,6 +159,7 @@
             "strike_conflict_only": "Strike jest dostępny tylko w profilu konfliktowym; otwarto arkusz przedmiotu.",
             "conflict_only": "Ta akcja jest dostępna tylko podczas aktywnego konfliktu.",
             "no_action": "W tej turze nie pozostała odpowiednia akcja.",
+            "not_active_turn": "Turę może zakończyć wyłącznie aktualnie aktywny uczestnik.",
             "finishing_blow_available": "Finishing Blow jest teraz dostępne.",
             "movement_used": "Darmowy ruch został już wykorzystany.",
             "calming_breath_no_effect": "Ani Zmęczenie, ani Napięcie nie przekracza połowy swojego progu.",

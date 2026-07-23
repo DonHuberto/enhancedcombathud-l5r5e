@@ -3,6 +3,9 @@
     "private": true,
     "type": "module",
     "scripts": {
-        "test": "node --test"
+        "test": "node --test",
+        "validate:release": "node scripts/validate-release.mjs",
+        "audit:ui": "node scripts/validate-release.mjs",
+        "ci": "npm test && npm run validate:release"
     }
 }

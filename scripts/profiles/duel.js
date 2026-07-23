@@ -1,7 +1,7 @@
 import { MODULE_ID, RINGS } from "../config.js";
 import { collectSkills } from "../data.js";
 import { getSkillLabel, openDicePicker } from "../rolls.js";
-import { consumeAction, getActionSlot, getCombatant } from "../state.js";
+import { executeImmediateAction, getActionSlot, getCombatant } from "../state.js";
 import { isPrimaryGM, requestGm } from "../socket.js";
 import {
     confirmAction,
@@ -44,7 +44,7 @@ export function isFinishingBlowAvailable(actor) {
 }
 
 async function beginCenter(actor) {
-    if (!getActionSlot(actor, { requiresCheck: true })) {
+    if (!getActionSlot(actor, { actionId: "center" })) {
         notify(`${MODULE_ID}.notifications.no_action`, "warn");
         return false;
     }
@@ -67,17 +67,18 @@ async function beginCenter(actor) {
         ringId: "void",
         skillId,
         actions: { support: true },
+        actionId: "center",
+        rollContext: { actionId: "center" },
     });
     if (!dialog) {
         pendingCenters.delete(actor.id);
         return false;
     }
-    await consumeAction(actor, { requiresCheck: true });
     return true;
 }
 
 async function beginPredict(actor) {
-    if (!getActionSlot(actor, { requiresCheck: false })) {
+    if (!getActionSlot(actor, { actionId: "predict" })) {
         notify(`${MODULE_ID}.notifications.no_action`, "warn");
         return false;
     }
@@ -97,14 +98,23 @@ async function beginPredict(actor) {
     const salt = foundry.utils.randomID(32);
     const commitment = await hashSecret(ring, salt);
     sessionStorage.setItem(storageKey("predict", combatant.id), JSON.stringify({ ring, salt }));
-    await combatant.setFlag(MODULE_ID, "duelPredict", {
+    const prediction = {
         commitment,
         opponentActorId: target.actor.id,
         owner: game.user.id,
         expiresRound: (game.combat?.round ?? 0) + 1,
         revealed: false,
+    };
+    const applied = await executeImmediateAction(actor, "predict", {
+        mutations: [{
+            documentUuid: combatant.uuid,
+            path: `flags.${MODULE_ID}.duelPredict`,
+            before: combatant.getFlag(MODULE_ID, "duelPredict") ?? null,
+            after: prediction,
+            reason: "predict",
+        }],
     });
-    await consumeAction(actor, { requiresCheck: false });
+    if (!applied.ok) return false;
     return createChatCard({
         actor,
         title: game.i18n.localize(`${MODULE_ID}.actions.predict.label`),

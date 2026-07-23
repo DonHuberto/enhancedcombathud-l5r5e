@@ -5,7 +5,6 @@ export function getSkirmishActions() {
         "challenge",
         "guard",
         "maneuver",
-        "free_movement",
         "prepare_item",
         "strike",
         "wait",

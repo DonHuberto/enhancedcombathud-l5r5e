@@ -5,7 +5,7 @@ import { createEquipmentClasses } from "./equipment.js";
 import { createTechniqueClasses } from "./techniques.js";
 import { createActionPanels } from "./actions.js";
 import { createWeaponSetsClass } from "./weapons.js";
-import { ensureCombatProfileSnapshot, registerStateHooks } from "./state.js";
+import { SUPPORTED_ACTOR_TYPES, canUseActor, clearLegacyTurnState, ensureCombatProfileSnapshot, registerStateHooks } from "./state.js";
 import { registerDuelHooks } from "./profiles/duel.js";
 import { registerIntrigueHooks } from "./profiles/intrigue.js";
 import { registerSocket } from "./socket.js";
@@ -39,9 +39,9 @@ Hooks.once("argonInit", (CoreHUD) => {
     CoreHUD.defineWeaponSets(createWeaponSetsClass(ARGON));
     CoreHUD.defineMovementHud(null);
     CoreHUD.defineTooltip(L5R5eTooltip);
-    CoreHUD.defineSupportedActorTypes(["character"]);
+    CoreHUD.defineSupportedActorTypes([...SUPPORTED_ACTOR_TYPES]);
 
-    console.info(`${MODULE_ID} | Registered Argon V14 adapter for character actors`);
+    console.info(`${MODULE_ID} | Registered Argon V14 adapter for character and NPC actors`);
 });
 
 Hooks.once("init", () => {
@@ -49,14 +49,14 @@ Hooks.once("init", () => {
     registerDuelHooks();
     registerIntrigueHooks();
 
-    Hooks.on("targetToken", () => ui.ARGON?._actor?.type === "character" && ui.ARGON.components?.portrait?.refresh?.());
+    Hooks.on("targetToken", () => SUPPORTED_ACTOR_TYPES.includes(ui.ARGON?._actor?.type) && ui.ARGON.components?.portrait?.refresh?.());
     Hooks.on("controlToken", (token, controlled) => {
         if (!game.settings.get(CORE_ID, "alwaysOn")) return;
-        if (controlled && token.actor?.type === "character") return;
+        if (controlled && canUseActor(token.actor)) return;
         setTimeout(() => {
-            if (canvas?.tokens?.controlled?.some((entry) => entry.actor?.type === "character")) return;
+            if (canvas?.tokens?.controlled?.some((entry) => canUseActor(entry.actor))) return;
             const actor = game.user.character;
-            if (actor?.type === "character" && actor.isOwner) ui.ARGON?.bind(actor);
+            if (canUseActor(actor)) ui.ARGON?.bind(actor);
         }, 150);
     });
     Hooks.on("updateItem", (item, changes) => {
@@ -82,9 +82,11 @@ Hooks.once("ready", async () => {
     }
     registerSocket();
     await ensureCombatProfileSnapshot();
+    await clearLegacyTurnState(game.combat);
 
     if (game.settings.get(CORE_ID, "alwaysOn") && !ui.ARGON?._target) {
         const target = canvas?.tokens?.controlled?.[0] ?? game.user.character;
-        if (target?.actor?.type === "character" || target?.type === "character") ui.ARGON.bind(target);
+        const actor = target?.actor ?? target;
+        if (canUseActor(actor)) ui.ARGON.bind(target);
     }
 });

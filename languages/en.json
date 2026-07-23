@@ -163,6 +163,7 @@
             "reinforce": { "label": "Reinforce", "tooltip": "Open a Labor or Tactics Support check for the selected Mass Battle context." },
             "staredown": { "label": "Staredown", "tooltip": "Apply mandatory round Strife, commit a secret bid up to Focus, and reveal all valid commitments together.", "bid": "Secret bid", "committed": "The secret bid has been committed." },
             "concede": { "label": "Concede", "tooltip": "Concede the duel after confirmation.", "confirm": "Concede this duel?" },
+            "end_turn": { "label": "End Turn", "tooltip": "Advance Combat after the active combatant has finished. This does not spend an action slot." },
             "free_movement": { "label": "Free Movement", "tooltip": "Mark free movement as used for this turn." }
         },
         "notifications": {
@@ -178,6 +179,7 @@
             "strike_conflict_only": "Strike is available only in a conflict profile; the item sheet was opened.",
             "conflict_only": "This action is available only during an active conflict.",
             "no_action": "No eligible action remains for this turn.",
+            "not_active_turn": "Only the currently active combatant can end the turn.",
             "finishing_blow_available": "Finishing Blow is available now.",
             "movement_used": "Free movement has already been used.",
             "calming_breath_no_effect": "Neither Fatigue nor Strife exceeds half its threshold.",

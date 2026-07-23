@@ -87,3 +87,10 @@ test("skills, rings and weapon state are read from the system schema", () => {
     assert.equal(getWeapons(actor, { equippedOnly: true }).length, 2);
     assert.equal(getWeapons(actor, { readiedOnly: true }).length, 1);
 });
+
+test("NPC skill groups are exposed without assuming the nested PC schema", () => {
+    assert.deepEqual(collectSkills({ skills: { martial: 3, social: 2 } }), [
+        { id: "martial", category: "martial", rank: 3 },
+        { id: "social", category: "social", rank: 2 },
+    ]);
+});

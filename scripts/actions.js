@@ -2,15 +2,12 @@ import { ACTION_ICONS, MODULE_ID } from "./config.js";
 import { getWeapons } from "./data.js";
 import { getPersuadeOptions, openDicePicker, openGenericRoll, openPersuadeRoll, openWeaponStrike } from "./rolls.js";
 import {
-    consumeAction,
-    consumeMovement,
+    canUseActor,
+    executeImmediateAction,
     getActionSlot,
     getCombatant,
     getProfile,
     getTurnState,
-    setGuard,
-    setWait,
-    updateTurnState,
 } from "./state.js";
 import {
     confirmAction,
@@ -20,7 +17,7 @@ import {
     promptText,
     withActionLock,
 } from "./utils.js";
-import { chooseWeapon, toggleReadied } from "./weapons.js";
+import { chooseWeapon } from "./weapons.js";
 import { requestGm } from "./socket.js";
 import { getUniversalActions } from "./profiles/universal.js";
 import { clearPersuadePending, getIntrigueActions, markPersuadePending } from "./profiles/intrigue.js";
@@ -36,7 +33,6 @@ const PROFILE_ACTIONS = {
     mass_battle: getMassBattleActions,
 };
 
-const NO_CHECK_ACTIONS = new Set(["calming_breath", "prepare_item", "predict", "wait"]);
 const ACTION_EXEMPT_ACTIONS = new Set(["concede", "staredown"]);
 
 export async function performUnmask(actor) {
@@ -82,17 +78,17 @@ async function calmingBreath(actor) {
         notify(`${MODULE_ID}.notifications.calming_breath_no_effect`, "info");
         return false;
     }
-    if (!getActionSlot(actor, { requiresCheck: false })) {
+    if (!getActionSlot(actor, { actionId: "calming_breath" })) {
         notify(`${MODULE_ID}.notifications.no_action`, "warn");
         return false;
     }
 
     return withActionLock(`calming-breath:${actor.uuid}`, async () => {
-        const update = {};
-        if (removeFatigue) update["system.fatigue.value"] = Math.max(0, fatigue - 1);
-        if (removeStrife) update["system.strife.value"] = Math.max(0, strife - 1);
-        await actor.update(update);
-        await consumeAction(actor, { requiresCheck: false });
+        const mutations = [];
+        if (removeFatigue) mutations.push({ documentUuid: actor.uuid, path: "system.fatigue.value", before: fatigue, after: Math.max(0, fatigue - 1), reason: "calmingBreath" });
+        if (removeStrife) mutations.push({ documentUuid: actor.uuid, path: "system.strife.value", before: strife, after: Math.max(0, strife - 1), reason: "calmingBreath" });
+        const applied = await executeImmediateAction(actor, "calming_breath", { mutations });
+        if (!applied.ok) return false;
         await createChatCard({
             actor,
             title: game.i18n.localize(`${MODULE_ID}.actions.calming_breath.label`),
@@ -108,13 +104,16 @@ async function calmingBreath(actor) {
 export async function prepareItem(actor, selectedWeapon = null) {
     const weapon = selectedWeapon ?? (await chooseWeapon(actor, { titleKey: "prepare_item" }));
     if (!weapon) return false;
-    if (!getActionSlot(actor, { requiresCheck: false })) {
+    if (!getActionSlot(actor, { actionId: "prepare_item" })) {
         notify(`${MODULE_ID}.notifications.no_action`, "warn");
         return false;
     }
-    const result = await toggleReadied(weapon);
+    const before = Boolean(weapon.system?.readied);
+    const applied = await executeImmediateAction(actor, "prepare_item", {
+        mutations: [{ documentUuid: weapon.uuid, path: "system.readied", before, after: !before, reason: "prepareItem" }],
+    });
+    const result = applied.ok;
     if (result) {
-        await consumeAction(actor, { requiresCheck: false });
         await createChatCard({
             actor,
             title: game.i18n.localize(`${MODULE_ID}.actions.prepare_item.label`),
@@ -131,30 +130,28 @@ async function strike(actor) {
     const weapon = await chooseWeapon(actor, { readiedOnly: true, titleKey: "strike" });
     if (!weapon) return false;
     const finishing = isFinishingBlowAvailable(actor);
-    if (!finishing && !getActionSlot(actor, { requiresCheck: true })) {
+    if (!finishing && !getActionSlot(actor, { actionId: "strike" })) {
         notify(`${MODULE_ID}.notifications.no_action`, "warn");
         return false;
     }
     const dialog = openWeaponStrike(actor, weapon);
     if (!dialog) return false;
-    if (!finishing) await consumeAction(actor, { requiresCheck: true });
-    else Hooks.callAll(`${MODULE_ID}.finishingBlowUsed`, actor);
+    if (finishing) Hooks.callAll(`${MODULE_ID}.finishingBlowUsed`, actor);
     return true;
 }
 
 async function openActionRoll(actor, options) {
-    if (!getActionSlot(actor, { requiresCheck: true })) {
+    if (!getActionSlot(actor, { actionId: options.actionId, actionTypes: Object.entries(options.actions ?? {}).filter(([, active]) => active).map(([type]) => type) })) {
         notify(`${MODULE_ID}.notifications.no_action`, "warn");
         return false;
     }
     const dialog = openDicePicker(actor, options);
     if (!dialog) return false;
-    await consumeAction(actor, { requiresCheck: true });
     return true;
 }
 
 async function waitAction(actor) {
-    if (!getActionSlot(actor, { requiresCheck: false })) {
+    if (!getActionSlot(actor, { actionId: "wait" })) {
         notify(`${MODULE_ID}.notifications.no_action`, "warn");
         return false;
     }
@@ -163,8 +160,8 @@ async function waitAction(actor) {
         label: game.i18n.localize(`${MODULE_ID}.actions.wait.condition`),
     });
     if (!condition) return false;
-    await setWait(actor, condition);
-    await consumeAction(actor, { requiresCheck: false });
+    const applied = await executeImmediateAction(actor, "wait", { turnStateChanges: { wait: condition } });
+    if (!applied.ok) return false;
     return createChatCard({
         actor,
         title: game.i18n.localize(`${MODULE_ID}.actions.wait.label`),
@@ -177,9 +174,10 @@ async function guard(actor) {
         skillId: "tactics",
         difficulty: 1,
         actions: { support: true },
+        actionId: "guard",
+        rollContext: { actionId: "guard" },
         target: getTargetToken(),
     });
-    if (success) await setGuard(actor, true);
     return success;
 }
 
@@ -188,9 +186,10 @@ async function maneuver(actor) {
         skillId: "fitness",
         difficulty: 2,
         actions: { move: true },
+        actionId: "maneuver",
+        rollContext: { actionId: "maneuver" },
         target: getTargetToken(),
     });
-    if (success) await updateTurnState(actor, { maneuver: true });
     return success;
 }
 
@@ -198,6 +197,8 @@ async function assist(actor) {
     return openActionRoll(actor, {
         skillsList: "artisan,martial,scholar,social,trade",
         actions: { support: true },
+        actionId: "assist",
+        rollContext: { actionId: "assist" },
         target: getTargetToken(),
     });
 }
@@ -206,12 +207,14 @@ async function challenge(actor) {
     return openActionRoll(actor, {
         skillsList: "command,courtesy,performance",
         actions: { scheme: true },
+        actionId: "challenge",
+        rollContext: { actionId: "challenge" },
         target: getTargetToken(),
     });
 }
 
 async function persuade(actor) {
-    if (!getActionSlot(actor, { requiresCheck: true })) {
+    if (!getActionSlot(actor, { actionId: "persuade" })) {
         notify(`${MODULE_ID}.notifications.no_action`, "warn");
         return false;
     }
@@ -227,7 +230,6 @@ async function persuade(actor) {
             notify(`${MODULE_ID}.notifications.no_active_gm`, "warn");
             return false;
         }
-        await consumeAction(actor, { requiresCheck: true });
         return true;
     }
     const dialog = openPersuadeRoll(actor);
@@ -235,19 +237,20 @@ async function persuade(actor) {
         await clearPersuadePending(actor);
         return false;
     }
-    await consumeAction(actor, { requiresCheck: true });
     return true;
 }
 
 async function customAction(actor) {
     return openActionRoll(actor, {
         skillsList: "artisan,martial,scholar,social,trade",
+        actionId: "custom_action",
+        rollContext: { actionId: "custom_action" },
         target: getTargetToken(),
     });
 }
 
 export async function executeAction(actor, actionId) {
-    if (actor?.type !== "character" || !actor.isOwner) return false;
+    if (!canUseActor(actor)) return false;
     if (["center", "predict", "concede", "staredown"].includes(actionId)) return executeDuelAction(actor, actionId);
     if (getProfile(actor) === "mass_battle" && ["assault", "challenge", "rally", "reinforce"].includes(actionId)) {
         return executeMassBattleAction(actor, actionId);
@@ -265,10 +268,11 @@ export async function executeAction(actor, actionId) {
         challenge: () => challenge(actor),
         persuade: () => persuade(actor),
         custom_action: () => customAction(actor),
-        free_movement: async () => {
-            const consumed = await consumeMovement(actor);
-            if (!consumed) notify(`${MODULE_ID}.notifications.movement_used`, "warn");
-            return consumed;
+        end_turn: async () => {
+            const combatant = getCombatant(actor);
+            if (combatant !== game.combat?.combatant) return false;
+            await game.combat.nextTurn();
+            return true;
         },
     };
     return handlers[actionId]?.() ?? false;
@@ -277,11 +281,9 @@ export async function executeAction(actor, actionId) {
 function actionAvailability(actor, actionId) {
     if (actionId === "generic_roll") return { enabled: true };
     if (!game.combat?.started) return { enabled: false, reason: `${MODULE_ID}.notifications.conflict_only` };
-    if (actionId === "free_movement") {
-        return getTurnState(actor).movementUsed
-            ? { enabled: false, reason: `${MODULE_ID}.notifications.movement_used` }
-            : { enabled: true };
-    }
+    if (actionId === "end_turn") return getCombatant(actor) === game.combat?.combatant
+        ? { enabled: true }
+        : { enabled: false, reason: `${MODULE_ID}.notifications.not_active_turn` };
     if (actionId === "staredown") {
         const bid = getCombatant(actor)?.getFlag(MODULE_ID, "duelBid");
         if (bid?.round === game.combat.round) {
@@ -293,8 +295,7 @@ function actionAvailability(actor, actionId) {
     }
     const finishingBlow = actionId === "strike" && isFinishingBlowAvailable(actor);
     if (!finishingBlow && !ACTION_EXEMPT_ACTIONS.has(actionId)) {
-        const requiresCheck = !NO_CHECK_ACTIONS.has(actionId);
-        if (!getActionSlot(actor, { requiresCheck })) {
+        if (!getActionSlot(actor, { actionId })) {
             return { enabled: false, reason: `${MODULE_ID}.notifications.no_action` };
         }
     }
@@ -374,6 +375,7 @@ export function createActionPanels(ARGON, { L5R5eEquipmentPanelButton }, { L5R5e
                 const actionIds = PROFILE_ACTIONS[profile]?.() ?? [];
                 const buttons = actionIds.map((actionId) => new L5R5eActionButton(actionId));
                 buttons.push(new L5R5eEquipmentPanelButton(), new L5R5eTechniquesPanelButton());
+                if (profile !== "universal") buttons.push(new L5R5eActionButton("end_turn"));
                 return buttons;
             }
         };

@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-test("bootstrap registers the V14 adapter surface and character-only support", async () => {
+test("bootstrap registers the V14 adapter surface for character and NPC actors", async () => {
     const onceHooks = new Map();
     globalThis.Hooks = {
         once: (name, callback) => onceHooks.set(name, callback),
@@ -43,5 +43,5 @@ test("bootstrap registers the V14 adapter surface and character-only support", a
     assert.equal(typeof registrations.tooltip, "function");
     assert.equal(registrations.main.length, 5);
     assert.equal(registrations.movement, null);
-    assert.deepEqual(registrations.actorTypes, ["character"]);
+    assert.deepEqual(registrations.actorTypes, ["character", "npc"]);
 });

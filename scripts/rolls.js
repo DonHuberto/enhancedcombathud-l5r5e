@@ -1,8 +1,9 @@
 import { MODULE_ID, SKILL_CATEGORIES, localize } from "./config.js";
+import { canUseActor } from "./state.js";
 import { getTargetToken, notify } from "./utils.js";
 
 export function openDicePicker(actor, options = {}) {
-    if (actor?.type !== "character" || !actor.isOwner) {
+    if (!canUseActor(actor)) {
         notify(`${MODULE_ID}.notifications.no_permission`, "warn");
         return null;
     }
@@ -47,11 +48,16 @@ export function openTechniqueRoll(actor, technique) {
         return null;
     }
 
+    const actionId = String(technique.system?.activation?.action_id ?? "").trim() || null;
+    const actionTypes = technique.system?.activation?.action_types ?? [];
     return openDicePicker(actor, {
         item: technique,
         ringId: technique.system?.ring || actor.system?.stance,
         difficulty: technique.system?.difficulty || 2,
         skillsList: skill,
+        actions: Object.fromEntries(actionTypes.map((type) => [type, true])),
+        actionId,
+        rollContext: actionId ? { actionId } : undefined,
     });
 }
 
@@ -60,12 +66,24 @@ export function openWeaponStrike(actor, weapon, { difficulty = 2, target = getTa
         notify(`${MODULE_ID}.notifications.weapon_not_readied`, "warn", { name: weapon?.name ?? "" });
         return null;
     }
+    const attackProfileSnapshot = foundry.utils.deepClone(weapon.attackProfile ?? {
+        damage: weapon.system.damage,
+        deadliness: weapon.system.deadliness,
+        range_min: weapon.system.grip_profiles?.[weapon.system.active_grip]?.range_min ?? 0,
+        range_max: weapon.system.grip_profiles?.[weapon.system.active_grip]?.range_max ?? (Number(weapon.system.range) || 0),
+    });
     return openDicePicker(actor, {
         item: weapon,
         skillId: weapon.system.skill,
         difficulty,
         target,
         actions: { attack: true },
+        actionId: "strike",
+        rollContext: {
+            actionId: "strike",
+            attackProfileSnapshot,
+            targetUuid: target?.uuid ?? null,
+        },
     });
 }
 
@@ -90,6 +108,8 @@ export function getPersuadeOptions(actor) {
         difficultyHidden,
         skillsList: "social",
         actions: { scheme: true },
+        actionId: "persuade",
+        rollContext: { actionId: "persuade" },
         remoteRequired: difficultyHidden && !game.user?.isGM,
         targetTokenIds: targets.map((token) => token.id),
         sceneId: canvas.scene?.id,

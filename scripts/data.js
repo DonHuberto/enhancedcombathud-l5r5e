@@ -41,6 +41,10 @@ export function collectSkills(system = {}) {
     const result = [];
     for (const category of SKILL_CATEGORIES) {
         const skills = system.skills?.[category] ?? {};
+        if (typeof skills === "number") {
+            result.push({ id: category, category, rank: numberValue(skills) });
+            continue;
+        }
         for (const [id, rank] of Object.entries(skills)) {
             result.push({ id, category, rank: numberValue(rank) });
         }
