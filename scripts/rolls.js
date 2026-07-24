@@ -62,19 +62,24 @@ export function openTechniqueRoll(actor, technique) {
 }
 
 export function openWeaponStrike(actor, weapon, { difficulty = 2, target = getTargetToken() } = {}) {
-    if (!weapon?.system?.equipped || !weapon?.system?.readied) {
+    const virtual = Boolean(weapon?.virtual);
+    if (!virtual && (!weapon?.system?.equipped || !weapon?.system?.readied)) {
         notify(`${MODULE_ID}.notifications.weapon_not_readied`, "warn", { name: weapon?.name ?? "" });
         return null;
     }
-    const attackProfileSnapshot = foundry.utils.deepClone(weapon.attackProfile ?? {
+    if (weapon?.available === false) {
+        notify(`${MODULE_ID}.notifications.attack_profile_unavailable`, "warn");
+        return null;
+    }
+    const attackProfileSnapshot = foundry.utils.deepClone((virtual ? weapon : weapon.attackProfile) ?? {
         damage: weapon.system.damage,
         deadliness: weapon.system.deadliness,
         range_min: weapon.system.grip_profiles?.[weapon.system.active_grip]?.range_min ?? 0,
         range_max: weapon.system.grip_profiles?.[weapon.system.active_grip]?.range_max ?? (Number(weapon.system.range) || 0),
     });
     return openDicePicker(actor, {
-        item: weapon,
-        skillId: weapon.system.skill,
+        item: virtual ? undefined : weapon,
+        skillId: attackProfileSnapshot.skillId ?? weapon.system?.skill,
         difficulty,
         target,
         actions: { attack: true },

@@ -1,10 +1,10 @@
 import { ACTION_ICONS, MODULE_ID } from "./config.js";
-import { prepareItem } from "./actions.js";
+import { prepareItem, throwItem } from "./actions.js";
 import { getEquippedArmor, getItemProperties, getWeapons, isReadiedWeapon } from "./data.js";
 import { openWeaponStrike } from "./rolls.js";
 import { getProfile } from "./state.js";
-import { getCurrentGrip, setGrip, toggleEquipped, toggleReadied } from "./weapons.js";
-import { enrichText, escapeHtml, getSourceLabel, notify, withActionLock } from "./utils.js";
+import { dropItem, getCurrentGrip, setGrip, toggleEquipped, toggleReadied } from "./weapons.js";
+import { enrichText, escapeHtml, getSourceLabel, notify, promptSelect, withActionLock } from "./utils.js";
 
 function itemSubtitle(item) {
     if (item.type === "weapon") {
@@ -25,11 +25,9 @@ export async function getEquipmentTooltip(item) {
             { label: "l5r5e.weapons.deadliness", value: item.system.deadliness ?? 0 },
             { label: "l5r5e.weapons.range", value: escapeHtml(item.system.range ?? 0) },
             { label: "l5r5e.skills.label", value: escapeHtml(item.system.skill ?? "—") },
-            { label: `${MODULE_ID}.equipment.grip_1`, value: escapeHtml(item.system.grip_1 || "—") },
-            { label: `${MODULE_ID}.equipment.grip_2`, value: escapeHtml(item.system.grip_2 || "—") },
             {
                 label: `${MODULE_ID}.equipment.current_grip`,
-                value: escapeHtml(item.system?.[getCurrentGrip(item)] || getCurrentGrip(item)),
+                value: escapeHtml(getCurrentGrip(item)),
             },
         );
     } else if (item.type === "armor") {
@@ -66,8 +64,10 @@ export function createEquipmentClasses(ARGON) {
 
         async _onLeftClick(event) {
             if (this.item.type === "weapon") {
-                if (event.shiftKey && (this.item.system.grip_1 || this.item.system.grip_2)) {
-                    const next = getCurrentGrip(this.item) === "grip_1" ? "grip_2" : "grip_1";
+                const grips = Object.keys(this.item.system?.grip_profiles ?? {});
+                if (event.shiftKey && grips.length > 1) {
+                    const current = getCurrentGrip(this.item);
+                    const next = grips[(grips.indexOf(current) + 1) % grips.length];
                     return setGrip(this.item, next);
                 }
                 if (getProfile(this.actor) !== "universal") {
@@ -79,7 +79,47 @@ export function createEquipmentClasses(ARGON) {
         }
 
         async _onRightClick() {
-            this.item?.sheet?.render(true);
+            if (!this.item) return false;
+            const choices = [
+                { value: "view", label: game.i18n.localize(`${MODULE_ID}.equipment.menu_view`) },
+                {
+                    value: "prepare",
+                    label: game.i18n.localize(
+                        `${MODULE_ID}.equipment.${this.item.type === "weapon" && this.item.system?.readied ? "menu_sheathe" : "menu_prepare"}`,
+                    ),
+                },
+            ];
+            if (this.item.type === "weapon") {
+                for (const grip of Object.keys(this.item.system?.grip_profiles ?? {})) {
+                    if (grip === getCurrentGrip(this.item)) continue;
+                    choices.push({
+                        value: `grip:${grip}`,
+                        label: game.i18n.format(`${MODULE_ID}.equipment.menu_grip`, { grip }),
+                    });
+                }
+            }
+            if (game.l5r5e?.equipment?.isHeld?.(this.item)) {
+                choices.push({ value: "drop", label: game.i18n.localize(`${MODULE_ID}.equipment.menu_drop`) });
+                try {
+                    if (game.settings.get("l5r5e", "enableImprovisedThrowAction")) {
+                        choices.push({ value: "throw", label: game.i18n.localize(`${MODULE_ID}.equipment.menu_throw_house_rule`) });
+                    }
+                } catch (_error) {
+                    // The core setting is unavailable on an incompatible system version.
+                }
+            }
+            const action = await promptSelect({
+                title: this.item.name,
+                label: game.i18n.localize(`${MODULE_ID}.equipment.menu_action`),
+                choices,
+            });
+            if (!action) return false;
+            if (action === "view") return this.item.sheet.render(true);
+            if (action === "prepare") return prepareItem(this.actor, this.item);
+            if (action === "drop") return dropItem(this.actor, this.item);
+            if (action === "throw") return throwItem(this.actor, this.item);
+            if (action.startsWith("grip:")) return setGrip(this.item, action.slice(5));
+            return false;
         }
 
         async _renderInner() {

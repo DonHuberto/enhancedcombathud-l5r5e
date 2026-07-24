@@ -1,12 +1,25 @@
+.extended-combat-hud {
+    --l5r5e-washi: #e8dcc1;
+    --l5r5e-washi-deep: #cdbb95;
+    --l5r5e-sumi: #211b18;
+    --l5r5e-sumi-soft: #453a32;
+    --l5r5e-urushi: #762b27;
+    --l5r5e-urushi-bright: #a6493f;
+    --l5r5e-aged-gold: #b59052;
+    --l5r5e-dark-wood: #251714;
+    --l5r5e-cream: #f5ecd9;
+}
+
 .extended-combat-hud .portrait-hud:has(.l5r5e-portrait-panel) {
-    min-height: 610px;
-    min-width: 520px;
+    min-height: 390px;
+    min-width: 310px;
     overflow: visible;
+    position: relative;
 }
 
 .extended-combat-hud .portrait-hud:has(.l5r5e-portrait-panel) .portrait-hud-image {
-    height: 285px;
-    mask-image: linear-gradient(to bottom, #000 58%, transparent 100%);
+    height: 360px;
+    mask-image: none;
 }
 
 .extended-combat-hud .portrait-hud:has(.l5r5e-portrait-panel) .player-details {
@@ -14,20 +27,25 @@
 }
 
 .extended-combat-hud .l5r5e-portrait-panel {
-    align-self: flex-end;
-    background: linear-gradient(155deg, rgb(26 18 19 / 94%), rgb(59 27 25 / 91%));
-    border: 1px solid rgb(196 151 92 / 58%);
-    box-shadow: 0 0 18px rgb(0 0 0 / 75%);
-    color: #f2e8d5;
+    background:
+        radial-gradient(circle at 18% 22%, rgb(255 255 255 / 20%) 0 1px, transparent 2px),
+        repeating-linear-gradient(7deg, transparent 0 8px, rgb(41 31 25 / 3%) 9px 10px),
+        linear-gradient(155deg, rgb(232 220 193 / 98%), rgb(205 187 149 / 97%));
+    border: 1px solid var(--l5r5e-sumi);
+    border-block: 3px double var(--l5r5e-aged-gold);
+    bottom: 0;
+    box-shadow: 0 8px 24px rgb(0 0 0 / 58%), inset 0 0 36px rgb(77 51 32 / 10%);
+    color: var(--l5r5e-sumi);
     display: grid;
-    gap: 0.45rem;
+    gap: 0.55rem;
     grid-template-columns: 1fr 1fr;
-    max-height: 390px;
+    left: calc(100% + 0.7rem);
+    max-height: min(76vh, 650px);
     overflow: auto;
-    padding: 0.65rem;
-    position: relative;
-    width: 100%;
-    z-index: 2;
+    padding: 0.75rem;
+    position: absolute;
+    width: clamp(420px, 34vw, 540px);
+    z-index: 6;
 }
 
 .extended-combat-hud .l5r5e-resource-grid,
@@ -42,6 +60,7 @@
 .extended-combat-hud .l5r5e-resource-grid,
 .extended-combat-hud .l5r5e-rings,
 .extended-combat-hud .l5r5e-warnings,
+.extended-combat-hud .l5r5e-weapon-summary,
 .extended-combat-hud .l5r5e-armor-summary,
 .extended-combat-hud .l5r5e-target,
 .extended-combat-hud .l5r5e-profile-tracker {
@@ -50,22 +69,31 @@
 
 .extended-combat-hud .l5r5e-resource-grid {
     display: grid;
-    grid-template-columns: repeat(5, minmax(0, 1fr));
+    grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 .extended-combat-hud .l5r5e-resource {
-    background: linear-gradient(to right, rgb(145 54 42 / 42%) calc(var(--l5r5e-resource, 0) * 100%), rgb(10 10 10 / 50%) 0);
-    border: 1px solid rgb(216 182 126 / 35%);
-    display: flex;
-    flex-direction: column;
+    background:
+        linear-gradient(to right, rgb(118 43 39 / 28%) calc(var(--l5r5e-resource, 0) * 100%), transparent 0),
+        rgb(255 250 236 / 38%);
+    border: 1px solid rgb(33 27 24 / 46%);
+    border-left: 4px solid var(--l5r5e-urushi);
+    display: grid;
+    grid-template-columns: 1fr auto;
     min-width: 0;
-    padding: 0.25rem;
-    text-align: center;
+    padding: 0.38rem 0.52rem;
+    text-align: left;
+}
+
+.extended-combat-hud .l5r5e-resource-fatigue,
+.extended-combat-hud .l5r5e-resource-strife,
+.extended-combat-hud .l5r5e-resource-void {
+    grid-column: 1 / -1;
 }
 
 .extended-combat-hud .l5r5e-resource-label {
-    color: #d9c5a6;
-    font-size: 0.64rem;
+    color: var(--l5r5e-sumi-soft);
+    font-size: 0.72rem;
     overflow: hidden;
     text-overflow: ellipsis;
     text-transform: uppercase;
@@ -74,7 +102,7 @@
 
 .extended-combat-hud .l5r5e-resource-value {
     font-family: var(--font-serif);
-    font-size: 1.1rem;
+    font-size: 1.16rem;
 }
 
 .extended-combat-hud .l5r5e-social-values {
@@ -83,8 +111,8 @@
 
 .extended-combat-hud .l5r5e-social-value {
     align-items: baseline;
-    background: rgb(0 0 0 / 28%);
-    border-bottom: 1px solid rgb(196 151 92 / 50%);
+    background: rgb(255 250 236 / 26%);
+    border-bottom: 1px solid rgb(33 27 24 / 42%);
     display: grid;
     flex: 1;
     grid-template-columns: 1fr auto;
@@ -92,7 +120,7 @@
 }
 
 .extended-combat-hud .l5r5e-social-value small {
-    color: #baa889;
+    color: var(--l5r5e-sumi-soft);
     font-size: 0.58rem;
     grid-column: 1 / -1;
 }
@@ -104,10 +132,11 @@
 
 .extended-combat-hud .l5r5e-social-secret button,
 .extended-combat-hud .l5r5e-ring,
-.extended-combat-hud .l5r5e-armor-row {
-    background: rgb(19 12 13 / 78%);
-    border: 1px solid rgb(196 151 92 / 45%);
-    color: #f2e8d5;
+.extended-combat-hud .l5r5e-armor-row,
+.extended-combat-hud .l5r5e-weapon-card {
+    background: rgb(37 23 20 / 92%);
+    border: 1px solid var(--l5r5e-aged-gold);
+    color: var(--l5r5e-cream);
 }
 
 .extended-combat-hud .l5r5e-social-secret button {
@@ -127,14 +156,14 @@
 }
 
 .extended-combat-hud .l5r5e-social-popover {
-    background: #181011;
-    border: 1px solid #c4975c;
+    background: var(--l5r5e-dark-wood);
+    border: 1px solid var(--l5r5e-aged-gold);
     bottom: calc(100% + 0.35rem);
     box-shadow: 0 5px 20px #000;
     color: #f2e8d5;
     left: 50%;
-    max-height: 220px;
-    min-width: 260px;
+    max-height: min(70vh, 520px);
+    width: clamp(420px, 42vw, 600px);
     overflow: auto;
     padding: 0.75rem;
     position: absolute;
@@ -162,7 +191,7 @@
 }
 
 .extended-combat-hud .l5r5e-ring.selected {
-    background: linear-gradient(145deg, #72372f, #2d1415);
+    background: linear-gradient(145deg, var(--l5r5e-urushi-bright), var(--l5r5e-urushi));
     border-color: #f0cf89;
     box-shadow: inset 0 0 8px rgb(240 207 137 / 40%), 0 0 7px rgb(240 207 137 / 30%);
 }
@@ -172,7 +201,7 @@
 }
 
 .extended-combat-hud .l5r5e-warning {
-    background: #702b27;
+    background: var(--l5r5e-urushi);
     border: 1px solid #e89b81;
     color: #fff2df;
     font-size: 0.7rem;
@@ -187,8 +216,59 @@
 }
 
 .extended-combat-hud .l5r5e-armor-summary {
-    max-height: 74px;
+    max-height: 110px;
     overflow: auto;
+}
+
+.extended-combat-hud .l5r5e-weapon-summary h4,
+.extended-combat-hud .l5r5e-profile-tracker h4 {
+    color: var(--l5r5e-urushi);
+    font-size: 0.72rem;
+    letter-spacing: 0.08em;
+    margin: 0 0 0.25rem;
+    text-transform: uppercase;
+}
+
+.extended-combat-hud .l5r5e-weapon-card {
+    align-items: center;
+    display: grid;
+    gap: 0.5rem;
+    grid-template-columns: 46px 1fr;
+    padding: 0.38rem;
+    text-align: left;
+    width: 100%;
+}
+
+.extended-combat-hud .l5r5e-weapon-card img {
+    border: 1px solid var(--l5r5e-aged-gold);
+    height: 46px;
+    object-fit: cover;
+    width: 46px;
+}
+
+.extended-combat-hud .l5r5e-weapon-details {
+    display: grid;
+    min-width: 0;
+}
+
+.extended-combat-hud .l5r5e-weapon-details strong {
+    color: #f4ddb0;
+    font-family: var(--font-serif);
+}
+
+.extended-combat-hud .l5r5e-weapon-grip,
+.extended-combat-hud .l5r5e-weapon-properties {
+    color: #d4c2a3;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.extended-combat-hud .l5r5e-weapon-stats {
+    display: grid;
+    font-size: 0.7rem;
+    gap: 0.28rem;
+    grid-template-columns: repeat(3, 1fr);
 }
 
 .extended-combat-hud .l5r5e-armor-row {
@@ -234,8 +314,8 @@
 
 .extended-combat-hud .l5r5e-target {
     align-items: center;
-    background: rgb(0 0 0 / 28%);
-    border-left: 3px solid #a7764d;
+    background: rgb(255 250 236 / 28%);
+    border-left: 3px solid var(--l5r5e-urushi);
     display: flex;
     gap: 0.45rem;
     padding: 0.3rem;
@@ -260,13 +340,13 @@
 }
 
 .extended-combat-hud .l5r5e-profile-tracker {
-    background: rgb(5 4 4 / 35%);
-    border-top: 1px solid rgb(196 151 92 / 45%);
+    background: rgb(255 250 236 / 24%);
+    border-top: 1px solid var(--l5r5e-aged-gold);
     padding: 0.35rem;
 }
 
 .extended-combat-hud .l5r5e-profile-tracker h4 {
-    color: #e4c996;
+    color: var(--l5r5e-urushi);
     margin: 0 0 0.2rem;
 }
 
@@ -296,6 +376,45 @@
     outline: 2px solid #f2c85b;
 }
 
+.extended-combat-hud .actions-container,
+.extended-combat-hud .action-panel .actions,
+.extended-combat-hud .action-panel .action-buttons {
+    display: grid;
+    grid-auto-columns: minmax(48px, 64px);
+    grid-auto-flow: column;
+    grid-template-rows: repeat(2, minmax(44px, auto));
+    margin-bottom: 0;
+    padding: 0.35rem;
+}
+
+.extended-combat-hud .actions-container:before {
+    display: none;
+}
+
+.extended-combat-hud .actions-container .action-element {
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: 68%;
+    min-height: 56px;
+    min-width: 56px;
+    padding: 0;
+    width: 56px;
+}
+
+.extended-combat-hud .actions-container .action-element-title {
+    display: none;
+}
+
+.extended-combat-hud .action-element[class*="l5r5e-action-"] {
+    min-width: 48px;
+}
+
+.extended-combat-hud .action-element.l5r5e-action-end_turn {
+    border-left: 2px solid var(--l5r5e-aged-gold);
+    grid-column: -2;
+    grid-row: 1 / span 2;
+}
+
 .extended-combat-hud .feature-element.l5r5e-readied {
     box-shadow: inset 0 0 0 3px #d6b466;
 }
@@ -320,8 +439,19 @@
 }
 
 .l5r5e-tooltip .ech-tooltip-body {
-    max-height: 42vh;
+    max-height: min(70vh, 620px);
     overflow: auto;
+}
+
+.l5r5e-tooltip {
+    width: clamp(420px, 42vw, 600px);
+}
+
+.extended-combat-hud button:focus-visible,
+.extended-combat-hud .action-element:focus-visible,
+.extended-combat-hud .feature-element:focus-visible {
+    outline: 3px solid var(--l5r5e-urushi-bright);
+    outline-offset: 2px;
 }
 
 .argon-l5r5e-chat-card {
@@ -342,4 +472,29 @@
 @keyframes l5r5e-finishing-blow {
     from { filter: brightness(0.9); }
     to { filter: brightness(1.45) drop-shadow(0 0 8px #f2c85b); }
+}
+
+@media (max-width: 1360px) {
+    .extended-combat-hud .l5r5e-portrait-panel {
+        width: clamp(400px, 40vw, 470px);
+    }
+}
+
+@media (max-height: 760px) {
+    .extended-combat-hud .portrait-hud:has(.l5r5e-portrait-panel),
+    .extended-combat-hud .portrait-hud:has(.l5r5e-portrait-panel) .portrait-hud-image {
+        min-height: 315px;
+        height: 315px;
+    }
+
+    .extended-combat-hud .l5r5e-portrait-panel {
+        max-height: 70vh;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .extended-combat-hud .l5r5e-warning,
+    .extended-combat-hud .action-element.l5r5e-finishing-blow {
+        animation: none !important;
+    }
 }

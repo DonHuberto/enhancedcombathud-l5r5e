@@ -18,7 +18,7 @@ export const ACTION_TYPES = Object.freeze(["attack", "scheme", "support", "move"
 export const ACTIONS_BY_PROFILE = Object.freeze({
     universal: ["generic_roll"],
     intrigue: ["persuade", "assist", "calming_breath", "custom_action"],
-    duel: ["calming_breath", "center", "predict", "prepare_item", "strike", "custom_action", "staredown", "concede"],
+    duel: ["calming_breath", "center", "predict", "prepare_item", "strike", "throw_item", "custom_action", "staredown", "concede"],
     skirmish: [
         "assist",
         "calming_breath",
@@ -27,6 +27,7 @@ export const ACTIONS_BY_PROFILE = Object.freeze({
         "maneuver",
         "prepare_item",
         "strike",
+        "throw_item",
         "wait",
         "custom_action",
     ],
@@ -42,6 +43,7 @@ export const ACTION_ICONS = Object.freeze({
     predict: `modules/${MODULE_ID}/icons/predict.svg`,
     prepare_item: `modules/${MODULE_ID}/icons/prepare-item.svg`,
     strike: `modules/${MODULE_ID}/icons/strike.svg`,
+    throw_item: `modules/${MODULE_ID}/icons/throw-item.svg`,
     guard: `modules/${MODULE_ID}/icons/guard.svg`,
     maneuver: `modules/${MODULE_ID}/icons/maneuver.svg`,
     end_turn: `modules/${MODULE_ID}/icons/wait.svg`,

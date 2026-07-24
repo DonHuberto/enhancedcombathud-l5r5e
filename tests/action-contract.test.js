@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import fs from "node:fs";
+import { throwItem } from "../scripts/actions.js";
 import { openWeaponStrike } from "../scripts/rolls.js";
 import { executeImmediateAction, getActionDefinition } from "../scripts/state.js";
 
@@ -57,4 +58,90 @@ test("checked actions are not consumed by module turn-state writes", () => {
     const state = fs.readFileSync(new URL("../scripts/state.js", import.meta.url), "utf8");
     assert.equal(actions.includes("consumeAction"), false);
     assert.equal(state.includes(`setFlag(MODULE_ID, LEGACY_TURN_FLAG`), false);
+});
+
+test("Throw Item reserves an improvised core intent and opens the system check", async () => {
+    let assessedOptions;
+    let pickerOptions;
+    const item = {
+        id: "item-1",
+        uuid: "Actor.a.Item.item-1",
+        type: "item",
+        name: "Lantern",
+        system: { equipped: true },
+    };
+    const items = [item];
+    items.get = (id) => items.find((entry) => entry.id === id);
+    const actor = {
+        id: "a",
+        uuid: "Actor.a",
+        type: "character",
+        isOwner: true,
+        system: { stance: "fire" },
+        items,
+    };
+    const targetActor = { uuid: "Actor.target" };
+    const target = { uuid: "Scene.scene.Token.target", actor: targetActor };
+    const intent = {
+        ok: true,
+        intentId: "throw-1",
+        status: "assess",
+        assessment: {
+            roll: {
+                actionId: "improvised-throw",
+                skillId: "ranged",
+                difficulty: 2,
+                rollContext: { equipmentIntentId: "throw-1", throwMode: "improvised" },
+            },
+        },
+    };
+    const equipment = {
+        heldItems: () => [item],
+        throw: (_actor, _item, options) => {
+            assessedOptions = options;
+            return intent;
+        },
+        confirm: (value) => ({ ...value, status: "confirmed" }),
+        reserve: async (value) => ({ ...value, status: "reserved" }),
+        cancel: async () => {},
+    };
+    globalThis.foundry = { utils: { deepClone: (value) => structuredClone(value) } };
+    globalThis.game = {
+        settings: { get: (_namespace, key) => key === "enableImprovisedThrowAction" },
+        user: { isGM: false, targets: new Set([{ document: target }]) },
+        l5r5e: {
+            equipment,
+            DicePickerDialog: class {
+                constructor(options) { pickerOptions = options; }
+                render() {}
+            },
+        },
+    };
+
+    assert.equal(await throwItem(actor), true);
+    assert.deepEqual(assessedOptions, { mode: "improvised", trackIndividual: true });
+    assert.equal(pickerOptions.actionId, "improvised-throw");
+    assert.equal(pickerOptions.item, item);
+    assert.equal(pickerOptions.target, target);
+    assert.equal(pickerOptions.rollContext.equipmentIntentId, "throw-1");
+    assert.equal(pickerOptions.rollContext.targetUuid, targetActor.uuid);
+});
+
+test("HUD layout keeps the portrait clear and exposes persistent equipment cards", () => {
+    const portrait = fs.readFileSync(new URL("../scripts/portrait.js", import.meta.url), "utf8");
+    const actions = fs.readFileSync(new URL("../scripts/actions.js", import.meta.url), "utf8");
+    const weapons = fs.readFileSync(new URL("../scripts/weapons.js", import.meta.url), "utf8");
+    const styles = fs.readFileSync(new URL("../styles/hud.css", import.meta.url), "utf8");
+    assert.match(portrait, /#buildWeapon\(\)/);
+    assert.match(portrait, /l5r5e-weapon-card/);
+    assert.match(portrait, /rangeHighlight/);
+    assert.match(styles, /--l5r5e-washi/);
+    assert.match(styles, /left:\s*calc\(100%/);
+    assert.match(styles, /mask-image:\s*none/);
+    assert.match(styles, /grid-template-rows:\s*repeat\(2/);
+    assert.match(styles, /prefers-reduced-motion/);
+    assert.match(actions, /aria-label/);
+    assert.match(weapons, /equipment\.changeLoadout\(this\.actor,\s*activeItems\)/);
+    assert.doesNotMatch(weapons, /setFlag\(MODULE_ID,\s*"currentGrip"/);
+    assert.doesNotMatch(weapons, /updateEmbeddedDocuments/);
 });

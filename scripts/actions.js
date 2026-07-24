@@ -15,9 +15,10 @@ import {
     getTargetToken,
     notify,
     promptText,
+    promptSelect,
     withActionLock,
 } from "./utils.js";
-import { chooseWeapon } from "./weapons.js";
+import { chooseWeapon, executeEquipmentIntent } from "./weapons.js";
 import { requestGm } from "./socket.js";
 import { getUniversalActions } from "./profiles/universal.js";
 import { clearPersuadePending, getIntrigueActions, markPersuadePending } from "./profiles/intrigue.js";
@@ -109,10 +110,10 @@ export async function prepareItem(actor, selectedWeapon = null) {
         return false;
     }
     const before = Boolean(weapon.system?.readied);
-    const applied = await executeImmediateAction(actor, "prepare_item", {
-        mutations: [{ documentUuid: weapon.uuid, path: "system.readied", before, after: !before, reason: "prepareItem" }],
-    });
-    const result = applied.ok;
+    const equipment = game.l5r5e?.equipment;
+    const result = equipment?.prepare
+        ? Boolean(await executeEquipmentIntent(equipment.prepare(actor, weapon, { ready: !before })))
+        : false;
     if (result) {
         await createChatCard({
             actor,
@@ -127,7 +128,27 @@ export async function prepareItem(actor, selectedWeapon = null) {
 }
 
 async function strike(actor) {
-    const weapon = await chooseWeapon(actor, { readiedOnly: true, titleKey: "strike" });
+    const profiles = (game.l5r5e?.equipment?.getAttackProfiles(actor) ?? []).filter((profile) => profile.available !== false);
+    if (!profiles.length) return false;
+    let profile = profiles[0];
+    if (profiles.length > 1) {
+        const selected = await promptSelect({
+            title: game.i18n.localize(`${MODULE_ID}.actions.strike.label`),
+            label: game.i18n.localize(`${MODULE_ID}.equipment.choose_attack_profile`),
+            choices: profiles.map((entry) => {
+                const item = entry.itemUuid ? [...actor.items].find((candidate) => candidate.uuid === entry.itemUuid) : null;
+                return {
+                    value: entry.itemUuid ?? entry.id,
+                    label: item?.name ?? game.i18n.localize(entry.labelKey ?? `${MODULE_ID}.equipment.unarmed`),
+                };
+            }),
+        });
+        if (!selected) return false;
+        profile = profiles.find((entry) => (entry.itemUuid ?? entry.id) === selected);
+    }
+    const weapon = profile.itemUuid
+        ? [...actor.items].find((item) => item.uuid === profile.itemUuid)
+        : profile;
     if (!weapon) return false;
     const finishing = isFinishingBlowAvailable(actor);
     if (!finishing && !getActionSlot(actor, { actionId: "strike" })) {
@@ -137,6 +158,75 @@ async function strike(actor) {
     const dialog = openWeaponStrike(actor, weapon);
     if (!dialog) return false;
     if (finishing) Hooks.callAll(`${MODULE_ID}.finishingBlowUsed`, actor);
+    return true;
+}
+
+function improvisedThrowEnabled() {
+    try {
+        return Boolean(game.settings.get("l5r5e", "enableImprovisedThrowAction"));
+    } catch (_error) {
+        return false;
+    }
+}
+
+function isThrowItemVisible(actor) {
+    return improvisedThrowEnabled() && (game.l5r5e?.equipment?.heldItems(actor) ?? []).length > 0;
+}
+
+export async function throwItem(actor, selectedItem = null) {
+    const equipment = game.l5r5e?.equipment;
+    if (!equipment?.throw || !equipment?.confirm || !equipment?.reserve) {
+        notify(`${MODULE_ID}.notifications.throw_api_unavailable`, "error");
+        return false;
+    }
+    const target = getTargetToken();
+    if (!target) {
+        notify(`${MODULE_ID}.notifications.no_target`, "warn");
+        return false;
+    }
+    if (!improvisedThrowEnabled()) return false;
+    const throwable = equipment.heldItems(actor);
+    if (!throwable.length) {
+        notify(`${MODULE_ID}.notifications.no_throwable_item`, "warn");
+        return false;
+    }
+    const itemId = selectedItem?.id ?? (throwable.length === 1
+        ? throwable[0].id
+        : await promptSelect({
+            title: game.i18n.localize(`${MODULE_ID}.actions.throw_item.label`),
+            label: game.i18n.localize(`${MODULE_ID}.equipment.choose_throw_item`),
+            choices: throwable.map((item) => ({ value: item.id, label: item.name })),
+        }));
+    const item = actor.items.get(itemId);
+    if (!item) return false;
+
+    const assessed = equipment.throw(actor, item, { mode: "improvised", trackIndividual: true });
+    if (!assessed.ok) {
+        notify(`${MODULE_ID}.notifications.throw_blocked`, "warn", { reason: assessed.assessment?.code ?? "blocked" });
+        return false;
+    }
+    const reserved = await equipment.reserve(equipment.confirm(assessed));
+    if (!reserved.ok) {
+        notify(`${MODULE_ID}.notifications.throw_blocked`, "warn", { reason: reserved.code ?? "blocked" });
+        return false;
+    }
+    const roll = reserved.assessment.roll;
+    const dialog = openDicePicker(actor, {
+        item,
+        skillId: roll.skillId,
+        difficulty: roll.difficulty,
+        target,
+        actions: { attack: true },
+        actionId: roll.actionId,
+        rollContext: {
+            ...foundry.utils.deepClone(roll.rollContext),
+            targetUuid: target.actor?.uuid ?? target.uuid,
+        },
+    });
+    if (!dialog) {
+        await equipment.cancel(reserved);
+        return false;
+    }
     return true;
 }
 
@@ -261,6 +351,7 @@ export async function executeAction(actor, actionId) {
         calming_breath: () => calmingBreath(actor),
         prepare_item: () => prepareItem(actor),
         strike: () => strike(actor),
+        throw_item: () => throwItem(actor),
         assist: () => assist(actor),
         guard: () => guard(actor),
         maneuver: () => maneuver(actor),
@@ -290,8 +381,11 @@ function actionAvailability(actor, actionId) {
             return { enabled: false, reason: `${MODULE_ID}.notifications.bid_already_committed` };
         }
     }
-    if (actionId === "strike" && !getWeapons(actor, { readiedOnly: true }).length) {
+    if (actionId === "strike" && !(game.l5r5e?.equipment?.getAttackProfiles(actor) ?? []).some((profile) => profile.available !== false)) {
         return { enabled: false, reason: `${MODULE_ID}.notifications.no_readied_weapon` };
+    }
+    if (actionId === "throw_item" && !isThrowItemVisible(actor)) {
+        return { enabled: false, reason: `${MODULE_ID}.notifications.no_throwable_item` };
     }
     const finishingBlow = actionId === "strike" && isFinishingBlowAvailable(actor);
     if (!finishingBlow && !ACTION_EXEMPT_ACTIONS.has(actionId)) {
@@ -351,6 +445,9 @@ export function createActionPanels(ARGON, { L5R5eEquipmentPanelButton }, { L5R5e
 
         async _renderInner() {
             await super._renderInner();
+            this.element.classList.add(`l5r5e-action-${this.actionId}`);
+            this.element.setAttribute("aria-label", game.i18n.localize(this.label));
+            this.element.setAttribute("tabindex", "0");
             this.element.classList.toggle("l5r5e-disabled", !this.availability.enabled);
             if (this.actionId === "strike") this.element.classList.toggle("l5r5e-finishing-blow", isFinishingBlowAvailable(this.actor));
         }
@@ -372,10 +469,14 @@ export function createActionPanels(ARGON, { L5R5eEquipmentPanelButton }, { L5R5e
 
             async _getButtons() {
                 if (getProfile(this.actor) !== profile) return [];
-                const actionIds = PROFILE_ACTIONS[profile]?.() ?? [];
+                const actionIds = (PROFILE_ACTIONS[profile]?.() ?? []).filter(
+                    (actionId) => actionId !== "throw_item" || isThrowItemVisible(this.actor),
+                );
                 const buttons = actionIds.map((actionId) => new L5R5eActionButton(actionId));
                 buttons.push(new L5R5eEquipmentPanelButton(), new L5R5eTechniquesPanelButton());
-                if (profile !== "universal") buttons.push(new L5R5eActionButton("end_turn"));
+                if (profile !== "universal" && getCombatant(this.actor) === game.combat?.combatant) {
+                    buttons.push(new L5R5eActionButton("end_turn"));
+                }
                 return buttons;
             }
         };

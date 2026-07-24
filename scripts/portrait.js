@@ -25,6 +25,21 @@ function localized(key) {
     return translated === key ? key.split(".").at(-1) : translated;
 }
 
+function tacticalGridApi() {
+    return game.modules.get("aedifs-tactical-grid")?.active
+        ? game.modules.get("aedifs-tactical-grid")?.api ?? globalThis.TacticalGrid
+        : null;
+}
+
+function profileRange(profile) {
+    const minimum = Number(profile?.range?.minimum ?? profile?.range_min ?? 0);
+    const maximum = Number(profile?.range?.maximum ?? profile?.range_max ?? minimum);
+    return {
+        minimum: Number.isFinite(minimum) ? Math.max(0, minimum) : 0,
+        maximum: Number.isFinite(maximum) ? Math.max(0, maximum) : 0,
+    };
+}
+
 async function resolveEffectDescription(effect) {
     if (effect.description) return effect.description;
     const statusId = Array.from(effect.statuses ?? [])[0];
@@ -139,6 +154,7 @@ export function createPortraitPanel(ARGON) {
                 await this.#buildNinjoGiri(),
                 this.#buildRings(),
                 this.#buildWarnings(),
+                this.#buildWeapon(),
                 this.#buildArmor(),
                 this.#buildTarget(),
                 this.#buildProfileTracker(),
@@ -231,6 +247,69 @@ export function createPortraitPanel(ARGON) {
                 badge.dataset.tooltip = game.i18n.localize(`${MODULE_ID}.warnings.${warning}_tooltip`);
                 section.appendChild(badge);
             }
+            return section;
+        }
+
+        #buildWeapon() {
+            const profiles = (game.l5r5e?.equipment?.getAttackProfiles(this.actor) ?? [])
+                .filter((profile) => profile.available !== false);
+            const profile = profiles.find((entry) => entry.source === "weapon")
+                ?? profiles.find((entry) => entry.id === "unarmed-punch")
+                ?? profiles[0];
+            const section = element("div", `l5r5e-weapon-summary ${profile ? "" : "hidden"}`);
+            if (!profile) return section;
+            const item = profile.itemUuid
+                ? [...this.actor.items].find((candidate) => candidate.uuid === profile.itemUuid)
+                : null;
+            const range = profileRange(profile);
+            const card = element("button", `l5r5e-weapon-card ${profile.virtual ? "unarmed" : ""}`);
+            card.type = "button";
+            card.setAttribute("aria-label", item?.name ?? game.i18n.localize(profile.labelKey));
+            card.dataset.tooltip = game.i18n.localize(`${MODULE_ID}.equipment.active_weapon_tooltip`);
+            const image = element("img");
+            image.src = item?.img ?? "systems/l5r5e/assets/icons/weapons/unarmed.svg";
+            image.alt = item?.name ?? game.i18n.localize(profile.labelKey);
+            const details = element("div", "l5r5e-weapon-details");
+            details.append(
+                element("strong", null, item?.name ?? game.i18n.localize(profile.labelKey)),
+                element("span", "l5r5e-weapon-grip", game.i18n.format(`${MODULE_ID}.equipment.grip_value`, {
+                    value: profile.grip ?? "unarmed",
+                })),
+            );
+            const stats = element("div", "l5r5e-weapon-stats");
+            stats.append(
+                element("span", null, game.i18n.format(`${MODULE_ID}.equipment.damage_value`, { value: profile.damage ?? 0 })),
+                element("span", null, game.i18n.format(`${MODULE_ID}.equipment.deadliness_value`, { value: profile.deadliness ?? 0 })),
+                element("span", null, game.i18n.format(`${MODULE_ID}.equipment.range_value`, {
+                    minimum: range.minimum,
+                    maximum: range.maximum,
+                })),
+            );
+            details.appendChild(stats);
+            const properties = (item?.system?.properties ?? [])
+                .map((property) => (typeof property === "string" ? property : property?.name ?? property?.id))
+                .filter(Boolean)
+                .join(" · ");
+            if (properties) details.appendChild(element("small", "l5r5e-weapon-properties", properties));
+            card.append(image, details);
+            card.addEventListener("click", () => item?.sheet?.render({ force: true }));
+            card.addEventListener("mouseenter", () => {
+                const api = tacticalGridApi();
+                if (!api?.rangeHighlight || !this.token || !canvas?.dimensions?.distance) return;
+                const unit = Number(canvas.dimensions.distance) * Number(game.l5r5e?.rangeBands?.fieldsPerBand ?? 3);
+                const ranges = [];
+                if (range.minimum > 0) ranges.push({
+                    range: range.minimum * unit,
+                    shaded: true,
+                    shadeColor: "#5f1b1b",
+                    shadeAlpha: 0.24,
+                });
+                ranges.push({ range: range.maximum * unit, lineColor: "#b59052", lineWidth: 2 });
+                api.rangeHighlight(this.token, { ranges });
+            });
+            card.addEventListener("mouseleave", () => tacticalGridApi()?.clearRangeHighlight?.(this.token));
+            section.appendChild(element("h4", null, game.i18n.localize(`${MODULE_ID}.equipment.active_weapon`)));
+            section.appendChild(card);
             return section;
         }
 

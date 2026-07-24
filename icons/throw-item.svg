@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="title">
+  <title id="title">Throw item</title>
+  <path fill="#efe2c5" d="M9 43c8-8 16-12 25-13l-5-6 3-3 14 11-14 11-3-3 5-6c-7 1-14 4-21 11z"/>
+  <path fill="#a72f29" d="M43 10l11 7-6 12-13-8z"/>
+  <path fill="none" stroke="#efe2c5" stroke-linecap="round" stroke-width="3" d="M10 51c11-2 20-1 28 3"/>
+</svg>

@@ -2,18 +2,93 @@ import { MODULE_ID } from "./config.js";
 import { getWeapons, isReadiedWeapon } from "./data.js";
 import { canUpdate, notify, promptSelect } from "./utils.js";
 
+function equipmentApi() {
+    return game.l5r5e?.equipment ?? null;
+}
+
+async function collectReleaseDecisions(intent) {
+    if (intent.assessment?.code !== "occupiedHands") return [];
+    const candidates = [...(intent.assessment?.hands?.heldItems ?? [])];
+    const releases = [];
+    let releasedHands = 0;
+    const required = Number(intent.assessment?.hands?.deficit ?? 0);
+
+    while (releasedHands < required) {
+        const remaining = candidates.filter((entry) => !releases.some((release) => release.itemUuid === entry.itemUuid));
+        if (!remaining.length) return null;
+        const choice = await promptSelect({
+            title: game.i18n.localize(`${MODULE_ID}.equipment.occupied_hands`),
+            label: game.i18n.format(`${MODULE_ID}.equipment.release_hands`, {
+                remaining: Math.max(0, required - releasedHands),
+            }),
+            choices: remaining.flatMap((entry) => [
+                {
+                    value: `${entry.itemUuid}|stow`,
+                    label: game.i18n.format(`${MODULE_ID}.equipment.release_stow`, { name: entry.name }),
+                },
+                {
+                    value: `${entry.itemUuid}|drop`,
+                    label: game.i18n.format(`${MODULE_ID}.equipment.release_drop`, { name: entry.name }),
+                },
+            ]),
+        });
+        if (!choice) return null;
+        const [itemUuid, mode] = choice.split("|");
+        const candidate = remaining.find((entry) => entry.itemUuid === itemUuid);
+        if (!candidate) return null;
+        releases.push({ itemUuid, mode });
+        releasedHands += Number(candidate.hands ?? 0);
+    }
+    return releases;
+}
+
+export async function executeEquipmentIntent(intent) {
+    const equipment = equipmentApi();
+    if (!equipment?.confirm || !equipment?.reserve || !equipment?.commit) {
+        notify(`${MODULE_ID}.notifications.equipment_api_unavailable`, "error");
+        return false;
+    }
+    if (!intent?.ok && intent?.assessment?.code !== "occupiedHands") {
+        notify(`${MODULE_ID}.notifications.equipment_blocked`, "warn", {
+            reason: intent?.assessment?.code ?? "blocked",
+        });
+        return false;
+    }
+
+    const releases = await collectReleaseDecisions(intent);
+    if (releases === null) return false;
+    const confirmed = equipment.confirm(intent, { releases });
+    if (!confirmed.ok) {
+        notify(`${MODULE_ID}.notifications.equipment_blocked`, "warn", { reason: confirmed.code ?? "blocked" });
+        return false;
+    }
+    const reserved = await equipment.reserve(confirmed);
+    if (!reserved.ok) {
+        notify(`${MODULE_ID}.notifications.equipment_blocked`, "warn", { reason: reserved.code ?? "blocked" });
+        return false;
+    }
+    const committed = await equipment.commit(reserved);
+    if (!committed.ok) {
+        await equipment.cancel?.(reserved);
+        notify(`${MODULE_ID}.notifications.equipment_blocked`, "warn", { reason: committed.code ?? "blocked" });
+        return false;
+    }
+    ui.ARGON?.refresh?.();
+    return committed;
+}
+
 export async function updateEquipmentState(item, { equipped = item?.system?.equipped, readied = item?.system?.readied } = {}) {
     if (!item || !canUpdate(item)) {
         notify(`${MODULE_ID}.notifications.no_permission`, "warn");
         return false;
     }
-
-    const update = { "system.equipped": !!equipped };
-    if (item.type === "weapon") {
-        update["system.readied"] = !!readied && !!equipped;
+    const equipment = equipmentApi();
+    if (!equipment?.prepare) {
+        notify(`${MODULE_ID}.notifications.equipment_api_unavailable`, "error");
+        return false;
     }
-    await item.update(update);
-    return true;
+    const ready = item.type === "weapon" ? Boolean(readied && equipped) : Boolean(equipped);
+    return executeEquipmentIntent(equipment.prepare(item.parent, item, { ready }));
 }
 
 export function toggleEquipped(item) {
@@ -30,14 +105,26 @@ export function toggleReadied(item) {
 }
 
 export async function setGrip(item, grip) {
-    if (item?.type !== "weapon" || !["grip_1", "grip_2"].includes(grip) || !canUpdate(item)) return false;
-    await item.setFlag(MODULE_ID, "currentGrip", grip);
-    ui.ARGON?.refresh();
-    return true;
+    if (item?.type !== "weapon" || !item.system?.grip_profiles?.[grip] || !canUpdate(item)) return false;
+    const equipment = equipmentApi();
+    if (!equipment?.changeGrip) {
+        notify(`${MODULE_ID}.notifications.equipment_api_unavailable`, "error");
+        return false;
+    }
+    return executeEquipmentIntent(equipment.changeGrip(item.parent, item, grip));
 }
 
 export function getCurrentGrip(item) {
-    return item?.getFlag?.(MODULE_ID, "currentGrip") ?? "grip_1";
+    return item?.system?.active_grip ?? "one-handed";
+}
+
+export async function dropItem(actor, item) {
+    const equipment = equipmentApi();
+    if (!equipment?.drop) {
+        notify(`${MODULE_ID}.notifications.equipment_api_unavailable`, "error");
+        return false;
+    }
+    return executeEquipmentIntent(equipment.drop(actor, item));
 }
 
 export async function chooseWeapon(actor, { readiedOnly = false, equippedOnly = false, titleKey = "prepare_item" } = {}) {
@@ -71,22 +158,15 @@ export function createWeaponSetsClass(ARGON) {
         }
 
         async _onSetChange({ sets, active }) {
-            const activeItems = new Set(
-                Object.values(sets[active] ?? {}).filter(
-                    (item) => item?.type === "weapon" && item.parent?.id === this.actor.id,
-                ),
-            );
-            const updates = [];
-
-            for (const weapon of getWeapons(this.actor)) {
-                const isActive = activeItems.has(weapon);
-                const update = { _id: weapon.id };
-                if (isActive && !weapon.system.equipped) update["system.equipped"] = true;
-                if (!!weapon.system.readied !== isActive) update["system.readied"] = isActive;
-                if (Object.keys(update).length > 1) updates.push(update);
+            const equipment = equipmentApi();
+            if (!equipment?.changeLoadout) {
+                notify(`${MODULE_ID}.notifications.equipment_api_unavailable`, "error");
+                return false;
             }
-
-            if (updates.length) await this.actor.updateEmbeddedDocuments("Item", updates);
+            const activeItems = Object.values(sets[active] ?? {}).filter(
+                (item) => item?.type === "weapon" && item.parent?.id === this.actor.id,
+            );
+            return Boolean(await executeEquipmentIntent(equipment.changeLoadout(this.actor, activeItems)));
         }
     };
 }
