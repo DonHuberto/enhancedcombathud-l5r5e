@@ -1,6 +1,6 @@
 # Foundry VTT 14 smoke checklist
 
-- Install L5R5e 1.14.108, Argon and this adapter from its stable manifest.
+- Install L5R5e 1.14.109, Argon and this adapter from its stable manifest.
 - As GM, select character, adversary and minion tokens; confirm the HUD opens and shows only their valid data.
 - As a player, repeat with OWNER and non-OWNER NPCs; the latter must not expose exact or hidden data.
 - Click every action in each conflict profile and compare the core action ID/type with `action-mapping.md`.

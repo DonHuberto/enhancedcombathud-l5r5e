@@ -94,6 +94,8 @@
             "unarmed": "Walka bez broni",
             "active_weapon": "Aktywna broń",
             "active_weapon_tooltip": "Otwórz kartę broni. Najedź, aby pokazać aktywne pasma zasięgu w Tactical Grid.",
+            "active_armor": "Aktywny pancerz",
+            "no_armor": "Brak założonego pancerza",
             "grip_value": "Chwyt: {value}",
             "damage_value": "Obrażenia {value}",
             "deadliness_value": "Śmiertelność {value}",

@@ -151,13 +151,19 @@ export function createWeaponSetsClass(ARGON) {
         async getDefaultSets() {
             const weapons = getWeapons(this.actor, { equippedOnly: true });
             return {
-                1: { primary: weapons[0]?.uuid ?? null, secondary: weapons[1]?.uuid ?? null },
-                2: { primary: weapons[2]?.uuid ?? null, secondary: weapons[3]?.uuid ?? null },
-                3: { primary: weapons[4]?.uuid ?? null, secondary: weapons[5]?.uuid ?? null },
+                1: { primary: weapons[0]?.uuid ?? null, secondary: null },
+                2: { primary: weapons[1]?.uuid ?? null, secondary: null },
+                3: { primary: weapons[2]?.uuid ?? null, secondary: null },
             };
         }
 
         async _onSetChange({ sets, active }) {
+            // Argon calls onSetChange once while merely rendering the HUD.
+            // That initial synchronization must never mutate the actor loadout.
+            if (!this._initialSetSynchronized) {
+                this._initialSetSynchronized = true;
+                return true;
+            }
             const equipment = equipmentApi();
             if (!equipment?.changeLoadout) {
                 notify(`${MODULE_ID}.notifications.equipment_api_unavailable`, "error");

@@ -7,6 +7,7 @@ export function getSkirmishActions() {
         "maneuver",
         "prepare_item",
         "strike",
+        "throw_item",
         "wait",
         "custom_action",
     ];

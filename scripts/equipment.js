@@ -155,6 +155,11 @@ export function createEquipmentClasses(ARGON) {
             return ACTION_ICONS.equipment;
         }
 
+        async _renderInner() {
+            await super._renderInner();
+            this.element.classList.add("l5r5e-large-action", "l5r5e-action-equipment");
+        }
+
         async _getPanel() {
             const items = [
                 ...getWeapons(this.actor),

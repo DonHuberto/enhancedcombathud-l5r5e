@@ -147,6 +147,14 @@ export function createPortraitPanel(ARGON) {
 
         async _renderInner() {
             await super._renderInner();
+            const portraitRoot = this.element.matches?.(".portrait-hud")
+                ? this.element
+                : this.element.querySelector(".portrait-hud");
+            if (!portraitRoot) return;
+
+            const gearStrip = element("section", "l5r5e-gear-strip");
+            gearStrip.append(this.#buildWeapon(), this.#buildArmor());
+
             const container = element("section", "l5r5e-portrait-panel");
             container.append(
                 this.#buildResources(),
@@ -154,12 +162,10 @@ export function createPortraitPanel(ARGON) {
                 await this.#buildNinjoGiri(),
                 this.#buildRings(),
                 this.#buildWarnings(),
-                this.#buildWeapon(),
-                this.#buildArmor(),
                 this.#buildTarget(),
                 this.#buildProfileTracker(),
             );
-            this.element.querySelector(".portrait-hud")?.appendChild(container);
+            portraitRoot.append(gearStrip, container);
         }
 
         #buildResources() {
@@ -315,14 +321,24 @@ export function createPortraitPanel(ARGON) {
 
         #buildArmor() {
             const armors = getEquippedArmor(this.actor);
-            const section = element("div", `l5r5e-armor-summary ${armors.length ? "" : "hidden"}`);
-            for (const armor of armors) {
-                const row = element("button", "l5r5e-armor-row");
-                row.type = "button";
-                row.dataset.tooltip = game.i18n.localize(`${MODULE_ID}.equipment.open_sheet`);
-                const image = element("img");
-                image.src = armor.img;
-                image.alt = armor.name;
+            const armor = armors[0] ?? null;
+            const section = element("div", `l5r5e-armor-summary ${armor ? "" : "empty"}`);
+            const row = element("button", "l5r5e-armor-row");
+            row.type = "button";
+            row.disabled = !armor;
+            row.dataset.tooltip = armor
+                ? game.i18n.localize(`${MODULE_ID}.equipment.open_sheet`)
+                : game.i18n.localize(`${MODULE_ID}.equipment.no_armor`);
+            const image = element("img");
+            image.src = armor?.img ?? "systems/l5r5e/assets/icons/items/armor.svg";
+            image.alt = armor?.name ?? game.i18n.localize(`${MODULE_ID}.equipment.no_armor`);
+            const details = element("span", "l5r5e-armor-details");
+            details.appendChild(element(
+                "strong",
+                "l5r5e-armor-name",
+                armor?.name ?? game.i18n.localize(`${MODULE_ID}.equipment.no_armor`),
+            ));
+            if (armor) {
                 const physical = element("span", "l5r5e-resistance physical");
                 physical.dataset.tooltip = game.i18n.localize("l5r5e.armors.physical");
                 physical.append(element("i", "fas fa-tint"), document.createTextNode(` ${armor.system?.armor?.physical ?? 0}`));
@@ -333,11 +349,15 @@ export function createPortraitPanel(ARGON) {
                     .map((property) => (typeof property === "string" ? property : property?.name ?? property?.id))
                     .filter(Boolean)
                     .join(", ");
-                row.append(image, element("span", "l5r5e-armor-name", armor.name), physical, supernatural);
-                if (properties) row.appendChild(element("small", "l5r5e-armor-properties", properties));
+                details.append(physical, supernatural);
+                if (properties) details.appendChild(element("small", "l5r5e-armor-properties", properties));
                 row.addEventListener("click", () => armor.sheet.render(true));
-                section.appendChild(row);
             }
+            row.append(image, details);
+            section.append(
+                element("h4", null, game.i18n.localize(`${MODULE_ID}.equipment.active_armor`)),
+                row,
+            );
             return section;
         }
 

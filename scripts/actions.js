@@ -128,6 +128,11 @@ export async function prepareItem(actor, selectedWeapon = null) {
 }
 
 async function strike(actor) {
+    const target = getTargetToken();
+    if (!target) {
+        notify(`${MODULE_ID}.notifications.no_target`, "warn");
+        return false;
+    }
     const profiles = (game.l5r5e?.equipment?.getAttackProfiles(actor) ?? []).filter((profile) => profile.available !== false);
     if (!profiles.length) return false;
     let profile = profiles[0];
@@ -155,7 +160,7 @@ async function strike(actor) {
         notify(`${MODULE_ID}.notifications.no_action`, "warn");
         return false;
     }
-    const dialog = openWeaponStrike(actor, weapon);
+    const dialog = openWeaponStrike(actor, weapon, { target });
     if (!dialog) return false;
     if (finishing) Hooks.callAll(`${MODULE_ID}.finishingBlowUsed`, actor);
     return true;
@@ -383,6 +388,9 @@ function actionAvailability(actor, actionId) {
     }
     if (actionId === "strike" && !(game.l5r5e?.equipment?.getAttackProfiles(actor) ?? []).some((profile) => profile.available !== false)) {
         return { enabled: false, reason: `${MODULE_ID}.notifications.no_readied_weapon` };
+    }
+    if (actionId === "strike" && !getTargetToken()) {
+        return { enabled: false, reason: `${MODULE_ID}.notifications.no_target` };
     }
     if (actionId === "throw_item" && !isThrowItemVisible(actor)) {
         return { enabled: false, reason: `${MODULE_ID}.notifications.no_throwable_item` };

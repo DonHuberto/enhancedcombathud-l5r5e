@@ -150,6 +150,11 @@ export function createTechniqueClasses(ARGON) {
             return ACTION_ICONS.techniques;
         }
 
+        async _renderInner() {
+            await super._renderInner();
+            this.element.classList.add("l5r5e-large-action", "l5r5e-action-techniques");
+        }
+
         async _getPanel() {
             const favorites = getFavoriteTechniqueIds(this.actor);
             const techniques = collectTechniques(this.actor).sort((a, b) => {

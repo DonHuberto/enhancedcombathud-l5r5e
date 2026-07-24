@@ -61,6 +61,11 @@ test("checked actions are not consumed by module turn-state writes", () => {
 });
 
 test("Throw Item reserves an improvised core intent and opens the system check", async () => {
+    const skirmish = fs.readFileSync(new URL("../scripts/profiles/skirmish.js", import.meta.url), "utf8");
+    const duel = fs.readFileSync(new URL("../scripts/profiles/duel.js", import.meta.url), "utf8");
+    assert.match(skirmish, /"throw_item"/);
+    assert.match(duel, /"throw_item"/);
+
     let assessedOptions;
     let pickerOptions;
     const item = {
@@ -133,15 +138,24 @@ test("HUD layout keeps the portrait clear and exposes persistent equipment cards
     const weapons = fs.readFileSync(new URL("../scripts/weapons.js", import.meta.url), "utf8");
     const styles = fs.readFileSync(new URL("../styles/hud.css", import.meta.url), "utf8");
     assert.match(portrait, /#buildWeapon\(\)/);
+    assert.match(portrait, /l5r5e-gear-strip/);
+    assert.match(portrait, /this\.element\.matches\?\.\("\.portrait-hud"\)/);
     assert.match(portrait, /l5r5e-weapon-card/);
+    assert.match(portrait, /l5r5e-armor-row/);
     assert.match(portrait, /rangeHighlight/);
     assert.match(styles, /--l5r5e-washi/);
-    assert.match(styles, /left:\s*calc\(100%/);
+    assert.match(styles, /--l5r5e-large-tile:\s*300px/);
+    assert.match(styles, /> \.weapon-sets[\s\S]*display:\s*none !important/);
+    assert.match(styles, /\.l5r5e-gear-strip[\s\S]*grid-template-columns:\s*repeat\(2/);
     assert.match(styles, /mask-image:\s*none/);
     assert.match(styles, /grid-template-rows:\s*repeat\(2/);
+    assert.match(styles, /display:\s*grid !important/);
+    assert.match(styles, /\.action-element\.l5r5e-large-action/);
     assert.match(styles, /prefers-reduced-motion/);
     assert.match(actions, /aria-label/);
+    assert.match(actions, /actionId === "strike" && !getTargetToken\(\)/);
     assert.match(weapons, /equipment\.changeLoadout\(this\.actor,\s*activeItems\)/);
+    assert.match(weapons, /_initialSetSynchronized/);
     assert.doesNotMatch(weapons, /setFlag\(MODULE_ID,\s*"currentGrip"/);
     assert.doesNotMatch(weapons, /updateEmbeddedDocuments/);
 });

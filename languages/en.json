@@ -102,6 +102,8 @@
             "unarmed": "Unarmed",
             "active_weapon": "Active weapon",
             "active_weapon_tooltip": "Open the weapon sheet. Hover to show its active Range bands on Tactical Grid.",
+            "active_armor": "Active armor",
+            "no_armor": "No equipped armor",
             "grip_value": "Grip: {value}",
             "damage_value": "Damage {value}",
             "deadliness_value": "Deadliness {value}",

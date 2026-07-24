@@ -1,5 +1,15 @@
 # Changelog
 
+## 2.0.3 - 2026-07-25
+
+- Place full-size weapon and armor squares directly beside the unobscured portrait and hide the duplicate legacy weapon-set strip.
+- Render ordinary actions as a strict two-row half-size grid while Equipment and Techniques occupy full-size two-by-two squares.
+- Fix portrait enhancement when Argon's component root is itself the portrait element.
+- Require a visible target for Strike, pass it into the core roll and preserve automatic attack and damage resolution.
+- Stop initial weapon-set synchronization from producing loadout warnings whenever the HUD is rebuilt at a new round.
+- Expose Throw Item in Skirmish and Duel when the core house rule is enabled and a held item is available.
+- Add live-layout and action-list regression assertions for the corrected HUD contract.
+
 ## 2.0.2 - 2026-07-24
 
 - Redesign the Combat HUD around an L5R washi, sumi, urushi, aged-gold and dark-wood palette while keeping the portrait unobscured and adapting to smaller viewports.

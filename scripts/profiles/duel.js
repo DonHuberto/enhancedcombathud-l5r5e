@@ -35,7 +35,17 @@ function duelCombatants() {
 }
 
 export function getDuelActions() {
-    return ["calming_breath", "center", "predict", "prepare_item", "strike", "custom_action", "staredown", "concede"];
+    return [
+        "calming_breath",
+        "center",
+        "predict",
+        "prepare_item",
+        "strike",
+        "throw_item",
+        "custom_action",
+        "staredown",
+        "concede",
+    ];
 }
 
 export function isFinishingBlowAvailable(actor) {
