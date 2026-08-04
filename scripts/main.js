@@ -12,6 +12,14 @@ import { registerSocket } from "./socket.js";
 
 let configured = false;
 
+export function isCoreSettingEnabled(key) {
+    try {
+        return Boolean(game.settings?.get?.(CORE_ID, key));
+    } catch (_error) {
+        return false;
+    }
+}
+
 Hooks.once("argonInit", (CoreHUD) => {
     if (game.system.id !== SYSTEM_ID || configured) return;
     configured = true;
@@ -51,7 +59,7 @@ Hooks.once("init", () => {
 
     Hooks.on("targetToken", () => SUPPORTED_ACTOR_TYPES.includes(ui.ARGON?._actor?.type) && ui.ARGON.components?.portrait?.refresh?.());
     Hooks.on("controlToken", (token, controlled) => {
-        if (!game.settings.get(CORE_ID, "alwaysOn")) return;
+        if (!isCoreSettingEnabled("alwaysOn")) return;
         if (controlled && canUseActor(token.actor)) return;
         setTimeout(() => {
             if (canvas?.tokens?.controlled?.some((entry) => canUseActor(entry.actor))) return;
@@ -84,7 +92,7 @@ Hooks.once("ready", async () => {
     await ensureCombatProfileSnapshot();
     await clearLegacyTurnState(game.combat);
 
-    if (game.settings.get(CORE_ID, "alwaysOn") && !ui.ARGON?._target) {
+    if (isCoreSettingEnabled("alwaysOn") && !ui.ARGON?._target) {
         const target = canvas?.tokens?.controlled?.[0] ?? game.user.character;
         const actor = target?.actor ?? target;
         if (canUseActor(actor)) ui.ARGON.bind(target);

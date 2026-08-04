@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.0.5 - 2026-08-04
+
+- Stop player clients from throwing during `controlToken` when Argon does not register its optional `alwaysOn` setting for that client.
+- Treat an unavailable optional core setting as disabled while preserving normal always-on binding when the setting exists.
+- Add regression coverage for the exact missing-setting exception observed during simultaneous GM and two-player Foundry testing.
+
 ## 2.0.4 - 2026-08-04
 
 - Centralize the executable route for every action displayed by the Universal, Intrigue, Duel, Skirmish and Mass Battle profiles.

@@ -45,3 +45,13 @@ test("bootstrap registers the V14 adapter surface for character and NPC actors",
     assert.equal(registrations.movement, null);
     assert.deepEqual(registrations.actorTypes, ["character", "npc"]);
 });
+
+test("missing optional Argon settings fail closed for player clients", async () => {
+    globalThis.Hooks = { once: () => null, on: () => null };
+    globalThis.game = {
+        system: { id: "l5r5e" },
+        settings: { get: () => { throw new Error('"enhancedcombathud.alwaysOn" is not a registered game setting'); } },
+    };
+    const { isCoreSettingEnabled } = await import(`../scripts/main.js?missing-setting=${Date.now()}`);
+    assert.equal(isCoreSettingEnabled("alwaysOn"), false);
+});
