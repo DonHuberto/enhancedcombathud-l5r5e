@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.0.4 - 2026-08-04
+
+- Centralize the executable route for every action displayed by the Universal, Intrigue, Duel, Skirmish and Mass Battle profiles.
+- Add an exhaustive regression test proving that public profile lists, runtime button lists and their action routes cannot drift apart.
+- Require L5R5E 1.14.112, whose equipment lifecycle now consumes the same canonical `prepare_item` action ID as the HUD.
+
 ## 2.0.3 - 2026-07-25
 
 - Place full-size weapon and armor squares directly beside the unobscured portrait and hide the duplicate legacy weapon-set strip.

@@ -36,6 +36,35 @@ const PROFILE_ACTIONS = {
 
 const ACTION_EXEMPT_ACTIONS = new Set(["concede", "staredown"]);
 
+const ACTION_ROUTES = Object.freeze({
+    generic_roll: "direct",
+    persuade: "direct",
+    assist: "direct",
+    calming_breath: "direct",
+    custom_action: "direct",
+    center: "duel",
+    predict: "duel",
+    prepare_item: "direct",
+    strike: "direct",
+    throw_item: "direct",
+    staredown: "duel",
+    concede: "duel",
+    challenge: "profile",
+    guard: "direct",
+    maneuver: "direct",
+    wait: "direct",
+    assault: "mass_battle",
+    rally: "mass_battle",
+    reinforce: "mass_battle",
+    end_turn: "direct",
+});
+
+export function getActionRoute(profile, actionId) {
+    const route = ACTION_ROUTES[actionId];
+    if (route === "profile") return profile === "mass_battle" ? "mass_battle" : "direct";
+    return route ?? null;
+}
+
 export async function performUnmask(actor) {
     if (!actor?.isOwner || !actor.statuses?.has("compromised")) return false;
     const confirmed = await confirmAction({
@@ -346,10 +375,9 @@ async function customAction(actor) {
 
 export async function executeAction(actor, actionId) {
     if (!canUseActor(actor)) return false;
-    if (["center", "predict", "concede", "staredown"].includes(actionId)) return executeDuelAction(actor, actionId);
-    if (getProfile(actor) === "mass_battle" && ["assault", "challenge", "rally", "reinforce"].includes(actionId)) {
-        return executeMassBattleAction(actor, actionId);
-    }
+    const route = getActionRoute(getProfile(actor), actionId);
+    if (route === "duel") return executeDuelAction(actor, actionId);
+    if (route === "mass_battle") return executeMassBattleAction(actor, actionId);
 
     const handlers = {
         generic_roll: () => openGenericRoll(actor),
@@ -371,7 +399,7 @@ export async function executeAction(actor, actionId) {
             return true;
         },
     };
-    return handlers[actionId]?.() ?? false;
+    return route === "direct" ? handlers[actionId]?.() ?? false : false;
 }
 
 function actionAvailability(actor, actionId) {

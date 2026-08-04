@@ -1,7 +1,13 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import fs from "node:fs";
-import { throwItem } from "../scripts/actions.js";
+import { getActionRoute, throwItem } from "../scripts/actions.js";
+import { ACTIONS_BY_PROFILE } from "../scripts/config.js";
+import { getUniversalActions } from "../scripts/profiles/universal.js";
+import { getIntrigueActions } from "../scripts/profiles/intrigue.js";
+import { getDuelActions } from "../scripts/profiles/duel.js";
+import { getSkirmishActions } from "../scripts/profiles/skirmish.js";
+import { getMassBattleActions } from "../scripts/profiles/mass-battle.js";
 import { openWeaponStrike } from "../scripts/rolls.js";
 import { executeImmediateAction, getActionDefinition } from "../scripts/state.js";
 
@@ -9,6 +15,26 @@ const registry = {
     wait: { actionId: "wait", actionTypes: ["support"], requiresCheck: false },
     strike: { actionId: "strike", actionTypes: ["attack"], requiresCheck: true },
 };
+
+test("every displayed profile action has one executable route and profile lists cannot drift", () => {
+    const runtimeActions = {
+        universal: getUniversalActions(),
+        intrigue: getIntrigueActions(),
+        duel: getDuelActions(),
+        skirmish: getSkirmishActions(),
+        mass_battle: getMassBattleActions(),
+    };
+    for (const [profile, actions] of Object.entries(ACTIONS_BY_PROFILE)) {
+        assert.deepEqual(runtimeActions[profile], actions, `${profile} profile actions drifted from the public configuration`);
+        for (const actionId of actions) {
+            assert.ok(getActionRoute(profile, actionId), `${profile}.${actionId} has no executable route`);
+        }
+    }
+    assert.equal(getActionRoute("skirmish", "challenge"), "direct");
+    assert.equal(getActionRoute("mass_battle", "challenge"), "mass_battle");
+    assert.equal(getActionRoute("skirmish", "end_turn"), "direct");
+    assert.equal(getActionRoute("skirmish", "unknown"), null);
+});
 
 test("HUD consumes the core action registry and immediate API with stable metadata", async () => {
     const calls = [];
