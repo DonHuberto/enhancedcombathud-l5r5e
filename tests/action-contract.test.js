@@ -171,8 +171,10 @@ test("HUD layout keeps the portrait clear and exposes persistent equipment cards
     assert.match(portrait, /rangeHighlight/);
     assert.match(styles, /--l5r5e-washi/);
     assert.match(styles, /--l5r5e-large-tile:\s*300px/);
+    assert.match(styles, /--l5r5e-gear-width:\s*calc\(var\(--l5r5e-large-tile\) \* 2\)/);
     assert.match(styles, /> \.weapon-sets[\s\S]*display:\s*none !important/);
     assert.match(styles, /\.l5r5e-gear-strip[\s\S]*grid-template-columns:\s*repeat\(2/);
+    assert.match(styles, /\.action-hud\s*\{[\s\S]*?margin-left:\s*var\(--l5r5e-gear-width\)/);
     assert.match(styles, /mask-image:\s*none/);
     assert.match(styles, /grid-template-rows:\s*repeat\(2/);
     assert.match(styles, /display:\s*grid !important/);

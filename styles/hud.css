@@ -10,6 +10,7 @@
     --l5r5e-cream: #f5ecd9;
     --l5r5e-large-tile: 300px;
     --l5r5e-small-tile: 150px;
+    --l5r5e-gear-width: calc(var(--l5r5e-large-tile) * 2);
 }
 
 .extended-combat-hud > .weapon-sets {
@@ -18,7 +19,7 @@
 
 .extended-combat-hud .portrait-hud:has(.l5r5e-gear-strip) {
     height: var(--l5r5e-large-tile);
-    margin-right: calc(var(--l5r5e-large-tile) * 2);
+    margin-right: var(--l5r5e-gear-width);
     min-height: var(--l5r5e-large-tile);
     min-width: var(--l5r5e-large-tile);
     overflow: visible;
@@ -43,7 +44,7 @@
     height: var(--l5r5e-large-tile);
     left: 100%;
     position: absolute;
-    width: calc(var(--l5r5e-large-tile) * 2);
+    width: var(--l5r5e-gear-width);
     z-index: 5;
 }
 
@@ -457,6 +458,10 @@
     grid-template-rows: repeat(2, var(--l5r5e-small-tile));
     margin-bottom: 0;
     padding: 0;
+}
+
+.extended-combat-hud .action-hud {
+    margin-left: var(--l5r5e-gear-width);
 }
 
 .extended-combat-hud .action-hud .actions-container:before {

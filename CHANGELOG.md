@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.0.6 - 2026-08-05
+
+- Reserve the complete weapon-and-armor strip width before laying out actions so equipment cards no longer cover the first action columns.
+- Keep every ordinary action clickable in the two-row grid while Equipment and Techniques retain their full two-by-two square geometry.
+- Add a layout-contract regression test, verify the corrected hit targets in simultaneous player sessions and require L5R5E 1.14.115 for the corrected legacy weapon range profile.
+
 ## 2.0.5 - 2026-08-04
 
 - Stop player clients from throwing during `controlToken` when Argon does not register its optional `alwaysOn` setting for that client.
