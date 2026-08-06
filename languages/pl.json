@@ -24,6 +24,7 @@
             "fatigue_tooltip": "Aktualne Zmęczenie i Wytrzymałość.",
             "strife_tooltip": "Aktualne Napięcie i Opanowanie.",
             "void_tooltip": "Aktualne i maksymalne Punkty Pustki.",
+            "overflow_tooltip": "Rezerwa nadmiarowa: {value} z {max}. Ta ciemniejsza rezerwa wyczerpuje się przed zwykłymi kulami.",
             "focus_tooltip": "Skupienie określa przygotowaną inicjatywę i limit tajnej deklaracji w pojedynku.",
             "vigilance_tooltip": "Czujność określa nieprzygotowaną inicjatywę i często przeciwstawia się akcjom Scheme."
         },

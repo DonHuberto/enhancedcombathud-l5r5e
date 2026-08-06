@@ -1,5 +1,13 @@
 import { MODULE_ID, PROFILES, RINGS } from "./config.js";
-import { getActiveWeaponProfile, getEquippedArmor, getResourceData, getWarningIds, getWeapons, weaponCoversRange } from "./data.js";
+import {
+    getActiveWeaponProfile,
+    getEquippedArmor,
+    getResourceData,
+    getResourceOrbView,
+    getWarningIds,
+    getWeapons,
+    weaponCoversRange,
+} from "./data.js";
 import { performUnmask } from "./actions.js";
 import { getProfile, setCombatProfile } from "./state.js";
 import { getProfileTrackerData } from "./profiles/tracker.js";
@@ -197,7 +205,30 @@ export function createPortraitPanel(ARGON) {
                     element("span", "l5r5e-resource-label", game.i18n.localize(`${MODULE_ID}.resources.${id}`)),
                     element("strong", "l5r5e-resource-value", max === null ? value : `${value}/${max}`),
                 );
-                if (max !== null && max > 0) tile.style.setProperty("--l5r5e-resource", String(Math.min(value / max, 1)));
+                if (max !== null && max > 0) {
+                    const view = getResourceOrbView({ value, max });
+                    const orbs = element("span", `l5r5e-resource-orbs l5r5e-resource-orbs-${id}`);
+                    orbs.setAttribute("aria-hidden", "true");
+                    for (let index = 0; index < view.normalCount; index += 1) {
+                        orbs.appendChild(element(
+                            "i",
+                            `l5r5e-resource-orb ${index < view.normalAvailable ? "available" : "spent"}`,
+                        ));
+                    }
+                    if (view.overflow) {
+                        const overflow = element(
+                            "i",
+                            `l5r5e-resource-orb l5r5e-resource-orb-overflow ${view.overflow.available > 0 ? "available" : "spent"}`,
+                            view.overflow.available > 0 ? `+${view.overflow.available}` : "0",
+                        );
+                        overflow.dataset.tooltip = game.i18n.format(`${MODULE_ID}.resources.overflow_tooltip`, {
+                            value: view.overflow.available,
+                            max: view.overflow.capacity,
+                        });
+                        orbs.appendChild(overflow);
+                    }
+                    tile.appendChild(orbs);
+                }
                 section.appendChild(tile);
             }
             return section;

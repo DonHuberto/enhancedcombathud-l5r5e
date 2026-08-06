@@ -5,6 +5,7 @@ import {
     collectSkills,
     getActiveWeaponProfile,
     getResourceData,
+    getResourceOrbView,
     getRingData,
     getWarningIds,
     getWeapons,
@@ -40,6 +41,47 @@ test("resource data uses the L5R5e endurance, composure and void fields", () => 
             void: { value: 1, max: 2 },
         },
     );
+});
+
+test("resource spheres cap at twelve and deplete the dark overflow reserve first", () => {
+    assert.deepEqual(getResourceOrbView({ value: 15, max: 15 }), {
+        capacity: 15,
+        remaining: 15,
+        normalCount: 11,
+        normalAvailable: 11,
+        overflow: { capacity: 4, available: 4 },
+    });
+    assert.deepEqual(getResourceOrbView({ value: 12, max: 15 }), {
+        capacity: 15,
+        remaining: 12,
+        normalCount: 11,
+        normalAvailable: 11,
+        overflow: { capacity: 4, available: 1 },
+    });
+    assert.deepEqual(getResourceOrbView({ value: 10, max: 15 }), {
+        capacity: 15,
+        remaining: 10,
+        normalCount: 11,
+        normalAvailable: 10,
+        overflow: { capacity: 4, available: 0 },
+    });
+});
+
+test("ordinary resource pools render one sphere per point without overflow", () => {
+    assert.deepEqual(getResourceOrbView({ value: 3, max: 10 }), {
+        capacity: 10,
+        remaining: 3,
+        normalCount: 10,
+        normalAvailable: 3,
+        overflow: null,
+    });
+    assert.deepEqual(getResourceOrbView({ value: 2, max: 4 }), {
+        capacity: 4,
+        remaining: 2,
+        normalCount: 4,
+        normalAvailable: 2,
+        overflow: null,
+    });
 });
 
 test("warnings cover thresholds and important system statuses", () => {

@@ -24,6 +24,7 @@
             "fatigue_tooltip": "Current Fatigue and Endurance.",
             "strife_tooltip": "Current Strife and Composure.",
             "void_tooltip": "Current and maximum Void Points.",
+            "overflow_tooltip": "Overflow reserve: {value} of {max}. This darker reserve is depleted before normal spheres.",
             "focus_tooltip": "Focus determines prepared initiative and limits the secret duel bid.",
             "vigilance_tooltip": "Vigilance determines unprepared initiative and often opposes Scheme actions."
         },

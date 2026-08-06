@@ -28,3 +28,17 @@ test("Universal remains compact while conflict profiles can span Argon's full wi
     assert.match(correction, /\.extended-combat-hud:has\(\.l5r5e-profile-universal\)\s*\{/);
     assert.match(correction, /\.action-hud\s*\{[\s\S]*?width: 100%;/);
 });
+
+test("open palettes rise above the portrait tier and tooltips share one flexible width", () => {
+    assert.match(css, /\.action-hud:has\(> \.features-container\.show\)\s*\{[\s\S]*?z-index:\s*15;/);
+    assert.ok(css.includes("bottom: calc(100% + var(--l5r5e-upper-height) + 18px);"));
+    assert.match(css, /\.ech-tooltip-container:has\(> \.l5r5e-tooltip\)[\s\S]*?width:\s*min\(560px, calc\(100vw - 32px\)\) !important;/);
+    assert.match(css, /\.ech-tooltip-container > \.l5r5e-tooltip[\s\S]*?width:\s*100%;/);
+});
+
+test("Focus and Vigilance use solid panels while bounded resources expose sphere rows", () => {
+    assert.match(css, /\.l5r5e-resource-focus,[\s\S]*?\.l5r5e-resource-vigilance\s*\{[\s\S]*?background:\s*linear-gradient/);
+    assert.match(css, /\.l5r5e-resource-orbs\s*\{[\s\S]*?grid-auto-flow:\s*column;/);
+    assert.match(css, /\.l5r5e-resource-orb-overflow[\s\S]*?background:\s*radial-gradient/);
+    assert.match(css, /\.l5r5e-weapon-properties,[\s\S]*?\.l5r5e-armor-properties\s*\{[\s\S]*?display:\s*block !important;/);
+});

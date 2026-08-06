@@ -1309,6 +1309,137 @@
     }
 }
 
+/* Resource spheres, raised palettes and unconstrained L5R tooltips. */
+.extended-combat-hud .l5r5e-resource-fatigue,
+.extended-combat-hud .l5r5e-resource-strife,
+.extended-combat-hud .l5r5e-resource-void {
+    background: linear-gradient(145deg, rgb(20 17 14 / 96%), rgb(6 5 4 / 96%));
+    min-height: 76px;
+}
+
+.extended-combat-hud .l5r5e-resource-focus,
+.extended-combat-hud .l5r5e-resource-vigilance {
+    background: linear-gradient(145deg, rgb(31 27 22 / 96%), rgb(13 11 9 / 96%));
+}
+
+.extended-combat-hud .l5r5e-resource-orbs {
+    align-items: center;
+    display: grid;
+    gap: clamp(2px, 0.22vw, 4px);
+    grid-auto-columns: clamp(14px, 1vw, 18px);
+    grid-auto-flow: column;
+    grid-column: 1 / -1;
+    justify-content: start;
+    margin-top: 7px;
+    min-height: 20px;
+}
+
+.extended-combat-hud .l5r5e-resource-orb {
+    background: rgb(75 67 55 / 32%);
+    border: 1px solid rgb(220 198 153 / 58%);
+    border-radius: 50%;
+    box-shadow: inset 0 0 5px rgb(0 0 0 / 72%);
+    display: grid;
+    font-size: 0.58rem;
+    font-style: normal;
+    height: clamp(14px, 1vw, 18px);
+    line-height: 1;
+    place-items: center;
+    width: clamp(14px, 1vw, 18px);
+}
+
+.extended-combat-hud .l5r5e-resource-orb.spent {
+    background: rgb(0 0 0 / 46%);
+    border-color: rgb(181 144 82 / 32%);
+    box-shadow: inset 0 0 7px #000;
+    opacity: 0.7;
+}
+
+.extended-combat-hud .l5r5e-resource-orbs-fatigue .l5r5e-resource-orb.available {
+    background: radial-gradient(circle at 35% 30%, #bed88b, #65843d 68%, #283719);
+    border-color: #d8e5b2;
+    box-shadow: 0 0 6px rgb(150 188 92 / 48%), inset 0 0 4px rgb(255 255 255 / 38%);
+}
+
+.extended-combat-hud .l5r5e-resource-orbs-strife .l5r5e-resource-orb.available {
+    background: radial-gradient(circle at 35% 30%, #db7468, #8f2f29 68%, #3b1210);
+    border-color: #e7a39b;
+    box-shadow: 0 0 6px rgb(185 70 61 / 48%), inset 0 0 4px rgb(255 255 255 / 30%);
+}
+
+.extended-combat-hud .l5r5e-resource-orbs-void .l5r5e-resource-orb.available {
+    background: radial-gradient(circle at 35% 30%, #d1a5eb, #75458f 68%, #291833);
+    border-color: #e0c1f0;
+    box-shadow: 0 0 7px rgb(155 95 188 / 58%), inset 0 0 4px rgb(255 255 255 / 34%);
+}
+
+.extended-combat-hud .l5r5e-resource-orb-overflow {
+    background: #100e0d !important;
+    border-color: #8b7768 !important;
+    color: #f2ddba;
+    font-weight: 800;
+    opacity: 1;
+}
+
+.extended-combat-hud .l5r5e-resource-orb-overflow.available {
+    background: radial-gradient(circle at 35% 30%, #695f58, #312b28 68%, #100e0d) !important;
+}
+
+.extended-combat-hud .l5r5e-weapon-grip {
+    font-size: 1.1rem;
+    line-height: 1.2;
+    margin-top: 0.2rem;
+}
+
+.extended-combat-hud .l5r5e-weapon-properties,
+.extended-combat-hud .l5r5e-armor-properties {
+    display: block !important;
+    font-size: 1rem;
+    line-height: 1.25;
+    margin-top: 0.35rem;
+    overflow: visible;
+    text-overflow: clip;
+    white-space: normal;
+}
+
+.extended-combat-hud .action-hud:has(> .features-container.show) {
+    z-index: 15;
+}
+
+.extended-combat-hud .action-hud > .features-container,
+.extended-combat-hud .action-hud > .features-container.is-spells {
+    bottom: calc(100% + var(--l5r5e-upper-height) + 18px);
+    z-index: 40;
+}
+
+.ech-tooltip-container:has(> .l5r5e-tooltip) {
+    height: auto !important;
+    max-height: min(82vh, 760px) !important;
+    max-width: min(560px, calc(100vw - 32px)) !important;
+    overflow: visible !important;
+    width: min(560px, calc(100vw - 32px)) !important;
+}
+
+.ech-tooltip-container > .l5r5e-tooltip {
+    display: block;
+    height: auto;
+    max-height: min(82vh, 760px);
+    max-width: 100%;
+    overflow: hidden;
+    width: 100%;
+}
+
+.ech-tooltip-container > .l5r5e-tooltip .ech-tooltip-body {
+    max-height: min(64vh, 620px);
+    overflow: auto;
+}
+
+.ech-tooltip-container > .l5r5e-tooltip .ech-tooltip-description {
+    max-height: none;
+    overflow: visible;
+    white-space: normal;
+}
+
 /* L5R5e cRPG layout correction ------------------------------------------
  * Argon compensates its own HUD scale by assigning #core-hud a wider inline
  * width. Do not clamp that width to 100vw: doing so applies the scale twice

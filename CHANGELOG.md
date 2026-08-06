@@ -1,5 +1,14 @@
 # Changelog
 
+## 2.0.9 - 2026-08-06
+
+- Replace segmented Fatigue, Strife and Void meters with responsive colored spheres; cap the display at twelve elements and group values above the cap into a darker reserve which depletes first.
+- Keep Focus and Vigilance on solid, unsegmented panels.
+- Increase active weapon grip and weapon/armor property typography, including on narrower layouts where those properties were previously hidden.
+- Raise Skills, Techniques and Equipment palettes above the complete HUD and portrait tier so every entry remains visible and clickable.
+- Let L5R5e tooltips size to their content within the viewport, with internal scrolling for long technique descriptions instead of clipping them in Argon's fixed container.
+- Add regression coverage for sphere calculations, solid secondary resources, palette stacking and flexible tooltip sizing.
+
 ## 2.0.8 - 2026-08-06
 
 - Stop clamping Argon's scale-compensated HUD width, which previously shrank the interface to roughly two thirds of the available viewport.
