@@ -3,6 +3,7 @@ import test from "node:test";
 
 import {
     collectSkills,
+    getActiveWeaponProfile,
     getResourceData,
     getRingData,
     getWarningIds,
@@ -93,4 +94,19 @@ test("NPC skill groups are exposed without assuming the nested PC schema", () =>
         { id: "martial", category: "martial", rank: 3 },
         { id: "social", category: "social", rank: 2 },
     ]);
+});
+
+test("active weapon uses the core readied profile and preserves its grip", () => {
+    const readied = { uuid: "Actor.a.Item.katana", type: "weapon", name: "Katana" };
+    const actor = { items: [readied] };
+    const equipment = {
+        getAttackProfiles: () => [
+            { id: "unarmed-punch", source: "unarmed", grip: "unarmed", available: true },
+            { id: "katana-two-handed", source: "weapon", itemUuid: readied.uuid, grip: "2h", damage: 6, available: true },
+        ],
+    };
+    assert.deepEqual(getActiveWeaponProfile(actor, equipment), {
+        profile: { id: "katana-two-handed", source: "weapon", itemUuid: readied.uuid, grip: "2h", damage: 6, available: true },
+        item: readied,
+    });
 });

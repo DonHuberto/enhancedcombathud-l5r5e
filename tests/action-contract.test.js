@@ -10,13 +10,23 @@ import { getSkirmishActions } from "../scripts/profiles/skirmish.js";
 import { getMassBattleActions } from "../scripts/profiles/mass-battle.js";
 import { openWeaponStrike } from "../scripts/rolls.js";
 import { executeImmediateAction, getActionDefinition } from "../scripts/state.js";
+import {
+    classifyActionIds,
+    profileUiState,
+    resolveProfileActionIds,
+    turnEconomyView,
+    waterExtraActionRestriction,
+} from "../scripts/action-layout.js";
+import { getTechniqueAvailability } from "../scripts/techniques.js";
 
 const registry = {
-    wait: { actionId: "wait", actionTypes: ["support"], requiresCheck: false },
-    strike: { actionId: "strike", actionTypes: ["attack"], requiresCheck: true },
+    wait: { actionId: "wait", actionTypes: ["support"], requiresCheck: false, profiles: ["skirmish"] },
+    strike: { actionId: "strike", actionTypes: ["attack"], requiresCheck: true, profiles: ["duel", "skirmish"] },
+    calming_breath: { actionId: "calming_breath", actionTypes: ["support"], requiresCheck: false, profiles: ["duel", "skirmish"] },
+    throw_item: { actionId: "throw_item", actionTypes: ["attack"], requiresCheck: true, profiles: ["duel", "skirmish"] },
 };
 
-test("every displayed profile action has one executable route and profile lists cannot drift", () => {
+test("every fallback profile action has an executable route", () => {
     const runtimeActions = {
         universal: getUniversalActions(),
         intrigue: getIntrigueActions(),
@@ -34,6 +44,69 @@ test("every displayed profile action has one executable route and profile lists 
     assert.equal(getActionRoute("mass_battle", "challenge"), "mass_battle");
     assert.equal(getActionRoute("skirmish", "end_turn"), "direct");
     assert.equal(getActionRoute("skirmish", "unknown"), null);
+});
+
+test("profile actions are registry-driven, omit Wait and group by check requirement", () => {
+    const skirmish = resolveProfileActionIds(registry, "skirmish", ACTIONS_BY_PROFILE.skirmish);
+    assert.deepEqual(skirmish, ["strike", "calming_breath", "throw_item"]);
+    assert.equal(skirmish.includes("wait"), false);
+    assert.equal(skirmish.includes("throw_item"), true);
+    assert.deepEqual(classifyActionIds(registry, skirmish), {
+        requiresCheck: ["strike", "throw_item"],
+        noCheck: ["calming_breath"],
+    });
+    assert.equal(ACTIONS_BY_PROFILE.skirmish.includes("wait"), false);
+});
+
+test("turn economy view exposes primary, Water extra action and movement bands", () => {
+    assert.deepEqual(turnEconomyView({
+        primaryAction: { used: true },
+        waterExtraAction: { available: true, used: false },
+        freeMovement: { budget: 7, spent: 2, used: false },
+    }), {
+        primary: { available: false, used: true },
+        water: { available: true, used: false },
+        movement: { available: true, used: false, remainingFields: 5, remainingBands: 2 },
+    });
+});
+
+test("palettes persist outside combat while conflict-only chrome does not", () => {
+    assert.deepEqual(profileUiState("universal", { activeTurn: true }), {
+        inConflict: false,
+        showEconomy: false,
+        showEndTurn: false,
+        palettes: ["skills", "techniques", "equipment"],
+    });
+    assert.deepEqual(profileUiState("skirmish", { activeTurn: true }), {
+        inConflict: true,
+        showEconomy: true,
+        showEndTurn: true,
+        palettes: ["skills", "techniques", "equipment"],
+    });
+});
+
+test("Water extra-action disabled reasons come from check and action-type metadata", () => {
+    const state = {
+        primaryAction: { used: true },
+        waterExtraAction: { available: true, used: false },
+        actionTypesUsed: ["support"],
+    };
+    assert.equal(waterExtraActionRestriction(state, { requiresCheck: true, actionTypes: ["attack"] }), "requiresCheck");
+    assert.equal(waterExtraActionRestriction(state, { requiresCheck: false, actionTypes: ["support"] }), "actionTypeConflict");
+    assert.equal(waterExtraActionRestriction(state, { requiresCheck: false, actionTypes: ["move"] }), null);
+});
+
+test("incomplete techniques fail safely and non-rituals remain informational outside combat", () => {
+    assert.deepEqual(getTechniqueAvailability({ system: { technique_type: "kata", skill: "" } }, "skirmish"), {
+        usable: false,
+        reason: "enhancedcombathud-l5r5e.techniques.informational_only",
+    });
+    assert.deepEqual(getTechniqueAvailability({ system: { technique_type: "kata", skill: "melee" } }, "universal"), {
+        usable: false,
+        uncertain: true,
+        reason: "enhancedcombathud-l5r5e.techniques.context_unknown",
+    });
+    assert.equal(getTechniqueAvailability({ system: { technique_type: "ritual", skill: "theology" } }, "universal").usable, true);
 });
 
 test("HUD consumes the core action registry and immediate API with stable metadata", async () => {
@@ -171,16 +244,21 @@ test("HUD layout keeps the portrait clear and exposes persistent equipment cards
     assert.match(portrait, /rangeHighlight/);
     assert.match(styles, /--l5r5e-washi/);
     assert.match(styles, /--l5r5e-large-tile:\s*300px/);
-    assert.match(styles, /--l5r5e-gear-width:\s*calc\(var\(--l5r5e-large-tile\) \* 2\)/);
-    assert.match(styles, /> \.weapon-sets[\s\S]*display:\s*none !important/);
+    assert.match(styles, /--l5r5e-gear-width:\s*calc\(var\(--l5r5e-gear-tile\) \* 2\)/);
+    assert.match(styles, /\.extended-combat-hud > \.weapon-sets \{\s*display:\s*grid !important;/);
+    assert.equal(styles.includes(".extended-combat-hud > .weapon-sets {\n    display: none !important;"), false);
     assert.match(styles, /\.l5r5e-gear-strip[\s\S]*grid-template-columns:\s*repeat\(2/);
-    assert.match(styles, /\.action-hud\s*\{[\s\S]*?margin-left:\s*var\(--l5r5e-gear-width\)/);
+    assert.match(styles, /\.l5r5e-turn-economy/);
+    assert.match(styles, /\.l5r5e-action-group-buttons/);
+    assert.match(styles, /\.l5r5e-palette-rail/);
+    assert.match(styles, /\.l5r5e-palette-search/);
     assert.match(styles, /mask-image:\s*none/);
     assert.match(styles, /grid-template-rows:\s*repeat\(2/);
     assert.match(styles, /display:\s*grid !important/);
-    assert.match(styles, /\.action-element\.l5r5e-large-action/);
     assert.match(styles, /prefers-reduced-motion/);
     assert.match(actions, /aria-label/);
+    assert.match(actions, /classifyActionIds/);
+    assert.match(actions, /resolveProfileActionIds/);
     assert.match(actions, /actionId === "strike" && !getTargetToken\(\)/);
     assert.match(weapons, /equipment\.changeLoadout\(this\.actor,\s*activeItems\)/);
     assert.match(weapons, /_initialSetSynchronized/);

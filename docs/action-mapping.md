@@ -10,7 +10,7 @@ The HUD is a frontend for `game.l5r5e.actionRegistry`, `actions`, `turns`, `move
 | Maneuver | Move | yes | Skirmish | Dice Picker and movement API |
 | Prepare Item | Support | no | Duel, Skirmish | `actions.executeImmediate` / equipment mutation |
 | Strike | Attack | yes | Duel, Skirmish | Dice Picker / resolution |
-| Wait | Support | no | Skirmish | `actions.executeImmediate`, canonical `turnState.wait` |
+| Wait | Support | no | Skirmish | Hidden in the HUD by design; core registry entry remains untouched |
 | Persuade | Scheme | yes | Intrigue | Dice Picker / authority request |
 | Challenge | Scheme | yes | Skirmish, Mass Battle | Dice Picker / resolution |
 | Center | Support | yes | Duel | Dice Picker / resolution |

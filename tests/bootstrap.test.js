@@ -20,7 +20,10 @@ test("bootstrap registers the V14 adapter surface for character and NPC actors",
             DRAWER: { DrawerButton: Component, DrawerPanel: Component },
             MAIN: {
                 BUTTONS: { ItemButton: Component, ButtonPanelButton: Component, ActionButton: Component },
-                BUTTON_PANELS: { ButtonPanel: Component },
+                BUTTON_PANELS: {
+                    ButtonPanel: Component,
+                    ACCORDION: { AccordionPanel: Component, AccordionPanelCategory: Component },
+                },
                 ActionPanel: Component,
             },
             WeaponSets: Component,

@@ -111,7 +111,6 @@ export function getProfileTrackerData(actor, profile) {
                 ),
                 detail(`${MODULE_ID}.trackers.skirmish.maneuver`, state.maneuver ? "✓" : "—"),
                 detail(`${MODULE_ID}.trackers.skirmish.guard`, state.guard ? "✓" : "—"),
-                detail(`${MODULE_ID}.trackers.skirmish.wait`, state.wait),
             ],
         };
     }

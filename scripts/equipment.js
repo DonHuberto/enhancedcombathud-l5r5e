@@ -52,7 +52,7 @@ export async function getEquipmentTooltip(item) {
     };
 }
 
-export function createEquipmentClasses(ARGON) {
+export function createEquipmentClasses(ARGON, { L5R5eSearchableButtonPanel }) {
     class L5R5eEquipmentItemButton extends ARGON.MAIN.BUTTONS.ItemButton {
         get hasTooltip() {
             return true;
@@ -122,11 +122,25 @@ export function createEquipmentClasses(ARGON) {
             return false;
         }
 
+        async activateListeners(element) {
+            await super.activateListeners(element);
+            element.onkeydown = (event) => {
+                if (event.key !== "Enter" && event.key !== " ") return;
+                event.preventDefault();
+                this._onLeftClick(event);
+            };
+            element.onfocus = () => element.dispatchEvent(new MouseEvent("mouseenter"));
+            element.onblur = () => element.dispatchEvent(new MouseEvent("mouseleave"));
+        }
+
         async _renderInner() {
             await super._renderInner();
             if (!this.item) return;
             this.element.classList.toggle("l5r5e-readied", isReadiedWeapon(this.item));
             this.element.classList.toggle("l5r5e-equipped", !!this.item.system?.equipped);
+            this.element.dataset.search = [this.item.name, itemSubtitle(this.item), getItemProperties(this.item).join(" ")].join(" ");
+            this.element.setAttribute("aria-label", this.item.name);
+            this.element.setAttribute("tabindex", "0");
         }
     }
 
@@ -155,9 +169,20 @@ export function createEquipmentClasses(ARGON) {
             return ACTION_ICONS.equipment;
         }
 
+        async activateListeners(element) {
+            await super.activateListeners(element);
+            element.onkeydown = (event) => {
+                if (event.key !== "Enter" && event.key !== " ") return;
+                event.preventDefault();
+                this._onClick(event);
+            };
+        }
+
         async _renderInner() {
             await super._renderInner();
-            this.element.classList.add("l5r5e-large-action", "l5r5e-action-equipment");
+            this.element.classList.add("l5r5e-palette-action", "l5r5e-action-equipment");
+            this.element.setAttribute("aria-label", game.i18n.localize(this.label));
+            this.element.setAttribute("tabindex", "0");
         }
 
         async _getPanel() {
@@ -166,7 +191,7 @@ export function createEquipmentClasses(ARGON) {
                 ...this.actor.items.filter((item) => item.type === "armor"),
                 ...this.actor.items.filter((item) => item.type === "item" && item.system?.equipped),
             ];
-            return new ARGON.MAIN.BUTTON_PANELS.ButtonPanel({
+            return new L5R5eSearchableButtonPanel({
                 id: this.id,
                 buttons: items.map((item) => new L5R5eEquipmentItemButton({ item })),
             });

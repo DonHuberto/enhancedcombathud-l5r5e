@@ -8,7 +8,6 @@ export function getSkirmishActions() {
         "prepare_item",
         "strike",
         "throw_item",
-        "wait",
         "custom_action",
     ];
 }

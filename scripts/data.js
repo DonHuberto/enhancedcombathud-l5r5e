@@ -110,6 +110,19 @@ export function getWeapons(actor, { equippedOnly = false, readiedOnly = false } 
     });
 }
 
+export function getActiveWeaponProfile(actor, equipmentApi = globalThis.game?.l5r5e?.equipment) {
+    const profiles = (equipmentApi?.getAttackProfiles?.(actor) ?? [])
+        .filter((profile) => profile?.available !== false);
+    const profile = profiles.find((entry) => entry.source === "weapon")
+        ?? profiles.find((entry) => entry.id === "unarmed-punch")
+        ?? profiles[0]
+        ?? null;
+    const item = profile?.itemUuid
+        ? [...(actor?.items ?? [])].find((candidate) => candidate.uuid === profile.itemUuid) ?? null
+        : null;
+    return { profile, item };
+}
+
 export function weaponCoversRange(range, band) {
     if (!Number.isFinite(Number(band))) return null;
     const values = String(range ?? "").match(/\d+/g)?.map(Number).filter(Number.isFinite) ?? [];

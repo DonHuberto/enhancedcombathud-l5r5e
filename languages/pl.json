@@ -60,6 +60,31 @@
             "weapon_in_range": "Przygotowana broń w zasięgu: {value}"
         },
         "drawer": { "title": "Postać L5R" },
+        "palettes": {
+            "title": "Palety postaci",
+            "search": "Szukaj...",
+            "close": "Zamknij paletę"
+        },
+        "action_groups": {
+            "quick": "Szybkie rzuty",
+            "roll_required": "Wymaga rzutu",
+            "no_roll": "Bez rzutu"
+        },
+        "action_types": {
+            "attack": "Atak",
+            "scheme": "Intryga",
+            "support": "Wsparcie",
+            "move": "Ruch"
+        },
+        "turn": {
+            "primary": "Akcja",
+            "water": "Akcja Wody",
+            "movement": "Ruch",
+            "available": "Dostępna",
+            "used": "Zużyta",
+            "unavailable": "Niedostępna",
+            "movement_value": "{value} pasmo/a"
+        },
         "skills": {
             "label": "Umiejętności",
             "rank": "Ranga",
@@ -148,6 +173,10 @@
         "actions": {
             "availability": "Dostępność",
             "available": "Dostępne",
+            "types": "Typy akcji",
+            "check_requirement": "Test",
+            "requires_check": "Wymagany",
+            "no_check": "Niewymagany",
             "generic_roll": { "label": "Własny rzut", "tooltip": "Otwiera systemowy Dice Picker bez zastępowania silnika Roll and Keep." },
             "assist": { "label": "Assist", "tooltip": "Otwiera test Support dla wybranego celu." },
             "calming_breath": { "label": "Calming Breath", "tooltip": "W konflikcie usuwa po 1 Zmęczenia i/lub Napięcia, gdy wartość przekracza połowę progu. Zużywa akcję, w tym dopuszczalną dodatkową akcję postawy Wody." },
@@ -189,6 +218,8 @@
             "strike_conflict_only": "Strike jest dostępny tylko w profilu konfliktowym; otwarto arkusz przedmiotu.",
             "conflict_only": "Ta akcja jest dostępna tylko podczas aktywnego konfliktu.",
             "no_action": "W tej turze nie pozostała odpowiednia akcja.",
+            "water_requires_no_check": "Dodatkową akcję postawy Wody można wykorzystać wyłącznie na akcję niewymagającą testu.",
+            "water_action_type_conflict": "Dodatkowa akcja Wody nie może współdzielić typu akcji wykorzystanego już w tej turze.",
             "not_active_turn": "Turę może zakończyć wyłącznie aktualnie aktywny uczestnik.",
             "finishing_blow_available": "Finishing Blow jest teraz dostępne.",
             "movement_used": "Darmowy ruch został już wykorzystany.",

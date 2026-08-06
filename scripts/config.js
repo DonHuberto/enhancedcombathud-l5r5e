@@ -28,7 +28,6 @@ export const ACTIONS_BY_PROFILE = Object.freeze({
         "prepare_item",
         "strike",
         "throw_item",
-        "wait",
         "custom_action",
     ],
     mass_battle: ["assault", "challenge", "rally", "reinforce"],

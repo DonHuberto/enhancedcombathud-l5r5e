@@ -1,5 +1,12 @@
 # Changelog
 
+## 2.0.7 - 2026-08-06
+
+- Rebuild the L5R5e Argon HUD around a lacquered cRPG layout with a dynamic character panel, rings, active weapon/grip, equipped armor, weapon sets and responsive action space.
+- Derive profile actions from the public L5R5e action registry, hide Wait, retain Throw Item, separate checked and no-check actions, and expose primary action, Water action and movement state.
+- Add searchable Skills, Techniques and Equipment palettes, keyboard focus/Escape support, Water restriction explanations, active equipment popovers and EN/PL localization.
+- Extend regression coverage for registry action grouping, Water restrictions, active-grip selection, safe technique fallbacks and Universal versus conflict HUD composition.
+
 ## 2.0.6 - 2026-08-05
 
 - Reserve the complete weapon-and-armor strip width before laying out actions so equipment cards no longer cover the first action columns.

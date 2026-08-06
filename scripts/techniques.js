@@ -96,7 +96,7 @@ export async function getTechniqueTooltip(item, actor) {
     };
 }
 
-export function createTechniqueClasses(ARGON) {
+export function createTechniqueClasses(ARGON, { L5R5eSearchableAccordionPanel }) {
     class L5R5eTechniqueButton extends ARGON.MAIN.BUTTONS.ItemButton {
         get hasTooltip() {
             return true;
@@ -130,10 +130,24 @@ export function createTechniqueClasses(ARGON) {
             this.item?.sheet?.render(true);
         }
 
+        async activateListeners(element) {
+            await super.activateListeners(element);
+            element.onkeydown = (event) => {
+                if (event.key !== "Enter" && event.key !== " ") return;
+                event.preventDefault();
+                this._onLeftClick(event);
+            };
+            element.onfocus = () => element.dispatchEvent(new MouseEvent("mouseenter"));
+            element.onblur = () => element.dispatchEvent(new MouseEvent("mouseleave"));
+        }
+
         async _renderInner() {
             await super._renderInner();
             this.element.classList.toggle("l5r5e-favorite", this.isFavorite);
             this.element.classList.toggle("l5r5e-informational", !getTechniqueAvailability(this.item, getProfile(this.actor)).usable);
+            this.element.dataset.search = [this.item?.name, getTechniqueLabel(getTechniqueType(this.item))].filter(Boolean).join(" ");
+            this.element.setAttribute("aria-label", this.item?.name ?? "");
+            this.element.setAttribute("tabindex", "0");
         }
     }
 
@@ -150,9 +164,20 @@ export function createTechniqueClasses(ARGON) {
             return ACTION_ICONS.techniques;
         }
 
+        async activateListeners(element) {
+            await super.activateListeners(element);
+            element.onkeydown = (event) => {
+                if (event.key !== "Enter" && event.key !== " ") return;
+                event.preventDefault();
+                this._onClick(event);
+            };
+        }
+
         async _renderInner() {
             await super._renderInner();
-            this.element.classList.add("l5r5e-large-action", "l5r5e-action-techniques");
+            this.element.classList.add("l5r5e-palette-action", "l5r5e-action-techniques");
+            this.element.setAttribute("aria-label", game.i18n.localize(this.label));
+            this.element.setAttribute("tabindex", "0");
         }
 
         async _getPanel() {
@@ -172,7 +197,7 @@ export function createTechniqueClasses(ARGON) {
                     }),
                 );
             }
-            return new ARGON.MAIN.BUTTON_PANELS.ACCORDION.AccordionPanel({
+            return new L5R5eSearchableAccordionPanel({
                 id: this.id,
                 accordionPanelCategories: categories,
             });

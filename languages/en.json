@@ -62,6 +62,31 @@
         "drawer": {
             "title": "L5R Character"
         },
+        "palettes": {
+            "title": "Character palettes",
+            "search": "Search...",
+            "close": "Close palette"
+        },
+        "action_groups": {
+            "quick": "Quick rolls",
+            "roll_required": "Roll required",
+            "no_roll": "No roll"
+        },
+        "action_types": {
+            "attack": "Attack",
+            "scheme": "Scheme",
+            "support": "Support",
+            "move": "Move"
+        },
+        "turn": {
+            "primary": "Action",
+            "water": "Water action",
+            "movement": "Movement",
+            "available": "Available",
+            "used": "Used",
+            "unavailable": "Unavailable",
+            "movement_value": "{value} band(s)"
+        },
         "skills": {
             "label": "Skills",
             "rank": "Rank",
@@ -168,6 +193,10 @@
         "actions": {
             "availability": "Availability",
             "available": "Available",
+            "types": "Action types",
+            "check_requirement": "Check",
+            "requires_check": "Required",
+            "no_check": "Not required",
             "generic_roll": { "label": "Custom Roll", "tooltip": "Open the system Dice Picker without replacing the L5R Roll and Keep engine." },
             "assist": { "label": "Assist", "tooltip": "Open a Support check for the selected target." },
             "calming_breath": { "label": "Calming Breath", "tooltip": "During a conflict, remove 1 Fatigue and/or 1 Strife when each value exceeds half its threshold. Uses an action, including the eligible Water stance extra action." },
@@ -209,6 +238,8 @@
             "strike_conflict_only": "Strike is available only in a conflict profile; the item sheet was opened.",
             "conflict_only": "This action is available only during an active conflict.",
             "no_action": "No eligible action remains for this turn.",
+            "water_requires_no_check": "The Water extra action can only be used for an action that does not require a check.",
+            "water_action_type_conflict": "The Water extra action cannot share an action type already used this turn.",
             "not_active_turn": "Only the currently active combatant can end the turn.",
             "finishing_blow_available": "Finishing Blow is available now.",
             "movement_used": "Free movement has already been used.",

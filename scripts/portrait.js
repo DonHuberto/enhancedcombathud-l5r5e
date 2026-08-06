@@ -1,5 +1,5 @@
 import { MODULE_ID, PROFILES, RINGS } from "./config.js";
-import { getEquippedArmor, getResourceData, getWarningIds, getWeapons, weaponCoversRange } from "./data.js";
+import { getActiveWeaponProfile, getEquippedArmor, getResourceData, getWarningIds, getWeapons, weaponCoversRange } from "./data.js";
 import { performUnmask } from "./actions.js";
 import { getProfile, setCombatProfile } from "./state.js";
 import { getProfileTrackerData } from "./profiles/tracker.js";
@@ -153,7 +153,7 @@ export function createPortraitPanel(ARGON) {
             if (!portraitRoot) return;
 
             const gearStrip = element("section", "l5r5e-gear-strip");
-            gearStrip.append(this.#buildWeapon(), this.#buildArmor());
+            gearStrip.append(await this.#buildWeapon(), await this.#buildArmor());
 
             const container = element("section", "l5r5e-portrait-panel");
             container.append(
@@ -166,6 +166,12 @@ export function createPortraitPanel(ARGON) {
                 this.#buildProfileTracker(),
             );
             portraitRoot.append(gearStrip, container);
+            for (const effectElement of portraitRoot.querySelectorAll(".effects-container > *")) {
+                effectElement.setAttribute("tabindex", "0");
+                effectElement.setAttribute("role", "button");
+                effectElement.onfocus = () => effectElement.dispatchEvent(new MouseEvent("mouseenter"));
+                effectElement.onblur = () => effectElement.dispatchEvent(new MouseEvent("mouseleave"));
+            }
         }
 
         #buildResources() {
@@ -181,6 +187,12 @@ export function createPortraitPanel(ARGON) {
             for (const [id, value, max, tooltip] of values) {
                 const tile = element("div", `l5r5e-resource l5r5e-resource-${id}`);
                 tile.dataset.tooltip = game.i18n.localize(tooltip);
+                if (max !== null) {
+                    tile.setAttribute("role", "progressbar");
+                    tile.setAttribute("aria-valuemin", "0");
+                    tile.setAttribute("aria-valuenow", String(value));
+                    tile.setAttribute("aria-valuemax", String(max));
+                }
                 tile.append(
                     element("span", "l5r5e-resource-label", game.i18n.localize(`${MODULE_ID}.resources.${id}`)),
                     element("strong", "l5r5e-resource-value", max === null ? value : `${value}/${max}`),
@@ -211,6 +223,7 @@ export function createPortraitPanel(ARGON) {
             const section = element("div", "l5r5e-ninjo-giri");
             for (const id of ["ninjo", "giri"]) {
                 const raw = this.actor.system?.social?.[id] ?? "";
+                if (!String(raw).trim()) continue;
                 const wrapper = element("div", "l5r5e-social-secret");
                 const button = element("button", `l5r5e-${id}`);
                 button.type = "button";
@@ -220,10 +233,19 @@ export function createPortraitPanel(ARGON) {
                 button.append(icon, label);
                 const popover = element("div", "l5r5e-social-popover hidden");
                 popover.innerHTML = await enrichText(raw, { relativeTo: this.actor });
-                button.addEventListener("click", () => popover.classList.toggle("hidden"));
+                button.setAttribute("aria-expanded", "false");
+                const toggle = (open = popover.classList.contains("hidden")) => {
+                    popover.classList.toggle("hidden", !open);
+                    button.setAttribute("aria-expanded", String(open));
+                };
+                button.addEventListener("click", () => toggle());
+                button.addEventListener("keydown", (event) => {
+                    if (event.key === "Escape") toggle(false);
+                });
                 wrapper.append(button, popover);
                 section.appendChild(wrapper);
             }
+            section.classList.toggle("hidden", !section.children.length);
             return section;
         }
 
@@ -235,7 +257,12 @@ export function createPortraitPanel(ARGON) {
                 button.dataset.ring = ring;
                 button.dataset.tooltip = game.i18n.localize(`l5r5e.conflict.stances.${ring}tip`);
                 const icon = element("i", `i_${ring}`);
-                button.append(icon, element("span", null, this.actor.system?.rings?.[ring] ?? 1));
+                button.setAttribute("aria-label", game.i18n.localize(`l5r5e.rings.${ring}`));
+                button.append(
+                    icon,
+                    element("strong", "l5r5e-ring-value", this.actor.system?.rings?.[ring] ?? 1),
+                    element("small", "l5r5e-ring-name", game.i18n.localize(`l5r5e.rings.${ring}`)),
+                );
                 button.addEventListener("click", async () => {
                     if (this.actor.system?.stance === ring) return;
                     await this.actor.update({ "system.stance": ring });
@@ -256,17 +283,32 @@ export function createPortraitPanel(ARGON) {
             return section;
         }
 
-        #buildWeapon() {
-            const profiles = (game.l5r5e?.equipment?.getAttackProfiles(this.actor) ?? [])
-                .filter((profile) => profile.available !== false);
-            const profile = profiles.find((entry) => entry.source === "weapon")
-                ?? profiles.find((entry) => entry.id === "unarmed-punch")
-                ?? profiles[0];
+        async #buildItemPopover(item, details = []) {
+            const popover = element("aside", "l5r5e-card-popover");
+            popover.setAttribute("role", "tooltip");
+            if (!item) return popover;
+            popover.appendChild(element("h3", null, item.name));
+            if (details.length) {
+                const list = element("dl", "l5r5e-card-popover-stats");
+                for (const [label, value] of details) {
+                    list.append(element("dt", null, label), element("dd", null, value));
+                }
+                popover.appendChild(list);
+            }
+            const description = element("div", "l5r5e-card-popover-description");
+            description.innerHTML = await enrichText(item.system?.description, { relativeTo: item });
+            popover.appendChild(description);
+            const properties = (item.system?.properties ?? [])
+                .map((property) => (typeof property === "string" ? property : property?.name ?? property?.id))
+                .filter(Boolean);
+            if (properties.length) popover.appendChild(element("p", "l5r5e-card-popover-properties", properties.join(" · ")));
+            return popover;
+        }
+
+        async #buildWeapon() {
+            const { profile, item } = getActiveWeaponProfile(this.actor);
             const section = element("div", `l5r5e-weapon-summary ${profile ? "" : "hidden"}`);
             if (!profile) return section;
-            const item = profile.itemUuid
-                ? [...this.actor.items].find((candidate) => candidate.uuid === profile.itemUuid)
-                : null;
             const range = profileRange(profile);
             const card = element("button", `l5r5e-weapon-card ${profile.virtual ? "unarmed" : ""}`);
             card.type = "button";
@@ -316,10 +358,16 @@ export function createPortraitPanel(ARGON) {
             card.addEventListener("mouseleave", () => tacticalGridApi()?.clearRangeHighlight?.(this.token));
             section.appendChild(element("h4", null, game.i18n.localize(`${MODULE_ID}.equipment.active_weapon`)));
             section.appendChild(card);
+            section.appendChild(await this.#buildItemPopover(item, [
+                [game.i18n.localize(`${MODULE_ID}.equipment.current_grip`), profile.grip ?? "unarmed"],
+                [game.i18n.localize("l5r5e.weapons.range"), `${range.minimum}–${range.maximum}`],
+                [game.i18n.localize("l5r5e.weapons.damage"), profile.damage ?? 0],
+                [game.i18n.localize("l5r5e.weapons.deadliness"), profile.deadliness ?? 0],
+            ]));
             return section;
         }
 
-        #buildArmor() {
+        async #buildArmor() {
             const armors = getEquippedArmor(this.actor);
             const armor = armors[0] ?? null;
             const section = element("div", `l5r5e-armor-summary ${armor ? "" : "empty"}`);
@@ -339,12 +387,16 @@ export function createPortraitPanel(ARGON) {
                 armor?.name ?? game.i18n.localize(`${MODULE_ID}.equipment.no_armor`),
             ));
             if (armor) {
+                const resistance = game.l5r5e?.qualities?.armorResistance?.(armor) ?? {
+                    physical: armor.system?.armor?.physical ?? 0,
+                    supernatural: armor.system?.armor?.supernatural ?? 0,
+                };
                 const physical = element("span", "l5r5e-resistance physical");
                 physical.dataset.tooltip = game.i18n.localize("l5r5e.armors.physical");
-                physical.append(element("i", "fas fa-tint"), document.createTextNode(` ${armor.system?.armor?.physical ?? 0}`));
+                physical.append(element("i", "fas fa-shield-halved"), document.createTextNode(` ${resistance.physical}`));
                 const supernatural = element("span", "l5r5e-resistance supernatural");
                 supernatural.dataset.tooltip = game.i18n.localize("l5r5e.armors.supernatural");
-                supernatural.append(element("i", "fas fa-bolt"), document.createTextNode(` ${armor.system?.armor?.supernatural ?? 0}`));
+                supernatural.append(element("i", "fas fa-sparkles"), document.createTextNode(` ${resistance.supernatural}`));
                 const properties = (armor.system?.properties ?? [])
                     .map((property) => (typeof property === "string" ? property : property?.name ?? property?.id))
                     .filter(Boolean)
@@ -358,6 +410,16 @@ export function createPortraitPanel(ARGON) {
                 element("h4", null, game.i18n.localize(`${MODULE_ID}.equipment.active_armor`)),
                 row,
             );
+            if (armor) {
+                const resistance = game.l5r5e?.qualities?.armorResistance?.(armor) ?? {
+                    physical: armor.system?.armor?.physical ?? 0,
+                    supernatural: armor.system?.armor?.supernatural ?? 0,
+                };
+                section.appendChild(await this.#buildItemPopover(armor, [
+                    [game.i18n.localize("l5r5e.armors.physical"), resistance.physical],
+                    [game.i18n.localize("l5r5e.armors.supernatural"), resistance.supernatural],
+                ]));
+            }
             return section;
         }
 

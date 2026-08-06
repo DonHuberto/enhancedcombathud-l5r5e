@@ -1,9 +1,17 @@
-import { ACTION_ICONS, MODULE_ID } from "./config.js";
+import { ACTION_ICONS, ACTIONS_BY_PROFILE, MODULE_ID } from "./config.js";
+import {
+    classifyActionIds,
+    profileUiState,
+    resolveProfileActionIds,
+    turnEconomyView,
+    waterExtraActionRestriction,
+} from "./action-layout.js";
 import { getWeapons } from "./data.js";
 import { getPersuadeOptions, openDicePicker, openGenericRoll, openPersuadeRoll, openWeaponStrike } from "./rolls.js";
 import {
     canUseActor,
     executeImmediateAction,
+    getActionDefinition,
     getActionSlot,
     getCombatant,
     getProfile,
@@ -20,21 +28,18 @@ import {
 } from "./utils.js";
 import { chooseWeapon, executeEquipmentIntent } from "./weapons.js";
 import { requestGm } from "./socket.js";
-import { getUniversalActions } from "./profiles/universal.js";
-import { clearPersuadePending, getIntrigueActions, markPersuadePending } from "./profiles/intrigue.js";
-import { executeDuelAction, getDuelActions, isFinishingBlowAvailable } from "./profiles/duel.js";
-import { getSkirmishActions } from "./profiles/skirmish.js";
-import { executeMassBattleAction, getMassBattleActions } from "./profiles/mass-battle.js";
-
-const PROFILE_ACTIONS = {
-    universal: getUniversalActions,
-    intrigue: getIntrigueActions,
-    duel: getDuelActions,
-    skirmish: getSkirmishActions,
-    mass_battle: getMassBattleActions,
-};
+import { clearPersuadePending, markPersuadePending } from "./profiles/intrigue.js";
+import { executeDuelAction, isFinishingBlowAvailable } from "./profiles/duel.js";
+import { executeMassBattleAction } from "./profiles/mass-battle.js";
 
 const ACTION_EXEMPT_ACTIONS = new Set(["concede", "staredown"]);
+
+function element(tag, className, text) {
+    const node = document.createElement(tag);
+    if (className) node.className = className;
+    if (text !== undefined) node.textContent = String(text);
+    return node;
+}
 
 const ACTION_ROUTES = Object.freeze({
     generic_roll: "direct",
@@ -402,7 +407,7 @@ export async function executeAction(actor, actionId) {
     return route === "direct" ? handlers[actionId]?.() ?? false : false;
 }
 
-function actionAvailability(actor, actionId) {
+export function actionAvailability(actor, actionId) {
     if (actionId === "generic_roll") return { enabled: true };
     if (!game.combat?.started) return { enabled: false, reason: `${MODULE_ID}.notifications.conflict_only` };
     if (actionId === "end_turn") return getCombatant(actor) === game.combat?.combatant
@@ -425,14 +430,27 @@ function actionAvailability(actor, actionId) {
     }
     const finishingBlow = actionId === "strike" && isFinishingBlowAvailable(actor);
     if (!finishingBlow && !ACTION_EXEMPT_ACTIONS.has(actionId)) {
-        if (!getActionSlot(actor, { actionId })) {
+        const definition = getActionDefinition(actionId);
+        if (!getActionSlot(actor, {
+            actionId,
+            actionTypes: definition?.actionTypes,
+            requiresCheck: definition?.requiresCheck,
+        })) {
+            const state = getTurnState(actor);
+            const waterRestriction = waterExtraActionRestriction(state, definition);
+            if (waterRestriction === "requiresCheck") {
+                return { enabled: false, reason: `${MODULE_ID}.notifications.water_requires_no_check` };
+            }
+            if (waterRestriction === "actionTypeConflict") {
+                return { enabled: false, reason: `${MODULE_ID}.notifications.water_action_type_conflict` };
+            }
             return { enabled: false, reason: `${MODULE_ID}.notifications.no_action` };
         }
     }
     return { enabled: true };
 }
 
-export function createActionPanels(ARGON, { L5R5eEquipmentPanelButton }, { L5R5eTechniquesPanelButton }) {
+export function createActionPanels(ARGON, { L5R5eEquipmentPanelButton }, { L5R5eTechniquesPanelButton }, { L5R5eSkillsPanelButton }) {
     class L5R5eActionButton extends ARGON.MAIN.BUTTONS.ActionButton {
         constructor(actionId) {
             super();
@@ -457,10 +475,19 @@ export function createActionPanels(ARGON, { L5R5eEquipmentPanelButton }, { L5R5e
 
         async getTooltipData() {
             const available = this.availability;
+            const definition = getActionDefinition(this.actionId);
+            const types = (definition?.actionTypes ?? [])
+                .map((type) => game.i18n.localize(`${MODULE_ID}.action_types.${type}`))
+                .join(", ") || "—";
             return {
                 title: game.i18n.localize(this.label),
                 description: game.i18n.localize(`${MODULE_ID}.actions.${this.actionId}.tooltip`),
                 details: [
+                    { label: `${MODULE_ID}.actions.types`, value: types },
+                    {
+                        label: `${MODULE_ID}.actions.check_requirement`,
+                        value: game.i18n.localize(`${MODULE_ID}.actions.${definition?.requiresCheck === false ? "no_check" : "requires_check"}`),
+                    },
                     {
                         label: `${MODULE_ID}.actions.availability`,
                         value: game.i18n.localize(available.enabled ? `${MODULE_ID}.actions.available` : available.reason),
@@ -479,12 +506,25 @@ export function createActionPanels(ARGON, { L5R5eEquipmentPanelButton }, { L5R5e
             );
         }
 
+        async activateListeners(element) {
+            await super.activateListeners(element);
+            element.onkeydown = (event) => {
+                if (event.key !== "Enter" && event.key !== " ") return;
+                event.preventDefault();
+                this._onLeftClick(event);
+            };
+            element.onfocus = () => element.dispatchEvent(new MouseEvent("mouseenter"));
+            element.onblur = () => element.dispatchEvent(new MouseEvent("mouseleave"));
+        }
+
         async _renderInner() {
             await super._renderInner();
             this.element.classList.add(`l5r5e-action-${this.actionId}`);
             this.element.setAttribute("aria-label", game.i18n.localize(this.label));
             this.element.setAttribute("tabindex", "0");
             this.element.classList.toggle("l5r5e-disabled", !this.availability.enabled);
+            const definition = getActionDefinition(this.actionId);
+            this.element.classList.add(definition?.requiresCheck === false ? "l5r5e-no-check-action" : "l5r5e-check-action");
             if (this.actionId === "strike") this.element.classList.toggle("l5r5e-finishing-blow", isFinishingBlowAvailable(this.actor));
         }
     }
@@ -496,24 +536,91 @@ export function createActionPanels(ARGON, { L5R5eEquipmentPanelButton }, { L5R5e
             }
 
             get maxActions() {
-                return profile === "universal" ? null : 1;
+                return null;
             }
 
             get currentActions() {
-                return profile === "universal" ? null : Number(!getTurnState(this.actor).actionUsed);
+                return null;
             }
 
             async _getButtons() {
                 if (getProfile(this.actor) !== profile) return [];
-                const actionIds = (PROFILE_ACTIONS[profile]?.() ?? []).filter(
+                const uiState = profileUiState(profile, { activeTurn: getCombatant(this.actor) === game.combat?.combatant });
+                const actionIds = resolveProfileActionIds(
+                    game.l5r5e?.actionRegistry,
+                    profile,
+                    ACTIONS_BY_PROFILE[profile] ?? [],
+                ).filter(
                     (actionId) => actionId !== "throw_item" || isThrowItemVisible(this.actor),
                 );
                 const buttons = actionIds.map((actionId) => new L5R5eActionButton(actionId));
-                buttons.push(new L5R5eEquipmentPanelButton(), new L5R5eTechniquesPanelButton());
-                if (profile !== "universal" && getCombatant(this.actor) === game.combat?.combatant) {
+                buttons.push(new L5R5eSkillsPanelButton(), new L5R5eTechniquesPanelButton(), new L5R5eEquipmentPanelButton());
+                if (uiState.showEndTurn) {
                     buttons.push(new L5R5eActionButton("end_turn"));
                 }
                 return buttons;
+            }
+
+            async _renderInner() {
+                await super._renderInner();
+                this.element.classList.add("l5r5e-action-layout", `l5r5e-profile-${profile}`);
+                const uiState = profileUiState(profile);
+                const actionIds = this._buttons.map((button) => button.actionId).filter((id) => id && id !== "end_turn");
+                const groups = classifyActionIds(game.l5r5e?.actionRegistry, actionIds);
+                const byActionId = new Map(this._buttons.filter((button) => button.actionId).map((button) => [button.actionId, button]));
+                const paletteButtons = this._buttons.filter((button) => button.id?.startsWith?.("l5r5e-"));
+                const endTurn = byActionId.get("end_turn");
+
+                const palette = element("section", "l5r5e-palette-rail");
+                palette.setAttribute("aria-label", game.i18n.localize(`${MODULE_ID}.palettes.title`));
+                for (const button of paletteButtons) palette.appendChild(button.element);
+
+                const makeGroup = (ids, kind, labelKey) => {
+                    const section = element("section", `l5r5e-action-group l5r5e-action-group-${kind}`);
+                    section.appendChild(element("h3", "l5r5e-action-group-title", game.i18n.localize(labelKey)));
+                    const body = element("div", "l5r5e-action-group-buttons");
+                    for (const actionId of ids) {
+                        const button = byActionId.get(actionId);
+                        if (button) body.appendChild(button.element);
+                    }
+                    section.appendChild(body);
+                    return section;
+                };
+
+                const economy = element("section", `l5r5e-turn-economy ${uiState.showEconomy ? "" : "hidden"}`);
+                if (uiState.showEconomy) {
+                    const view = turnEconomyView(getTurnState(this.actor));
+                    for (const [id, state] of Object.entries(view)) {
+                        const status = state.used ? "used" : state.available ? "available" : "unavailable";
+                        const value = id === "movement"
+                            ? game.i18n.format(`${MODULE_ID}.turn.movement_value`, { value: state.remainingBands })
+                            : game.i18n.localize(`${MODULE_ID}.turn.${status}`);
+                        const pill = element("div", `l5r5e-economy-pill l5r5e-economy-${id} ${status}`);
+                        pill.append(
+                            element("span", "l5r5e-economy-label", game.i18n.localize(`${MODULE_ID}.turn.${id}`)),
+                            element("strong", "l5r5e-economy-value", value),
+                        );
+                        economy.appendChild(pill);
+                    }
+                }
+
+                this.element.replaceChildren();
+                this.element.append(palette, economy);
+                if (groups.requiresCheck.length) {
+                    this.element.appendChild(makeGroup(
+                        groups.requiresCheck,
+                        "check",
+                        `${MODULE_ID}.action_groups.${profile === "universal" ? "quick" : "roll_required"}`,
+                    ));
+                }
+                if (groups.noCheck.length) {
+                    this.element.appendChild(makeGroup(groups.noCheck, "no-check", `${MODULE_ID}.action_groups.no_roll`));
+                }
+                if (endTurn) {
+                    const endSection = element("section", "l5r5e-end-turn-slot");
+                    endSection.appendChild(endTurn.element);
+                    this.element.appendChild(endSection);
+                }
             }
         };
     }

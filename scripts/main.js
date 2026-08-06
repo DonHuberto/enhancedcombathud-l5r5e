@@ -4,6 +4,8 @@ import { createDrawerClasses } from "./drawer.js";
 import { createEquipmentClasses } from "./equipment.js";
 import { createTechniqueClasses } from "./techniques.js";
 import { createActionPanels } from "./actions.js";
+import { createSearchablePanelClasses } from "./palettes.js";
+import { createSkillClasses } from "./skills.js";
 import { createWeaponSetsClass } from "./weapons.js";
 import { SUPPORTED_ACTOR_TYPES, canUseActor, clearLegacyTurnState, ensureCombatProfileSnapshot, registerStateHooks } from "./state.js";
 import { registerDuelHooks } from "./profiles/duel.js";
@@ -25,10 +27,12 @@ Hooks.once("argonInit", (CoreHUD) => {
     configured = true;
 
     const ARGON = CoreHUD.ARGON;
-    const equipmentClasses = createEquipmentClasses(ARGON);
-    const techniqueClasses = createTechniqueClasses(ARGON);
+    const paletteClasses = createSearchablePanelClasses(ARGON);
+    const equipmentClasses = createEquipmentClasses(ARGON, paletteClasses);
+    const techniqueClasses = createTechniqueClasses(ARGON, paletteClasses);
+    const skillClasses = createSkillClasses(ARGON, paletteClasses);
     const { L5R5eDrawerPanel } = createDrawerClasses(ARGON);
-    const { panels } = createActionPanels(ARGON, equipmentClasses, techniqueClasses);
+    const { panels } = createActionPanels(ARGON, equipmentClasses, techniqueClasses, skillClasses);
 
     class L5R5eTooltip extends ARGON.CORE.Tooltip {
         get classes() {
@@ -57,6 +61,19 @@ Hooks.once("init", () => {
     registerDuelHooks();
     registerIntrigueHooks();
 
+    const refreshBoundHud = foundry.utils.debounce((document) => {
+        const actor = document?.documentName === "Actor" ? document : document?.parent;
+        if (actor && actor !== ui.ARGON?._actor) return;
+        if (SUPPORTED_ACTOR_TYPES.includes(ui.ARGON?._actor?.type)) ui.ARGON.refresh();
+    }, 60);
+
+    Hooks.on("updateActor", (actor) => refreshBoundHud(actor));
+    Hooks.on("createActiveEffect", (effect) => refreshBoundHud(effect));
+    Hooks.on("updateActiveEffect", (effect) => refreshBoundHud(effect));
+    Hooks.on("deleteActiveEffect", (effect) => refreshBoundHud(effect));
+    Hooks.on("updateCombatant", (combatant) => refreshBoundHud(combatant.actor));
+    Hooks.on("l5r5e.turnStateChanged", (combatant) => refreshBoundHud(combatant?.actor));
+
     Hooks.on("targetToken", () => SUPPORTED_ACTOR_TYPES.includes(ui.ARGON?._actor?.type) && ui.ARGON.components?.portrait?.refresh?.());
     Hooks.on("controlToken", (token, controlled) => {
         if (!isCoreSettingEnabled("alwaysOn")) return;
@@ -77,7 +94,7 @@ Hooks.once("init", () => {
                 ),
             )
         ) {
-            ui.ARGON.refresh();
+            refreshBoundHud(item);
         }
     });
 });
