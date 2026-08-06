@@ -166,7 +166,6 @@ export function createPortraitPanel(ARGON) {
             container.append(
                 this.#buildResources(),
                 this.#buildStats(),
-                await this.#buildNinjoGiri(),
                 this.#buildRings(),
                 this.#buildWarnings(),
                 this.#buildTarget(),
@@ -242,36 +241,6 @@ export function createPortraitPanel(ARGON) {
                 );
                 section.appendChild(tile);
             }
-            return section;
-        }
-
-        async #buildNinjoGiri() {
-            const section = element("div", "l5r5e-ninjo-giri");
-            for (const id of ["ninjo", "giri"]) {
-                const raw = this.actor.system?.social?.[id] ?? "";
-                if (!String(raw).trim()) continue;
-                const wrapper = element("div", "l5r5e-social-secret");
-                const button = element("button", `l5r5e-${id}`);
-                button.type = "button";
-                button.dataset.tooltip = game.i18n.localize(`${MODULE_ID}.social.${id}_tooltip`);
-                const icon = element("i", id === "ninjo" ? "fas fa-heart" : "fas fa-scroll");
-                const label = element("span", null, game.i18n.localize(`l5r5e.social.${id}`));
-                button.append(icon, label);
-                const popover = element("div", "l5r5e-social-popover hidden");
-                popover.innerHTML = await enrichText(raw, { relativeTo: this.actor });
-                button.setAttribute("aria-expanded", "false");
-                const toggle = (open = popover.classList.contains("hidden")) => {
-                    popover.classList.toggle("hidden", !open);
-                    button.setAttribute("aria-expanded", String(open));
-                };
-                button.addEventListener("click", () => toggle());
-                button.addEventListener("keydown", (event) => {
-                    if (event.key === "Escape") toggle(false);
-                });
-                wrapper.append(button, popover);
-                section.appendChild(wrapper);
-            }
-            section.classList.toggle("hidden", !section.children.length);
             return section;
         }
 

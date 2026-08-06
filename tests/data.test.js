@@ -7,6 +7,7 @@ import {
     getResourceData,
     getResourceOrbView,
     getRingData,
+    getTechniqueSkills,
     getWarningIds,
     getWeapons,
     numberValue,
@@ -17,6 +18,12 @@ test("numberValue normalizes finite values and preserves a fallback", () => {
     assert.equal(numberValue("4"), 4);
     assert.equal(numberValue(undefined, 2), 2);
     assert.equal(numberValue("not-a-number", 3), 3);
+});
+
+test("technique skills normalize strings, arrays and keyed objects", () => {
+    assert.deepEqual(getTechniqueSkills({ system: { skill: "melee, fitness" } }), ["melee", "fitness"]);
+    assert.deepEqual(getTechniqueSkills({ system: { skill: ["theology", "meditation"] } }), ["theology", "meditation"]);
+    assert.deepEqual(getTechniqueSkills({ system: { skill: { melee: true, ranged: false } } }), ["melee"]);
 });
 
 test("weapon range strings cover only their declared abstract bands", () => {

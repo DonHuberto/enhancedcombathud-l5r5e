@@ -1,5 +1,14 @@
 # Changelog
 
+## 2.0.11 - 2026-08-06
+
+- Move Ninjo and Giri below the portrait into the row immediately above the vertical Skills, Techniques and Equipment controls.
+- Align Action and Water Action above the Roll Required group, Movement above No Roll, and fit the complete HUD width to its rendered upper and action tiers instead of leaving an empty tail after End Turn.
+- Move palette artwork to the right edge of each control and enlarge the compact weapon and armor statistic badges.
+- Replace the scattered square palette tiles with searchable, compact vertical category lists and make the close control reliably remove the visible panel state.
+- Treat techniques explicitly marked `activation.requires_check` as rollable even without a predefined skill by opening the Dice Picker with the full skill-category selection; ordinary left-click no longer opens an item sheet, while right-click remains the intentional edit route.
+- Add regression coverage for technique skill normalization, check metadata, compact list palettes, identity placement, turn-economy alignment and fitted HUD width.
+
 ## 2.0.10 - 2026-08-06
 
 - Treat Fatigue and Strife as accumulating tracks which begin empty, fill upward, continue beyond Endurance or Composure, and retain their uncapped numeric `value/threshold` readout.

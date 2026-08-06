@@ -2,7 +2,7 @@
     "id": "enhancedcombathud-l5r5e",
     "title": "Argon - Character HUD (L5R5E)",
     "description": "Legend of the Five Rings 5e system adapter for Argon. Provides an always-available character HUD and contextual Intrigue, Duel, Skirmish, and Mass Battle profiles.",
-    "version": "2.0.10",
+    "version": "2.0.11",
     "authors": [
         {
             "name": "DonHuberto",
@@ -55,6 +55,6 @@
     },
     "url": "https://github.com/DonHuberto/enhancedcombathud-l5r5e",
     "manifest": "https://github.com/DonHuberto/enhancedcombathud-l5r5e/releases/latest/download/module.json",
-    "download": "https://github.com/DonHuberto/enhancedcombathud-l5r5e/releases/download/v2.0.10/module.zip",
+    "download": "https://github.com/DonHuberto/enhancedcombathud-l5r5e/releases/download/v2.0.11/module.zip",
     "changelog": "https://github.com/DonHuberto/enhancedcombathud-l5r5e/blob/main/CHANGELOG.md"
 }

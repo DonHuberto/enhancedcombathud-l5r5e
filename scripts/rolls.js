@@ -1,4 +1,5 @@
 import { MODULE_ID, SKILL_CATEGORIES, localize } from "./config.js";
+import { getTechniqueSkills, techniqueRequiresCheck } from "./data.js";
 import { canUseActor } from "./state.js";
 import { getTargetToken, notify } from "./utils.js";
 
@@ -41,10 +42,9 @@ export function openGenericRoll(actor, overrides = {}) {
 }
 
 export function openTechniqueRoll(actor, technique) {
-    const skill = String(technique?.system?.skill ?? "").trim();
-    if (!skill) {
+    const skills = getTechniqueSkills(technique);
+    if (!techniqueRequiresCheck(technique)) {
         notify(`${MODULE_ID}.notifications.technique_informational`, "info", { name: technique?.name ?? "" });
-        technique?.sheet?.render(true);
         return null;
     }
 
@@ -54,7 +54,7 @@ export function openTechniqueRoll(actor, technique) {
         item: technique,
         ringId: technique.system?.ring || actor.system?.stance,
         difficulty: technique.system?.difficulty || 2,
-        skillsList: skill,
+        skillsList: skills.length ? skills.join(",") : SKILL_CATEGORIES.join(","),
         actions: Object.fromEntries(actionTypes.map((type) => [type, true])),
         actionId,
         rollContext: actionId ? { actionId } : undefined,

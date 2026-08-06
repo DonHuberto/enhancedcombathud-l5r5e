@@ -1,5 +1,5 @@
 import { ACTION_ICONS, MODULE_ID, TECHNIQUE_TYPES } from "./config.js";
-import { collectTechniques, getTechniqueType } from "./data.js";
+import { collectTechniques, getTechniqueType, techniqueRequiresCheck } from "./data.js";
 import { getTechniqueLabel, openTechniqueRoll } from "./rolls.js";
 import { getProfile } from "./state.js";
 import { enrichText, escapeHtml, getSourceLabel, notify } from "./utils.js";
@@ -19,7 +19,7 @@ export async function toggleFavoriteTechnique(actor, item) {
 }
 
 export function getTechniqueAvailability(item, profile) {
-    const hasRoll = !!String(item?.system?.skill ?? "").trim();
+    const hasRoll = techniqueRequiresCheck(item);
     if (!hasRoll) return { usable: false, reason: `${MODULE_ID}.techniques.informational_only` };
     if (profile === "universal" && getTechniqueType(item) !== "ritual") {
         return { usable: false, uncertain: true, reason: `${MODULE_ID}.techniques.context_unknown` };
@@ -114,7 +114,7 @@ export function createTechniqueClasses(ARGON, { L5R5eSearchableAccordionPanel })
             const availability = getTechniqueAvailability(this.item, getProfile(this.actor));
             if (availability.usable) return openTechniqueRoll(this.actor, this.item);
             notify(availability.reason, "info");
-            return this.item?.sheet?.render(true);
+            return null;
         }
 
         async _onRightClick(event) {

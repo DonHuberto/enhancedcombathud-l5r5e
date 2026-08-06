@@ -7,9 +7,11 @@ import test from "node:test";
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const css = readFileSync(resolve(root, "styles/hud.css"), "utf8");
 const correction = css.slice(css.indexOf("/* L5R5e cRPG layout correction"));
-const mockup = css.slice(css.indexOf("/* v2.0.10 final cascade overrides"));
+const mockup = css.slice(css.indexOf("/* v2.0.11 final cascade overrides"));
 const portrait = readFileSync(resolve(root, "scripts/portrait.js"), "utf8");
 const actions = readFileSync(resolve(root, "scripts/actions.js"), "utf8");
+const identity = readFileSync(resolve(root, "scripts/identity.js"), "utf8");
+const palettes = readFileSync(resolve(root, "scripts/palettes.js"), "utf8");
 
 test("the corrected HUD preserves Argon's compensating width and two-tier layout", () => {
     assert.ok(correction.includes("max-width: none;"), "Argon's scaled width must not be clamped to 100vw");
@@ -53,6 +55,19 @@ test("secondary stats, palettes, economy and actions follow the mockup hierarchy
     assert.match(mockup, /\.l5r5e-action-group-buttons,[\s\S]*?grid-template-rows:\s*minmax\(0, 1fr\)/);
     assert.match(actions, /id === "water" && this\.actor\.system\?\.stance !== "water"/);
     assert.match(actions, /l5r5e-economy-icon/);
+    assert.match(actions, /id === "movement" \? noCheckEconomy : checkEconomy/);
+    assert.match(actions, /--l5r5e-fit-width/);
+    assert.match(identity, /l5r5e-action-identity/);
+    assert.doesNotMatch(portrait, /#buildNinjoGiri/);
+    assert.match(mockup, /"identity economy-check economy-no-check end"/);
+    assert.match(mockup, /background-position:\s*calc\(100% - 12px\) center/);
+});
+
+test("palettes are compact vertical lists and their close control removes the visible state", () => {
+    assert.match(css, /\.l5r5e-palette-panel \.features-accordion-content[\s\S]*?flex-direction:\s*column/);
+    assert.match(css, /\.l5r5e-palette-panel \.feature-element[\s\S]*?height:\s*38px !important/);
+    assert.match(palettes, /panel\.element\.classList\.remove\("show"\)/);
+    assert.match(palettes, /event\.stopPropagation\(\)/);
 });
 
 test("equipment uses system Conflict icons and the obsolete profile popup is absent", () => {

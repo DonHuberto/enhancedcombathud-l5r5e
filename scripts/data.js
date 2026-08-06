@@ -97,6 +97,34 @@ export function getTechniqueType(item) {
     return TECHNIQUE_TYPES.includes(type) ? type : "specificity";
 }
 
+export function getTechniqueSkills(item) {
+    const values = [];
+    const collect = (raw) => {
+        if (raw === null || raw === undefined || raw === false || raw === "") return;
+        if (typeof raw === "string") {
+            values.push(...raw.split(",").map((entry) => entry.trim()).filter(Boolean));
+            return;
+        }
+        if (Array.isArray(raw)) {
+            raw.forEach(collect);
+            return;
+        }
+        if (raw instanceof Map) {
+            for (const [key, value] of raw.entries()) value === true ? collect(key) : collect(value);
+            return;
+        }
+        if (typeof raw === "object") {
+            for (const [key, value] of Object.entries(raw)) value === true ? collect(key) : collect(value);
+        }
+    };
+    collect(item?.system?.skill);
+    return [...new Set(values)];
+}
+
+export function techniqueRequiresCheck(item) {
+    return getTechniqueSkills(item).length > 0 || item?.system?.activation?.requires_check === true;
+}
+
 export function getItemProperties(item) {
     const values = item?.system?.properties;
     if (!Array.isArray(values)) return [];

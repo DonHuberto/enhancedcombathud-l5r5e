@@ -37,7 +37,13 @@ function addSearchUi(panel, itemSelector) {
         panel.toggle(false);
         panel._parent?.element?.focus?.();
     });
-    close.addEventListener("click", () => panel.toggle(false));
+    close.addEventListener("click", (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        panel.element.classList.remove("show");
+        panel._parent?.element?.classList.remove("active");
+        panel._parent?.element?.focus?.();
+    });
 }
 
 export function createSearchablePanelClasses(ARGON) {

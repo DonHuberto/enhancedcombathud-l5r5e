@@ -106,6 +106,9 @@ test("incomplete techniques fail safely and non-rituals remain informational out
         uncertain: true,
         reason: "enhancedcombathud-l5r5e.techniques.context_unknown",
     });
+    assert.equal(getTechniqueAvailability({
+        system: { technique_type: "kata", skill: "", activation: { requires_check: true } },
+    }, "skirmish").usable, true);
     assert.equal(getTechniqueAvailability({ system: { technique_type: "ritual", skill: "theology" } }, "universal").usable, true);
 });
 
@@ -236,7 +239,7 @@ test("HUD layout keeps the portrait clear and exposes persistent equipment cards
     const actions = fs.readFileSync(new URL("../scripts/actions.js", import.meta.url), "utf8");
     const weapons = fs.readFileSync(new URL("../scripts/weapons.js", import.meta.url), "utf8");
     const styles = fs.readFileSync(new URL("../styles/hud.css", import.meta.url), "utf8");
-    const mockup = styles.slice(styles.indexOf("/* v2.0.10 final cascade overrides"));
+    const mockup = styles.slice(styles.indexOf("/* v2.0.11 final cascade overrides"));
     assert.match(portrait, /#buildWeapon\(\)/);
     assert.match(portrait, /l5r5e-gear-strip/);
     assert.match(portrait, /this\.element\.matches\?\.\("\.portrait-hud"\)/);

@@ -7,6 +7,7 @@ import {
     waterExtraActionRestriction,
 } from "./action-layout.js";
 import { getWeapons } from "./data.js";
+import { buildNinjoGiri } from "./identity.js";
 import { getPersuadeOptions, openDicePicker, openGenericRoll, openPersuadeRoll, openWeaponStrike } from "./rolls.js";
 import {
     canUseActor,
@@ -571,6 +572,7 @@ export function createActionPanels(ARGON, { L5R5eEquipmentPanelButton }, { L5R5e
                 const paletteButtons = this._buttons.filter((button) => button.id?.startsWith?.("l5r5e-"));
                 const endTurn = byActionId.get("end_turn");
 
+                const identity = await buildNinjoGiri(this.actor);
                 const palette = element("section", "l5r5e-palette-rail");
                 palette.setAttribute("aria-label", game.i18n.localize(`${MODULE_ID}.palettes.title`));
                 for (const button of paletteButtons) palette.appendChild(button.element);
@@ -587,7 +589,8 @@ export function createActionPanels(ARGON, { L5R5eEquipmentPanelButton }, { L5R5e
                     return section;
                 };
 
-                const economy = element("section", `l5r5e-turn-economy ${uiState.showEconomy ? "" : "hidden"}`);
+                const checkEconomy = element("section", `l5r5e-turn-economy l5r5e-turn-economy-check ${uiState.showEconomy ? "" : "hidden"}`);
+                const noCheckEconomy = element("section", `l5r5e-turn-economy l5r5e-turn-economy-no-check ${uiState.showEconomy ? "" : "hidden"}`);
                 if (uiState.showEconomy) {
                     const view = turnEconomyView(getTurnState(this.actor));
                     for (const [id, state] of Object.entries(view)) {
@@ -605,12 +608,12 @@ export function createActionPanels(ARGON, { L5R5eEquipmentPanelButton }, { L5R5e
                             element("span", "l5r5e-economy-label", game.i18n.localize(`${MODULE_ID}.turn.${id}`)),
                             element("strong", "l5r5e-economy-value", value),
                         );
-                        economy.appendChild(pill);
+                        (id === "movement" ? noCheckEconomy : checkEconomy).appendChild(pill);
                     }
                 }
 
                 this.element.replaceChildren();
-                this.element.append(palette, economy);
+                this.element.append(identity, palette, checkEconomy, noCheckEconomy);
                 if (groups.requiresCheck.length) {
                     this.element.appendChild(makeGroup(
                         groups.requiresCheck,
@@ -626,6 +629,19 @@ export function createActionPanels(ARGON, { L5R5eEquipmentPanelButton }, { L5R5e
                     endSection.appendChild(endTurn.element);
                     this.element.appendChild(endSection);
                 }
+                requestAnimationFrame(() => {
+                    const hud = this.element.closest(".extended-combat-hud");
+                    if (!hud) return;
+                    const style = getComputedStyle(hud);
+                    const number = (name) => Number.parseFloat(style.getPropertyValue(name)) || 0;
+                    const upperWidth = number("--l5r5e-large-tile")
+                        + number("--l5r5e-stat-width")
+                        + number("--l5r5e-gear-width")
+                        + 8;
+                    const fitWidth = Math.ceil(Math.max(upperWidth, this.element.scrollWidth));
+                    hud.style.setProperty("--l5r5e-fit-width", `${fitWidth}px`);
+                    hud.classList.add("l5r5e-fit-content");
+                });
             }
         };
     }

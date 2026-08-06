@@ -1309,6 +1309,191 @@
     }
 }
 
+/* v2.0.11 compact HUD composition and list palettes. */
+.extended-combat-hud.l5r5e-fit-content {
+    width: var(--l5r5e-fit-width) !important;
+}
+
+.extended-combat-hud .action-hud {
+    max-width: none;
+    width: max-content;
+}
+
+.extended-combat-hud .action-hud .actions-container.l5r5e-action-layout {
+    grid-template-areas:
+        "identity economy-check economy-no-check end"
+        "palette check no-check end";
+    grid-template-columns: var(--l5r5e-palette-width) max-content max-content var(--l5r5e-end-width);
+    grid-template-rows: 56px minmax(0, 1fr);
+    max-width: none;
+    overflow: visible;
+    width: max-content;
+}
+
+.extended-combat-hud .l5r5e-action-identity {
+    align-items: stretch;
+    display: grid;
+    gap: 6px;
+    grid-area: identity;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    justify-content: stretch;
+    min-width: 0;
+}
+
+.extended-combat-hud .l5r5e-action-identity .l5r5e-social-secret {
+    min-width: 0;
+    position: relative;
+}
+
+.extended-combat-hud .l5r5e-action-identity .l5r5e-social-secret button {
+    align-items: center;
+    display: flex;
+    gap: 0.35rem;
+    justify-content: center;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    width: 100%;
+}
+
+.extended-combat-hud .l5r5e-palette-rail {
+    grid-area: palette;
+}
+
+.extended-combat-hud .action-hud .actions-container .action-element.l5r5e-palette-action {
+    background-position: calc(100% - 12px) center;
+    background-size: 34px;
+    justify-content: flex-start;
+    padding: 0 76px 0 14px;
+}
+
+.extended-combat-hud .action-hud .actions-container .action-element.l5r5e-palette-action::before {
+    right: 68px;
+}
+
+.extended-combat-hud .action-hud .actions-container .action-element.l5r5e-palette-action::after {
+    content: "›";
+    right: 49px;
+    top: calc(50% - 0.58rem);
+}
+
+.extended-combat-hud .l5r5e-turn-economy-check {
+    grid-area: economy-check;
+    justify-content: center;
+}
+
+.extended-combat-hud .l5r5e-turn-economy-no-check {
+    grid-area: economy-no-check;
+    justify-content: center;
+}
+
+.extended-combat-hud .l5r5e-turn-economy-no-check .l5r5e-economy-pill {
+    margin-inline: auto;
+}
+
+.extended-combat-hud .l5r5e-weapon-stats > span,
+.extended-combat-hud .l5r5e-resistance {
+    font-size: 1rem;
+    min-height: 30px;
+    padding: 0.32rem 0.55rem;
+}
+
+.extended-combat-hud .l5r5e-weapon-stats i,
+.extended-combat-hud .l5r5e-resistance i {
+    font-size: 1.15rem;
+}
+
+.extended-combat-hud .action-hud > .features-container.l5r5e-palette-panel,
+.extended-combat-hud .action-hud > .features-container.l5r5e-palette-panel.is-spells {
+    align-content: stretch;
+    display: flex;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    max-height: min(70vh, 680px);
+    max-width: min(440px, 92vw);
+    min-width: min(360px, 88vw);
+    padding: 58px 10px 10px;
+    width: min(440px, 92vw);
+}
+
+.extended-combat-hud .l5r5e-palette-panel .features-accordion {
+    display: flex !important;
+    flex: 0 0 auto;
+    flex-direction: column;
+    max-width: 100%;
+    min-width: 0;
+    width: 100% !important;
+}
+
+.extended-combat-hud .l5r5e-palette-panel .feature-accordion-title {
+    border-bottom: 1px solid rgb(181 144 82 / 45%);
+    display: block;
+    font-size: 0.72rem;
+    letter-spacing: 0.08em;
+    padding: 0.4rem 0.55rem 0.25rem;
+    position: static;
+    text-align: left;
+    text-transform: uppercase;
+    transform: none;
+    writing-mode: horizontal-tb;
+    width: 100%;
+}
+
+.extended-combat-hud .l5r5e-palette-panel .features-accordion-content {
+    display: flex !important;
+    flex-direction: column;
+    grid-template-columns: 1fr !important;
+    width: 100%;
+}
+
+.extended-combat-hud .l5r5e-palette-panel .feature-spell-slots {
+    display: none !important;
+}
+
+.extended-combat-hud .l5r5e-palette-panel .feature-element {
+    align-items: center;
+    background-position: 10px center;
+    background-repeat: no-repeat;
+    background-size: 25px;
+    cursor: pointer;
+    display: flex !important;
+    flex: 0 0 38px;
+    height: 38px !important;
+    justify-content: flex-start;
+    min-height: 38px !important;
+    min-width: 0;
+    padding: 0 0.65rem 0 44px;
+    pointer-events: auto;
+    position: relative;
+    width: 100% !important;
+}
+
+.extended-combat-hud .l5r5e-palette-panel .feature-element-title {
+    font-size: 0.8rem;
+    line-height: 1.2;
+    margin: 0;
+    max-width: 100%;
+    overflow: hidden;
+    text-align: left;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.extended-combat-hud .l5r5e-palette-close {
+    cursor: pointer;
+    pointer-events: auto;
+    position: relative;
+    z-index: 3;
+}
+
+.extended-combat-hud .l5r5e-profile-universal {
+    grid-template-areas:
+        "identity economy-check economy-no-check"
+        "palette check check" !important;
+    grid-template-columns: var(--l5r5e-palette-width) max-content max-content !important;
+    grid-template-rows: 56px minmax(0, 1fr) !important;
+}
+
 /* v2.0.10 mockup alignment: accumulating tracks, compact stats and one-row actions. */
 .extended-combat-hud {
     --l5r5e-action-height: clamp(220px, 20vh, 252px);
@@ -2128,7 +2313,7 @@
     }
 }
 
-/* v2.0.10 final cascade overrides. Keep this section last. */
+/* v2.0.11 final cascade overrides. Keep this section last. */
 .extended-combat-hud {
     --l5r5e-action-height: clamp(220px, 20vh, 252px);
     --l5r5e-action-tile: clamp(92px, 6.5vw, 124px);
@@ -2136,6 +2321,12 @@
     --l5r5e-end-width: clamp(135px, 9vw, 180px);
     --l5r5e-orb-size: clamp(14px, 0.9vw, 17px);
     --l5r5e-palette-width: clamp(175px, 12vw, 220px);
+    width: var(--l5r5e-fit-width, max-content) !important;
+}
+
+.extended-combat-hud .action-hud {
+    max-width: none;
+    width: max-content;
 }
 
 .extended-combat-hud .l5r5e-resource-grid {
@@ -2219,10 +2410,13 @@
 
 .extended-combat-hud .action-hud .actions-container.l5r5e-action-layout {
     grid-template-areas:
-        "palette economy economy end"
+        "identity economy-check economy-no-check end"
         "palette check no-check end";
     grid-template-columns: var(--l5r5e-palette-width) max-content max-content var(--l5r5e-end-width);
     grid-template-rows: 56px minmax(0, 1fr);
+    max-width: none;
+    overflow: visible;
+    width: max-content;
 }
 
 .extended-combat-hud .l5r5e-palette-rail {
@@ -2232,15 +2426,36 @@
 }
 
 .extended-combat-hud .action-hud .actions-container .action-element.l5r5e-palette-action {
-    background-position: 16px center;
-    background-size: 40px;
+    background-position: calc(100% - 12px) center;
+    background-size: 34px;
+    justify-content: flex-start;
     min-height: 0;
-    padding: 0 52px 0 68px;
+    padding: 0 76px 0 14px;
     position: relative;
+}
+
+.extended-combat-hud .action-hud .actions-container .action-element.l5r5e-palette-action::before {
+    right: 68px;
+}
+
+.extended-combat-hud .action-hud .actions-container .action-element.l5r5e-palette-action::after {
+    content: "›";
+    right: 49px;
+    top: calc(50% - 0.58rem);
 }
 
 .extended-combat-hud .l5r5e-turn-economy {
     justify-content: start;
+}
+
+.extended-combat-hud .l5r5e-turn-economy-check {
+    grid-area: economy-check;
+    justify-content: center;
+}
+
+.extended-combat-hud .l5r5e-turn-economy-no-check {
+    grid-area: economy-no-check;
+    justify-content: center;
 }
 
 .extended-combat-hud .l5r5e-economy-pill {
@@ -2280,6 +2495,14 @@
 
 .extended-combat-hud:has(.l5r5e-profile-universal) {
     --l5r5e-action-height: 210px;
+}
+
+.extended-combat-hud .l5r5e-profile-universal {
+    grid-template-areas:
+        "identity economy-check economy-no-check"
+        "palette check check" !important;
+    grid-template-columns: var(--l5r5e-palette-width) max-content max-content !important;
+    grid-template-rows: 56px minmax(0, 1fr) !important;
 }
 
 @media (max-width: 1450px), (max-height: 900px) {
