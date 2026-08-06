@@ -1,5 +1,13 @@
 # Changelog
 
+## 2.0.8 - 2026-08-06
+
+- Stop clamping Argon's scale-compensated HUD width, which previously shrank the interface to roughly two thirds of the available viewport.
+- Recompose the interface into a substantial character-and-equipment tier above a dedicated action tier, with larger typography, rings, resource meters and effect targets.
+- Place the active weapon and equipped armor in full square cards beside the character panel, with the I–III loadout strip directly above them.
+- Keep Universal compact while allowing conflict profiles to span the viewport with grouped two-row actions, centered turn economy and a separated End Turn control.
+- Add regression coverage for the compensated width, two-tier composition, square equipment cards and compact Universal profile.
+
 ## 2.0.7 - 2026-08-06
 
 - Rebuild the L5R5e Argon HUD around a lacquered cRPG layout with a dynamic character panel, rings, active weapon/grip, equipped armor, weapon sets and responsive action space.
