@@ -1,4 +1,4 @@
-import { MODULE_ID, PROFILES, RINGS } from "./config.js";
+import { HUD_ICONS, MODULE_ID, PROFILES, RINGS } from "./config.js";
 import {
     getActiveWeaponProfile,
     getEquippedArmor,
@@ -10,7 +10,6 @@ import {
 } from "./data.js";
 import { performUnmask } from "./actions.js";
 import { getProfile, setCombatProfile } from "./state.js";
-import { getProfileTrackerData } from "./profiles/tracker.js";
 import { configureProfileTracker } from "./profiles/configure.js";
 import {
     enrichText,
@@ -166,12 +165,11 @@ export function createPortraitPanel(ARGON) {
             const container = element("section", "l5r5e-portrait-panel");
             container.append(
                 this.#buildResources(),
-                this.#buildSocial(),
+                this.#buildStats(),
                 await this.#buildNinjoGiri(),
                 this.#buildRings(),
                 this.#buildWarnings(),
                 this.#buildTarget(),
-                this.#buildProfileTracker(),
             );
             portraitRoot.append(gearStrip, container);
             for (const effectElement of portraitRoot.querySelectorAll(".effects-container > *")) {
@@ -186,46 +184,33 @@ export function createPortraitPanel(ARGON) {
             const section = element("div", "l5r5e-resource-grid");
             const resources = getResourceData(this.actor.system);
             const values = [
-                ["fatigue", resources.fatigue.value, resources.fatigue.max, `${MODULE_ID}.resources.fatigue_tooltip`],
-                ["strife", resources.strife.value, resources.strife.max, `${MODULE_ID}.resources.strife_tooltip`],
-                ["void", resources.void.value, resources.void.max, `${MODULE_ID}.resources.void_tooltip`],
-                ["focus", this.actor.system?.focus ?? 0, null, `${MODULE_ID}.resources.focus_tooltip`],
-                ["vigilance", this.actor.system?.vigilance ?? 0, null, `${MODULE_ID}.resources.vigilance_tooltip`],
+                ["fatigue", resources.fatigue.value, resources.fatigue.max, `${MODULE_ID}.resources.fatigue_tooltip`, true],
+                ["strife", resources.strife.value, resources.strife.max, `${MODULE_ID}.resources.strife_tooltip`, true],
+                ["void", resources.void.value, resources.void.max, `${MODULE_ID}.resources.void_tooltip`, false],
             ];
-            for (const [id, value, max, tooltip] of values) {
+            for (const [id, value, max, tooltip, growsBeyondMax] of values) {
                 const tile = element("div", `l5r5e-resource l5r5e-resource-${id}`);
                 tile.dataset.tooltip = game.i18n.localize(tooltip);
-                if (max !== null) {
-                    tile.setAttribute("role", "progressbar");
-                    tile.setAttribute("aria-valuemin", "0");
-                    tile.setAttribute("aria-valuenow", String(value));
-                    tile.setAttribute("aria-valuemax", String(max));
-                }
+                tile.setAttribute("role", "progressbar");
+                tile.setAttribute("aria-valuemin", "0");
+                tile.setAttribute("aria-valuenow", String(value));
+                tile.setAttribute("aria-valuemax", String(Math.max(max, value)));
+                tile.setAttribute("aria-valuetext", `${value}/${max}`);
                 tile.append(
                     element("span", "l5r5e-resource-label", game.i18n.localize(`${MODULE_ID}.resources.${id}`)),
-                    element("strong", "l5r5e-resource-value", max === null ? value : `${value}/${max}`),
+                    element("strong", "l5r5e-resource-value", `${value}/${max}`),
                 );
-                if (max !== null && max > 0) {
-                    const view = getResourceOrbView({ value, max });
+                if (max > 0 || value > 0) {
+                    const view = getResourceOrbView({ value, max, growsBeyondMax });
                     const orbs = element("span", `l5r5e-resource-orbs l5r5e-resource-orbs-${id}`);
                     orbs.setAttribute("aria-hidden", "true");
-                    for (let index = 0; index < view.normalCount; index += 1) {
+                    for (let index = 0; index < view.displayed; index += 1) {
+                        const states = [index < view.filled ? "filled" : "empty"];
+                        if (growsBeyondMax && index >= view.threshold) states.push("over-limit");
                         orbs.appendChild(element(
                             "i",
-                            `l5r5e-resource-orb ${index < view.normalAvailable ? "available" : "spent"}`,
+                            `l5r5e-resource-orb ${states.join(" ")}`,
                         ));
-                    }
-                    if (view.overflow) {
-                        const overflow = element(
-                            "i",
-                            `l5r5e-resource-orb l5r5e-resource-orb-overflow ${view.overflow.available > 0 ? "available" : "spent"}`,
-                            view.overflow.available > 0 ? `+${view.overflow.available}` : "0",
-                        );
-                        overflow.dataset.tooltip = game.i18n.format(`${MODULE_ID}.resources.overflow_tooltip`, {
-                            value: view.overflow.available,
-                            max: view.overflow.capacity,
-                        });
-                        orbs.appendChild(overflow);
                     }
                     tile.appendChild(orbs);
                 }
@@ -234,16 +219,26 @@ export function createPortraitPanel(ARGON) {
             return section;
         }
 
-        #buildSocial() {
-            const section = element("div", "l5r5e-social-values");
-            for (const id of ["honor", "glory", "status"]) {
-                const value = Number(this.actor.system?.social?.[id] ?? 0);
-                const tile = element("div", "l5r5e-social-value");
-                tile.dataset.tooltip = game.i18n.localize(`${MODULE_ID}.social.${id}_tooltip`);
+        #buildStats() {
+            const section = element("div", "l5r5e-stat-list");
+            const stats = [
+                ["focus", this.actor.system?.focus ?? 0, `${MODULE_ID}.resources.focus`, `${MODULE_ID}.resources.focus_tooltip`],
+                ["vigilance", this.actor.system?.vigilance ?? 0, `${MODULE_ID}.resources.vigilance`, `${MODULE_ID}.resources.vigilance_tooltip`],
+                ["honor", this.actor.system?.social?.honor ?? 0, "l5r5e.social.honor", `${MODULE_ID}.social.honor_tooltip`],
+                ["glory", this.actor.system?.social?.glory ?? 0, "l5r5e.social.glory", `${MODULE_ID}.social.glory_tooltip`],
+                ["status", this.actor.system?.social?.status ?? 0, "l5r5e.social.status", `${MODULE_ID}.social.status_tooltip`],
+            ];
+            for (const [id, rawValue, label, tooltip] of stats) {
+                const value = Number(rawValue);
+                const tile = element("div", `l5r5e-stat-row l5r5e-stat-${id}`);
+                tile.dataset.tooltip = game.i18n.localize(tooltip);
+                const icon = element("img", "l5r5e-stat-icon");
+                icon.src = HUD_ICONS.stats[id];
+                icon.alt = "";
                 tile.append(
-                    element("span", null, game.i18n.localize(`l5r5e.social.${id}`)),
+                    icon,
+                    element("span", "l5r5e-stat-label", game.i18n.localize(label)),
                     element("strong", null, value),
-                    element("small", null, game.i18n.format(`${MODULE_ID}.social.rank`, { value: Math.floor(value / 10) })),
                 );
                 section.appendChild(tile);
             }
@@ -356,13 +351,16 @@ export function createPortraitPanel(ARGON) {
                 })),
             );
             const stats = element("div", "l5r5e-weapon-stats");
+            const makeStat = (iconClass, tooltip, value) => {
+                const stat = element("span");
+                stat.dataset.tooltip = tooltip;
+                stat.append(element("i", iconClass), document.createTextNode(` ${value}`));
+                return stat;
+            };
             stats.append(
-                element("span", null, game.i18n.format(`${MODULE_ID}.equipment.damage_value`, { value: profile.damage ?? 0 })),
-                element("span", null, game.i18n.format(`${MODULE_ID}.equipment.deadliness_value`, { value: profile.deadliness ?? 0 })),
-                element("span", null, game.i18n.format(`${MODULE_ID}.equipment.range_value`, {
-                    minimum: range.minimum,
-                    maximum: range.maximum,
-                })),
+                makeStat("fas fa-arrows-alt-h", game.i18n.localize("l5r5e.weapons.range"), `${range.minimum}–${range.maximum}`),
+                makeStat("fas fa-tint", game.i18n.localize("l5r5e.weapons.damage"), profile.damage ?? 0),
+                makeStat("fas fa-skull", game.i18n.localize("l5r5e.weapons.deadliness"), profile.deadliness ?? 0),
             );
             details.appendChild(stats);
             const properties = (item?.system?.properties ?? [])
@@ -424,10 +422,10 @@ export function createPortraitPanel(ARGON) {
                 };
                 const physical = element("span", "l5r5e-resistance physical");
                 physical.dataset.tooltip = game.i18n.localize("l5r5e.armors.physical");
-                physical.append(element("i", "fas fa-shield-halved"), document.createTextNode(` ${resistance.physical}`));
+                physical.append(element("i", "fas fa-tint"), document.createTextNode(` ${resistance.physical}`));
                 const supernatural = element("span", "l5r5e-resistance supernatural");
                 supernatural.dataset.tooltip = game.i18n.localize("l5r5e.armors.supernatural");
-                supernatural.append(element("i", "fas fa-sparkles"), document.createTextNode(` ${resistance.supernatural}`));
+                supernatural.append(element("i", "fas fa-bolt"), document.createTextNode(` ${resistance.supernatural}`));
                 const properties = (armor.system?.properties ?? [])
                     .map((property) => (typeof property === "string" ? property : property?.name ?? property?.id))
                     .filter(Boolean)
@@ -500,22 +498,5 @@ export function createPortraitPanel(ARGON) {
             return section;
         }
 
-        #buildProfileTracker() {
-            const profile = getProfile(this.actor);
-            const tracker = getProfileTrackerData(this.actor, profile);
-            const section = element("div", `l5r5e-profile-tracker ${tracker ? "" : "hidden"}`);
-            if (!tracker) return section;
-            section.appendChild(element("h4", null, game.i18n.localize(tracker.title)));
-            const list = element("dl");
-            for (const entry of tracker.details) {
-                list.append(
-                    element("dt", null, game.i18n.localize(entry.label)),
-                    element("dd", null, entry.value),
-                );
-            }
-            section.appendChild(list);
-            if (tracker.selectionRequired) section.appendChild(element("small", "l5r5e-warning", game.i18n.localize(`${MODULE_ID}.trackers.selection_required`)));
-            return section;
-        }
     };
 }

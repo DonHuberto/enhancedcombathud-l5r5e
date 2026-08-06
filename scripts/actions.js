@@ -1,4 +1,4 @@
-import { ACTION_ICONS, ACTIONS_BY_PROFILE, MODULE_ID } from "./config.js";
+import { ACTION_ICONS, ACTIONS_BY_PROFILE, HUD_ICONS, MODULE_ID } from "./config.js";
 import {
     classifyActionIds,
     profileUiState,
@@ -591,12 +591,17 @@ export function createActionPanels(ARGON, { L5R5eEquipmentPanelButton }, { L5R5e
                 if (uiState.showEconomy) {
                     const view = turnEconomyView(getTurnState(this.actor));
                     for (const [id, state] of Object.entries(view)) {
+                        if (id === "water" && this.actor.system?.stance !== "water") continue;
                         const status = state.used ? "used" : state.available ? "available" : "unavailable";
                         const value = id === "movement"
                             ? game.i18n.format(`${MODULE_ID}.turn.movement_value`, { value: state.remainingBands })
-                            : game.i18n.localize(`${MODULE_ID}.turn.${status}`);
+                            : String(state.available && !state.used ? 1 : 0);
                         const pill = element("div", `l5r5e-economy-pill l5r5e-economy-${id} ${status}`);
+                        const icon = element("img", "l5r5e-economy-icon");
+                        icon.src = HUD_ICONS.economy[id];
+                        icon.alt = "";
                         pill.append(
+                            icon,
                             element("span", "l5r5e-economy-label", game.i18n.localize(`${MODULE_ID}.turn.${id}`)),
                             element("strong", "l5r5e-economy-value", value),
                         );

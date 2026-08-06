@@ -22,24 +22,19 @@ export function getResourceData(system = {}) {
     };
 }
 
-export function getResourceOrbView({ value = 0, max = 0, maxOrbs = 12 } = {}) {
-    const capacity = Math.max(0, Math.floor(numberValue(max)));
-    const visibleLimit = Math.max(1, Math.floor(numberValue(maxOrbs, 12)));
-    const current = Math.max(0, numberValue(value));
-    const remaining = Math.max(0, Math.min(capacity, current));
-    const normalCount = capacity > visibleLimit ? visibleLimit - 1 : Math.min(capacity, visibleLimit);
-    const overflowCapacity = Math.max(0, capacity - normalCount);
-    const overflowAvailable = Math.max(0, Math.min(overflowCapacity, remaining - normalCount));
-    const normalAvailable = Math.max(0, Math.min(normalCount, remaining));
+export function getResourceOrbView({ value = 0, max = 0, maxOrbs = 24, growsBeyondMax = false } = {}) {
+    const threshold = Math.max(0, Math.floor(numberValue(max)));
+    const current = Math.max(0, Math.floor(numberValue(value)));
+    const visibleLimit = Math.max(1, Math.floor(numberValue(maxOrbs, 24)));
+    const desired = growsBeyondMax ? Math.max(threshold, current) : threshold;
+    const displayed = Math.min(visibleLimit, desired);
 
     return {
-        capacity,
-        remaining,
-        normalCount,
-        normalAvailable,
-        overflow: overflowCapacity > 0
-            ? { capacity: overflowCapacity, available: overflowAvailable }
-            : null,
+        threshold,
+        current,
+        displayed,
+        filled: Math.min(displayed, current),
+        truncated: desired > visibleLimit,
     };
 }
 

@@ -1,5 +1,15 @@
 # Changelog
 
+## 2.0.10 - 2026-08-06
+
+- Treat Fatigue and Strife as accumulating tracks which begin empty, fill upward, continue beyond Endurance or Composure, and retain their uncapped numeric `value/threshold` readout.
+- Render at most 24 resource markers in two rows of twelve; values and thresholds above 24 remain numeric while the visual track stays capped.
+- Present Void Points as 45-degree diamond markers and combine Focus, Vigilance, Honor, Glory and Status into one icon-led vertical list.
+- Rebuild Skills, Techniques and Equipment as icon/label/divider/caret rows and place every conflict action in one bottom row beneath the icon-led turn-economy strip.
+- Show Water Action only in Water stance, order weapon statistics as Range, Damage and Deadliness using the same Font Awesome icons as the system Conflict sheet, and place armor names above resistance icons.
+- Remove the non-dismissible profile tracker panel which displayed headings such as `Skirmish` over the ring selector.
+- Add replaceable SVG placeholders for stat, palette and turn-economy artwork plus regression coverage for accumulating resources and the revised layout hierarchy.
+
 ## 2.0.9 - 2026-08-06
 
 - Replace segmented Fatigue, Strife and Void meters with responsive colored spheres; cap the display at twelve elements and group values above the cap into a darker reserve which depletes first.

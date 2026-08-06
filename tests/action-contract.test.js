@@ -236,6 +236,7 @@ test("HUD layout keeps the portrait clear and exposes persistent equipment cards
     const actions = fs.readFileSync(new URL("../scripts/actions.js", import.meta.url), "utf8");
     const weapons = fs.readFileSync(new URL("../scripts/weapons.js", import.meta.url), "utf8");
     const styles = fs.readFileSync(new URL("../styles/hud.css", import.meta.url), "utf8");
+    const mockup = styles.slice(styles.indexOf("/* v2.0.10 final cascade overrides"));
     assert.match(portrait, /#buildWeapon\(\)/);
     assert.match(portrait, /l5r5e-gear-strip/);
     assert.match(portrait, /this\.element\.matches\?\.\("\.portrait-hud"\)/);
@@ -253,7 +254,7 @@ test("HUD layout keeps the portrait clear and exposes persistent equipment cards
     assert.match(styles, /\.l5r5e-palette-rail/);
     assert.match(styles, /\.l5r5e-palette-search/);
     assert.match(styles, /mask-image:\s*none/);
-    assert.match(styles, /grid-template-rows:\s*repeat\(2/);
+    assert.match(mockup, /grid-template-rows:\s*minmax\(0, 1fr\)/);
     assert.match(styles, /display:\s*grid !important/);
     assert.match(styles, /prefers-reduced-motion/);
     assert.match(actions, /aria-label/);

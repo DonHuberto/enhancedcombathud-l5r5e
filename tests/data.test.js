@@ -43,44 +43,37 @@ test("resource data uses the L5R5e endurance, composure and void fields", () => 
     );
 });
 
-test("resource spheres cap at twelve and deplete the dark overflow reserve first", () => {
-    assert.deepEqual(getResourceOrbView({ value: 15, max: 15 }), {
-        capacity: 15,
-        remaining: 15,
-        normalCount: 11,
-        normalAvailable: 11,
-        overflow: { capacity: 4, available: 4 },
+test("Fatigue and Strife tracks fill upward, grow past their thresholds and cap visually at 24", () => {
+    assert.deepEqual(getResourceOrbView({ value: 0, max: 12, growsBeyondMax: true }), {
+        threshold: 12,
+        current: 0,
+        displayed: 12,
+        filled: 0,
+        truncated: false,
     });
-    assert.deepEqual(getResourceOrbView({ value: 12, max: 15 }), {
-        capacity: 15,
-        remaining: 12,
-        normalCount: 11,
-        normalAvailable: 11,
-        overflow: { capacity: 4, available: 1 },
+    assert.deepEqual(getResourceOrbView({ value: 13, max: 10, growsBeyondMax: true }), {
+        threshold: 10,
+        current: 13,
+        displayed: 13,
+        filled: 13,
+        truncated: false,
     });
-    assert.deepEqual(getResourceOrbView({ value: 10, max: 15 }), {
-        capacity: 15,
-        remaining: 10,
-        normalCount: 11,
-        normalAvailable: 10,
-        overflow: { capacity: 4, available: 0 },
+    assert.deepEqual(getResourceOrbView({ value: 25, max: 32, growsBeyondMax: true }), {
+        threshold: 32,
+        current: 25,
+        displayed: 24,
+        filled: 24,
+        truncated: true,
     });
 });
 
-test("ordinary resource pools render one sphere per point without overflow", () => {
-    assert.deepEqual(getResourceOrbView({ value: 3, max: 10 }), {
-        capacity: 10,
-        remaining: 3,
-        normalCount: 10,
-        normalAvailable: 3,
-        overflow: null,
-    });
+test("bounded Void points fill only their fixed diamond track", () => {
     assert.deepEqual(getResourceOrbView({ value: 2, max: 4 }), {
-        capacity: 4,
-        remaining: 2,
-        normalCount: 4,
-        normalAvailable: 2,
-        overflow: null,
+        threshold: 4,
+        current: 2,
+        displayed: 4,
+        filled: 2,
+        truncated: false,
     });
 });
 

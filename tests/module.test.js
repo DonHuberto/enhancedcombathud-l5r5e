@@ -4,7 +4,7 @@ import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import test from "node:test";
 
-import { ACTIONS_BY_PROFILE, ACTION_ICONS, MODULE_ID, PROFILES } from "../scripts/config.js";
+import { ACTIONS_BY_PROFILE, ACTION_ICONS, HUD_ICONS, MODULE_ID, PROFILES } from "../scripts/config.js";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 
@@ -24,9 +24,9 @@ test("manifest targets Foundry 14 and the supported Core/System baselines", () =
     assert.equal(manifest.relationships.requires[0].compatibility.minimum, "5.0.1");
     assert.equal(manifest.relationships.systems[0].id, "l5r5e");
     assert.equal(manifest.relationships.systems[0].compatibility.minimum, "1.14.115");
-    assert.equal(manifest.version, "2.0.9");
+    assert.equal(manifest.version, "2.0.10");
     assert.equal(manifest.manifest.endsWith("/releases/latest/download/module.json"), true);
-    assert.equal(manifest.download.endsWith("/releases/download/v2.0.9/module.zip"), true);
+    assert.equal(manifest.download.endsWith("/releases/download/v2.0.10/module.zip"), true);
     assert.ok(manifest.changelog);
     assert.equal(manifest.dependencies, undefined);
     assert.equal(manifest.systems, undefined);
@@ -61,6 +61,12 @@ test("every profile action is localized and every referenced module icon exists"
     for (const icon of Object.values(ACTION_ICONS)) {
         const prefix = `modules/${MODULE_ID}/`;
         if (icon.startsWith(prefix)) assert.ok(existsSync(resolve(root, icon.slice(prefix.length))), `missing icon: ${icon}`);
+    }
+    for (const group of Object.values(HUD_ICONS)) {
+        for (const icon of Object.values(group)) {
+            const prefix = `modules/${MODULE_ID}/`;
+            if (icon.startsWith(prefix)) assert.ok(existsSync(resolve(root, icon.slice(prefix.length))), `missing HUD icon: ${icon}`);
+        }
     }
 });
 

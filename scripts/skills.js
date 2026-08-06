@@ -76,7 +76,7 @@ export function createSkillClasses(ARGON, { L5R5eSearchableAccordionPanel }) {
         }
 
         get icon() {
-            return ACTION_ICONS.generic_roll;
+            return ACTION_ICONS.skills;
         }
 
         async activateListeners(element) {

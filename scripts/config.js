@@ -15,6 +15,21 @@ export const SKILL_CATEGORIES = Object.freeze(["artisan", "martial", "scholar", 
 
 export const ACTION_TYPES = Object.freeze(["attack", "scheme", "support", "move"]);
 
+export const HUD_ICONS = Object.freeze({
+    stats: Object.freeze({
+        focus: `modules/${MODULE_ID}/icons/stats/focus.svg`,
+        vigilance: `modules/${MODULE_ID}/icons/stats/vigilance.svg`,
+        honor: `modules/${MODULE_ID}/icons/stats/honor.svg`,
+        glory: `modules/${MODULE_ID}/icons/stats/glory.svg`,
+        status: `modules/${MODULE_ID}/icons/stats/status.svg`,
+    }),
+    economy: Object.freeze({
+        primary: `modules/${MODULE_ID}/icons/economy/action.svg`,
+        water: "systems/l5r5e/assets/icons/rings/water.svg",
+        movement: `modules/${MODULE_ID}/icons/economy/movement.svg`,
+    }),
+});
+
 export const ACTIONS_BY_PROFILE = Object.freeze({
     universal: ["generic_roll"],
     intrigue: ["persuade", "assist", "calming_breath", "custom_action"],
@@ -35,6 +50,7 @@ export const ACTIONS_BY_PROFILE = Object.freeze({
 
 export const ACTION_ICONS = Object.freeze({
     generic_roll: "systems/l5r5e/assets/icons/rings/void.svg",
+    skills: `modules/${MODULE_ID}/icons/palettes/skills.svg`,
     assist: `modules/${MODULE_ID}/icons/assist.svg`,
     calming_breath: `modules/${MODULE_ID}/icons/calming-breath.svg`,
     challenge: `modules/${MODULE_ID}/icons/challenge.svg`,
@@ -54,8 +70,8 @@ export const ACTION_ICONS = Object.freeze({
     reinforce: `modules/${MODULE_ID}/icons/reinforce.svg`,
     staredown: `modules/${MODULE_ID}/icons/challenge.svg`,
     concede: `modules/${MODULE_ID}/icons/concede.svg`,
-    techniques: "systems/l5r5e/assets/icons/items/technique.svg",
-    equipment: "systems/l5r5e/assets/icons/items/item.svg",
+    techniques: `modules/${MODULE_ID}/icons/palettes/techniques.svg`,
+    equipment: `modules/${MODULE_ID}/icons/palettes/equipment.svg`,
 });
 
 export const TECHNIQUE_TYPES = Object.freeze([

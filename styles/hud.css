@@ -1309,6 +1309,274 @@
     }
 }
 
+/* v2.0.10 mockup alignment: accumulating tracks, compact stats and one-row actions. */
+.extended-combat-hud {
+    --l5r5e-action-height: clamp(220px, 20vh, 252px);
+    --l5r5e-action-tile: clamp(92px, 6.5vw, 124px);
+    --l5r5e-economy-width: clamp(150px, 10vw, 190px);
+    --l5r5e-end-width: clamp(135px, 9vw, 180px);
+    --l5r5e-orb-size: clamp(14px, 0.9vw, 17px);
+    --l5r5e-palette-width: clamp(175px, 12vw, 220px);
+}
+
+.extended-combat-hud .l5r5e-resource-grid {
+    grid-template-columns: 1fr;
+}
+
+.extended-combat-hud .l5r5e-resource-fatigue,
+.extended-combat-hud .l5r5e-resource-strife {
+    min-height: 70px;
+}
+
+.extended-combat-hud .l5r5e-resource-void {
+    min-height: 58px;
+}
+
+.extended-combat-hud .l5r5e-resource-orbs {
+    display: grid;
+    gap: 4px;
+    grid-auto-flow: row;
+    grid-auto-rows: var(--l5r5e-orb-size);
+    grid-template-columns: repeat(12, var(--l5r5e-orb-size));
+    margin-top: 6px;
+    min-height: var(--l5r5e-orb-size);
+    width: max-content;
+}
+
+.extended-combat-hud .l5r5e-resource-orb {
+    background: rgb(0 0 0 / 52%);
+    border-color: rgb(181 144 82 / 36%);
+    height: var(--l5r5e-orb-size);
+    opacity: 0.72;
+    width: var(--l5r5e-orb-size);
+}
+
+.extended-combat-hud .l5r5e-resource-orbs-fatigue .l5r5e-resource-orb.filled {
+    background: radial-gradient(circle at 35% 30%, #bed88b, #65843d 68%, #283719);
+    border-color: #d8e5b2;
+    box-shadow: 0 0 6px rgb(150 188 92 / 48%), inset 0 0 4px rgb(255 255 255 / 38%);
+    opacity: 1;
+}
+
+.extended-combat-hud .l5r5e-resource-orbs-strife .l5r5e-resource-orb.filled {
+    background: radial-gradient(circle at 35% 30%, #db7468, #8f2f29 68%, #3b1210);
+    border-color: #e7a39b;
+    box-shadow: 0 0 6px rgb(185 70 61 / 48%), inset 0 0 4px rgb(255 255 255 / 30%);
+    opacity: 1;
+}
+
+.extended-combat-hud .l5r5e-resource-orb.over-limit {
+    border-color: #e7a646;
+    box-shadow: 0 0 7px rgb(216 96 44 / 72%), inset 0 0 5px rgb(255 208 115 / 38%);
+}
+
+.extended-combat-hud .l5r5e-resource-orbs-void {
+    gap: 7px;
+}
+
+.extended-combat-hud .l5r5e-resource-orbs-void .l5r5e-resource-orb {
+    border-radius: 1px;
+    height: calc(var(--l5r5e-orb-size) * 0.78);
+    margin: calc(var(--l5r5e-orb-size) * 0.11);
+    transform: rotate(45deg);
+    width: calc(var(--l5r5e-orb-size) * 0.78);
+}
+
+.extended-combat-hud .l5r5e-resource-orbs-void .l5r5e-resource-orb.filled {
+    background: radial-gradient(circle at 35% 30%, #d1a5eb, #75458f 68%, #291833);
+    border-color: #e0c1f0;
+    box-shadow: 0 0 7px rgb(155 95 188 / 58%), inset 0 0 4px rgb(255 255 255 / 34%);
+    opacity: 1;
+}
+
+.extended-combat-hud .l5r5e-stat-list {
+    display: grid;
+    grid-template-columns: 1fr;
+}
+
+.extended-combat-hud .l5r5e-stat-row {
+    align-items: center;
+    border-bottom: 1px solid rgb(181 144 82 / 34%);
+    color: #dfcfad;
+    display: grid;
+    gap: 0.45rem;
+    grid-template-columns: 24px minmax(0, 1fr) auto;
+    min-height: 29px;
+    padding: 0.18rem 0.35rem;
+}
+
+.extended-combat-hud .l5r5e-stat-row:last-child {
+    border-bottom: 0;
+}
+
+.extended-combat-hud .l5r5e-stat-icon {
+    border: 0;
+    height: 20px;
+    object-fit: contain;
+    width: 20px;
+}
+
+.extended-combat-hud .l5r5e-stat-label {
+    font-size: 0.76rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+.extended-combat-hud .l5r5e-stat-row strong {
+    color: #fff3d8;
+    font-family: var(--font-serif);
+    font-size: 1rem;
+}
+
+.extended-combat-hud .l5r5e-profile-tracker {
+    display: none !important;
+}
+
+.extended-combat-hud .l5r5e-weapon-stats > span {
+    align-items: center;
+    display: flex;
+    gap: 0.25rem;
+    justify-content: center;
+}
+
+.extended-combat-hud .l5r5e-weapon-stats i {
+    color: #d9b872;
+    font-size: 1rem;
+}
+
+.extended-combat-hud .l5r5e-armor-details {
+    align-content: end;
+    grid-template-columns: repeat(2, minmax(0, max-content));
+    justify-content: start;
+}
+
+.extended-combat-hud .l5r5e-armor-name,
+.extended-combat-hud .l5r5e-armor-properties {
+    grid-column: 1 / -1;
+}
+
+.extended-combat-hud .l5r5e-armor-name {
+    margin-bottom: 0.15rem;
+}
+
+.extended-combat-hud .action-hud .actions-container.l5r5e-action-layout {
+    grid-template-areas:
+        "palette economy economy end"
+        "palette check no-check end";
+    grid-template-columns: var(--l5r5e-palette-width) max-content max-content var(--l5r5e-end-width);
+    grid-template-rows: 56px minmax(0, 1fr);
+}
+
+.extended-combat-hud .l5r5e-palette-rail {
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-rows: repeat(3, 1fr);
+}
+
+.extended-combat-hud .action-hud .actions-container .action-element.l5r5e-palette-action {
+    background-position: 16px center;
+    background-size: 40px;
+    min-height: 0;
+    padding: 0 52px 0 68px;
+    position: relative;
+}
+
+.extended-combat-hud .action-hud .actions-container .action-element.l5r5e-palette-action::before {
+    background: rgb(181 144 82 / 55%);
+    bottom: 15%;
+    content: "";
+    position: absolute;
+    right: 43px;
+    top: 15%;
+    width: 1px;
+}
+
+.extended-combat-hud .action-hud .actions-container .action-element.l5r5e-palette-action::after {
+    color: #eadab8;
+    content: "⌃";
+    font-size: 1.15rem;
+    line-height: 1;
+    position: absolute;
+    right: 16px;
+    top: calc(50% - 0.45rem);
+}
+
+.extended-combat-hud .l5r5e-turn-economy {
+    justify-content: start;
+}
+
+.extended-combat-hud .l5r5e-economy-pill {
+    display: grid;
+    gap: 0.45rem;
+    grid-template-columns: 30px minmax(0, 1fr) auto;
+    min-height: 42px;
+}
+
+.extended-combat-hud .l5r5e-economy-icon {
+    border: 0;
+    height: 27px;
+    object-fit: contain;
+    width: 27px;
+}
+
+.extended-combat-hud .l5r5e-economy-value {
+    border-left: 1px solid rgb(181 144 82 / 55%);
+    margin-left: 0;
+    min-width: 2.1rem;
+    padding-left: 0.55rem;
+    text-align: center;
+}
+
+.extended-combat-hud .l5r5e-action-group {
+    align-self: stretch;
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr);
+    overflow: hidden;
+}
+
+.extended-combat-hud .l5r5e-action-group-buttons,
+.extended-combat-hud .l5r5e-profile-universal .l5r5e-action-group-buttons {
+    grid-auto-columns: var(--l5r5e-action-tile);
+    grid-auto-flow: column;
+    grid-template-rows: minmax(0, 1fr);
+    height: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+}
+
+.extended-combat-hud .action-hud .actions-container .l5r5e-action-group .action-element,
+.extended-combat-hud .l5r5e-profile-universal .l5r5e-action-group .action-element {
+    background-position: center 14px;
+    background-size: 46px;
+    height: 100%;
+    min-height: 0;
+    min-width: var(--l5r5e-action-tile);
+    padding: 64px 5px 7px;
+    width: var(--l5r5e-action-tile);
+}
+
+.extended-combat-hud:has(.l5r5e-profile-universal) {
+    --l5r5e-action-height: 210px;
+}
+
+@media (max-width: 1450px), (max-height: 900px) {
+    .extended-combat-hud {
+        --l5r5e-action-height: 220px;
+        --l5r5e-action-tile: 96px;
+        --l5r5e-economy-width: 145px;
+        --l5r5e-end-width: 135px;
+        --l5r5e-palette-width: 175px;
+    }
+
+    .extended-combat-hud .action-hud .actions-container .l5r5e-action-group .action-element {
+        background-position: center 9px;
+        background-size: 38px;
+        height: 100%;
+        min-height: 0;
+        padding: 49px 4px 5px;
+    }
+}
+
 /* Resource spheres, raised palettes and unconstrained L5R tooltips. */
 .extended-combat-hud .l5r5e-resource-fatigue,
 .extended-combat-hud .l5r5e-resource-strife,
@@ -1857,5 +2125,177 @@
         height: 110px;
         min-height: 110px;
         padding: 43px 4px 4px;
+    }
+}
+
+/* v2.0.10 final cascade overrides. Keep this section last. */
+.extended-combat-hud {
+    --l5r5e-action-height: clamp(220px, 20vh, 252px);
+    --l5r5e-action-tile: clamp(92px, 6.5vw, 124px);
+    --l5r5e-economy-width: clamp(150px, 10vw, 190px);
+    --l5r5e-end-width: clamp(135px, 9vw, 180px);
+    --l5r5e-orb-size: clamp(14px, 0.9vw, 17px);
+    --l5r5e-palette-width: clamp(175px, 12vw, 220px);
+}
+
+.extended-combat-hud .l5r5e-resource-grid {
+    grid-template-columns: 1fr;
+}
+
+.extended-combat-hud .l5r5e-resource-fatigue,
+.extended-combat-hud .l5r5e-resource-strife {
+    min-height: 70px;
+}
+
+.extended-combat-hud .l5r5e-resource-void {
+    min-height: 58px;
+}
+
+.extended-combat-hud .l5r5e-resource-orbs {
+    display: grid;
+    gap: 4px;
+    grid-auto-flow: row;
+    grid-auto-rows: var(--l5r5e-orb-size);
+    grid-template-columns: repeat(12, var(--l5r5e-orb-size));
+    margin-top: 6px;
+    min-height: var(--l5r5e-orb-size);
+    width: max-content;
+}
+
+.extended-combat-hud .l5r5e-resource-orb {
+    background: rgb(0 0 0 / 52%);
+    border-color: rgb(181 144 82 / 36%);
+    height: var(--l5r5e-orb-size);
+    opacity: 0.72;
+    width: var(--l5r5e-orb-size);
+}
+
+.extended-combat-hud .l5r5e-resource-orbs-fatigue .l5r5e-resource-orb.filled {
+    background: radial-gradient(circle at 35% 30%, #bed88b, #65843d 68%, #283719);
+    border-color: #d8e5b2;
+    box-shadow: 0 0 6px rgb(150 188 92 / 48%), inset 0 0 4px rgb(255 255 255 / 38%);
+    opacity: 1;
+}
+
+.extended-combat-hud .l5r5e-resource-orbs-strife .l5r5e-resource-orb.filled {
+    background: radial-gradient(circle at 35% 30%, #db7468, #8f2f29 68%, #3b1210);
+    border-color: #e7a39b;
+    box-shadow: 0 0 6px rgb(185 70 61 / 48%), inset 0 0 4px rgb(255 255 255 / 30%);
+    opacity: 1;
+}
+
+.extended-combat-hud .l5r5e-resource-orb.over-limit {
+    border-color: #e7a646;
+    box-shadow: 0 0 7px rgb(216 96 44 / 72%), inset 0 0 5px rgb(255 208 115 / 38%);
+}
+
+.extended-combat-hud .l5r5e-resource-orbs-void {
+    gap: 7px;
+}
+
+.extended-combat-hud .l5r5e-resource-orbs-void .l5r5e-resource-orb {
+    border-radius: 1px;
+    height: calc(var(--l5r5e-orb-size) * 0.78);
+    margin: calc(var(--l5r5e-orb-size) * 0.11);
+    transform: rotate(45deg);
+    width: calc(var(--l5r5e-orb-size) * 0.78);
+}
+
+.extended-combat-hud .l5r5e-resource-orbs-void .l5r5e-resource-orb.filled {
+    background: radial-gradient(circle at 35% 30%, #d1a5eb, #75458f 68%, #291833);
+    border-color: #e0c1f0;
+    box-shadow: 0 0 7px rgb(155 95 188 / 58%), inset 0 0 4px rgb(255 255 255 / 34%);
+    opacity: 1;
+}
+
+.extended-combat-hud .l5r5e-profile-tracker {
+    display: none !important;
+}
+
+.extended-combat-hud .l5r5e-armor-name,
+.extended-combat-hud .l5r5e-armor-properties {
+    grid-column: 1 / -1;
+}
+
+.extended-combat-hud .action-hud .actions-container.l5r5e-action-layout {
+    grid-template-areas:
+        "palette economy economy end"
+        "palette check no-check end";
+    grid-template-columns: var(--l5r5e-palette-width) max-content max-content var(--l5r5e-end-width);
+    grid-template-rows: 56px minmax(0, 1fr);
+}
+
+.extended-combat-hud .l5r5e-palette-rail {
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-rows: repeat(3, 1fr);
+}
+
+.extended-combat-hud .action-hud .actions-container .action-element.l5r5e-palette-action {
+    background-position: 16px center;
+    background-size: 40px;
+    min-height: 0;
+    padding: 0 52px 0 68px;
+    position: relative;
+}
+
+.extended-combat-hud .l5r5e-turn-economy {
+    justify-content: start;
+}
+
+.extended-combat-hud .l5r5e-economy-pill {
+    display: grid;
+    gap: 0.45rem;
+    grid-template-columns: 30px minmax(0, 1fr) auto;
+    min-height: 42px;
+}
+
+.extended-combat-hud .l5r5e-action-group {
+    align-self: stretch;
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr);
+    overflow: hidden;
+}
+
+.extended-combat-hud .l5r5e-action-group-buttons,
+.extended-combat-hud .l5r5e-profile-universal .l5r5e-action-group-buttons {
+    grid-auto-columns: var(--l5r5e-action-tile);
+    grid-auto-flow: column;
+    grid-template-rows: minmax(0, 1fr);
+    height: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+}
+
+.extended-combat-hud .action-hud .actions-container .l5r5e-action-group .action-element,
+.extended-combat-hud .l5r5e-profile-universal .l5r5e-action-group .action-element {
+    background-position: center 14px;
+    background-size: 46px;
+    height: 100%;
+    min-height: 0;
+    min-width: var(--l5r5e-action-tile);
+    padding: 64px 5px 7px;
+    width: var(--l5r5e-action-tile);
+}
+
+.extended-combat-hud:has(.l5r5e-profile-universal) {
+    --l5r5e-action-height: 210px;
+}
+
+@media (max-width: 1450px), (max-height: 900px) {
+    .extended-combat-hud {
+        --l5r5e-action-height: 220px;
+        --l5r5e-action-tile: 96px;
+        --l5r5e-economy-width: 145px;
+        --l5r5e-end-width: 135px;
+        --l5r5e-palette-width: 175px;
+    }
+
+    .extended-combat-hud .action-hud .actions-container .l5r5e-action-group .action-element {
+        background-position: center 9px;
+        background-size: 38px;
+        height: 100%;
+        min-height: 0;
+        padding: 49px 4px 5px;
     }
 }
