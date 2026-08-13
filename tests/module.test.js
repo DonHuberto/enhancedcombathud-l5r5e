@@ -24,9 +24,9 @@ test("manifest targets Foundry 14 and the supported Core/System baselines", () =
     assert.equal(manifest.relationships.requires[0].compatibility.minimum, "5.0.1");
     assert.equal(manifest.relationships.systems[0].id, "l5r5e");
     assert.equal(manifest.relationships.systems[0].compatibility.minimum, "1.14.115");
-    assert.equal(manifest.version, "2.0.11");
+    assert.equal(manifest.version, "2.0.12");
     assert.equal(manifest.manifest.endsWith("/releases/latest/download/module.json"), true);
-    assert.equal(manifest.download.endsWith("/releases/download/v2.0.11/module.zip"), true);
+    assert.equal(manifest.download.endsWith("/releases/download/v2.0.12/module.zip"), true);
     assert.ok(manifest.changelog);
     assert.equal(manifest.dependencies, undefined);
     assert.equal(manifest.systems, undefined);

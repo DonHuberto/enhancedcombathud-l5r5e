@@ -1,5 +1,15 @@
 # Changelog
 
+## 2.0.12 - 2026-08-13
+
+- Replace action background artwork with dedicated DOM icons so icons and multiline labels keep separate, vertically balanced areas at every HUD scale, including End Turn.
+- Rebuild Skills, Techniques and Equipment controls as icon-first, label-middle and caret-last rows without overlap; align the I–III weapon-set markers inside centered circles and reserve enough width for the complete Movement value.
+- Unify Skills, Techniques and Equipment entries under one compact 31-pixel list-row contract and bind explicit mouse activation so skill entries reliably open the Dice Picker.
+- Raise Ninjo and Giri above the portrait stacking layer while retaining their position directly above the palette controls.
+- Remove redundant tooltips from Fatigue, Strife, Void, Focus, Vigilance, Honor, Glory, Status, Ninjo and Giri.
+- Restyle action, technique, equipment and remaining native HUD tooltips as spacious washi-paper panels with readable descriptions and two-column metadata instead of the compact blue Argon theme.
+- Add behavioral regression coverage for icon insertion, refresh reuse, mouse routing, compact palette geometry, resource tooltip removal and tooltip styling.
+
 ## 2.0.11 - 2026-08-06
 
 - Move Ninjo and Giri below the portrait into the row immediately above the vertical Skills, Techniques and Equipment controls.

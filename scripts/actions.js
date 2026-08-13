@@ -7,6 +7,7 @@ import {
     waterExtraActionRestriction,
 } from "./action-layout.js";
 import { getWeapons } from "./data.js";
+import { installHudButtonIcon } from "./hud-buttons.js";
 import { buildNinjoGiri } from "./identity.js";
 import { getPersuadeOptions, openDicePicker, openGenericRoll, openPersuadeRoll, openWeaponStrike } from "./rolls.js";
 import {
@@ -521,6 +522,7 @@ export function createActionPanels(ARGON, { L5R5eEquipmentPanelButton }, { L5R5e
         async _renderInner() {
             await super._renderInner();
             this.element.classList.add(`l5r5e-action-${this.actionId}`);
+            installHudButtonIcon(this.element, this.icon, "l5r5e-action-icon");
             this.element.setAttribute("aria-label", game.i18n.localize(this.label));
             this.element.setAttribute("tabindex", "0");
             this.element.classList.toggle("l5r5e-disabled", !this.availability.enabled);

@@ -51,7 +51,7 @@ export function createSearchablePanelClasses(ARGON) {
         async _renderInner() {
             await super._renderInner();
             this.element.classList.add("l5r5e-palette-panel");
-            addSearchUi(this, ".feature-element");
+            addSearchUi(this, ".l5r5e-palette-entry");
         }
     }
 
@@ -59,7 +59,7 @@ export function createSearchablePanelClasses(ARGON) {
         async _renderInner() {
             await super._renderInner();
             this.element.classList.add("l5r5e-palette-panel");
-            addSearchUi(this, ".feature-element");
+            addSearchUi(this, ".l5r5e-palette-entry");
         }
     }
 

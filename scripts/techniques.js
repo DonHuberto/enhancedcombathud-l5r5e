@@ -1,5 +1,6 @@
 import { ACTION_ICONS, MODULE_ID, TECHNIQUE_TYPES } from "./config.js";
 import { collectTechniques, getTechniqueType, techniqueRequiresCheck } from "./data.js";
+import { bindHudPointerActivation, installHudButtonIcon } from "./hud-buttons.js";
 import { getTechniqueLabel, openTechniqueRoll } from "./rolls.js";
 import { getProfile } from "./state.js";
 import { enrichText, escapeHtml, getSourceLabel, notify } from "./utils.js";
@@ -132,6 +133,10 @@ export function createTechniqueClasses(ARGON, { L5R5eSearchableAccordionPanel })
 
         async activateListeners(element) {
             await super.activateListeners(element);
+            bindHudPointerActivation(element, {
+                onLeft: (event) => this._onPreLeftClick(event),
+                onRight: (event) => this._onRightClick(event),
+            });
             element.onkeydown = (event) => {
                 if (event.key !== "Enter" && event.key !== " ") return;
                 event.preventDefault();
@@ -143,6 +148,8 @@ export function createTechniqueClasses(ARGON, { L5R5eSearchableAccordionPanel })
 
         async _renderInner() {
             await super._renderInner();
+            this.element.classList.add("l5r5e-palette-entry");
+            installHudButtonIcon(this.element, this.icon, "l5r5e-entry-icon");
             this.element.classList.toggle("l5r5e-favorite", this.isFavorite);
             this.element.classList.toggle("l5r5e-informational", !getTechniqueAvailability(this.item, getProfile(this.actor)).usable);
             this.element.dataset.search = [this.item?.name, getTechniqueLabel(getTechniqueType(this.item))].filter(Boolean).join(" ");
@@ -176,6 +183,7 @@ export function createTechniqueClasses(ARGON, { L5R5eSearchableAccordionPanel })
         async _renderInner() {
             await super._renderInner();
             this.element.classList.add("l5r5e-palette-action", "l5r5e-action-techniques");
+            installHudButtonIcon(this.element, this.icon, "l5r5e-palette-icon");
             this.element.setAttribute("aria-label", game.i18n.localize(this.label));
             this.element.setAttribute("tabindex", "0");
         }

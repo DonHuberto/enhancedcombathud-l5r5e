@@ -5,13 +5,16 @@ import { fileURLToPath } from "node:url";
 import test from "node:test";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
-const css = readFileSync(resolve(root, "styles/hud.css"), "utf8");
+const baseCss = readFileSync(resolve(root, "styles/hud.css"), "utf8");
+const fixes = readFileSync(resolve(root, "styles/hud-v2.0.12.css"), "utf8");
+const css = `${baseCss}\n${fixes}`;
 const correction = css.slice(css.indexOf("/* L5R5e cRPG layout correction"));
-const mockup = css.slice(css.indexOf("/* v2.0.11 final cascade overrides"));
+const mockup = baseCss.slice(baseCss.indexOf("/* v2.0.11 final cascade overrides"));
 const portrait = readFileSync(resolve(root, "scripts/portrait.js"), "utf8");
 const actions = readFileSync(resolve(root, "scripts/actions.js"), "utf8");
 const identity = readFileSync(resolve(root, "scripts/identity.js"), "utf8");
 const palettes = readFileSync(resolve(root, "scripts/palettes.js"), "utf8");
+const skills = readFileSync(resolve(root, "scripts/skills.js"), "utf8");
 
 test("the corrected HUD preserves Argon's compensating width and two-tier layout", () => {
     assert.ok(correction.includes("max-width: none;"), "Argon's scaled width must not be clamped to 100vw");
@@ -68,6 +71,34 @@ test("palettes are compact vertical lists and their close control removes the vi
     assert.match(css, /\.l5r5e-palette-panel \.feature-element[\s\S]*?height:\s*38px !important/);
     assert.match(palettes, /panel\.element\.classList\.remove\("show"\)/);
     assert.match(palettes, /event\.stopPropagation\(\)/);
+});
+
+test("skills share the compact palette contract and have an explicit primary-click route", () => {
+    assert.match(skills, /classList\.add\("l5r5e-palette-entry", "l5r5e-skill-entry"\)/);
+    assert.match(skills, /bindHudPointerActivation\(element, \{ onLeft:/);
+    assert.match(palettes, /addSearchUi\(this, "\.l5r5e-palette-entry"\)/);
+    assert.match(fixes, /\.l5r5e-palette-entry[\s\S]*?height:\s*31px !important/);
+    assert.match(fixes, /grid-template-columns:\s*1\.05rem minmax\(0, 1fr\)/);
+});
+
+test("actions use dedicated icon nodes and movement reserves independent label/value space", () => {
+    assert.match(actions, /installHudButtonIcon\(this\.element, this\.icon, "l5r5e-action-icon"\)/);
+    assert.match(fixes, /grid-template-rows:\s*minmax\(0, 1fr\) minmax\(2\.35em, auto\)/);
+    assert.match(fixes, /\.l5r5e-end-turn-slot \.action-element[\s\S]*?grid-template-rows:\s*minmax\(0, 1fr\) auto/);
+    assert.match(fixes, /\.l5r5e-economy-pill\.l5r5e-economy-movement[\s\S]*?min-width:\s*var\(--l5r5e-movement-width\)/);
+});
+
+test("resource and secondary-stat rows no longer request native tooltips", () => {
+    const resourceBlock = portrait.slice(portrait.indexOf("#buildResources"), portrait.indexOf("#buildStats"));
+    const statsBlock = portrait.slice(portrait.indexOf("#buildStats"), portrait.indexOf("#buildRings"));
+    assert.doesNotMatch(resourceBlock, /dataset\.tooltip/);
+    assert.doesNotMatch(statsBlock, /dataset\.tooltip/);
+});
+
+test("all Argon HUD tooltips use the paper surface and readable detail grid", () => {
+    assert.match(fixes, /\.ech-tooltip-container > \.l5r5e-tooltip[\s\S]*?background:\s*#e8dcc1 !important/);
+    assert.match(fixes, /\.ech-tooltip-details[\s\S]*?grid-template-columns:\s*repeat\(2, minmax\(0, 1fr\)\)/);
+    assert.match(fixes, /body:has\(\.extended-combat-hud:hover\) #tooltip/);
 });
 
 test("equipment uses system Conflict icons and the obsolete profile popup is absent", () => {

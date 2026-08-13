@@ -1,4 +1,3 @@
-import { MODULE_ID } from "./config.js";
 import { enrichText } from "./utils.js";
 
 function element(tag, className, text) {
@@ -16,7 +15,6 @@ export async function buildNinjoGiri(actor) {
         const wrapper = element("div", "l5r5e-social-secret");
         const button = element("button", `l5r5e-${id}`);
         button.type = "button";
-        button.dataset.tooltip = game.i18n.localize(`${MODULE_ID}.social.${id}_tooltip`);
         button.append(
             element("i", id === "ninjo" ? "fas fa-heart" : "fas fa-scroll"),
             element("span", null, game.i18n.localize(`l5r5e.social.${id}`)),

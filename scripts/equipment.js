@@ -1,6 +1,7 @@
 import { ACTION_ICONS, MODULE_ID } from "./config.js";
 import { prepareItem, throwItem } from "./actions.js";
 import { getEquippedArmor, getItemProperties, getWeapons, isReadiedWeapon } from "./data.js";
+import { bindHudPointerActivation, installHudButtonIcon } from "./hud-buttons.js";
 import { openWeaponStrike } from "./rolls.js";
 import { getProfile } from "./state.js";
 import { dropItem, getCurrentGrip, setGrip, toggleEquipped, toggleReadied } from "./weapons.js";
@@ -124,6 +125,10 @@ export function createEquipmentClasses(ARGON, { L5R5eSearchableButtonPanel }) {
 
         async activateListeners(element) {
             await super.activateListeners(element);
+            bindHudPointerActivation(element, {
+                onLeft: (event) => this._onPreLeftClick(event),
+                onRight: (event) => this._onRightClick(event),
+            });
             element.onkeydown = (event) => {
                 if (event.key !== "Enter" && event.key !== " ") return;
                 event.preventDefault();
@@ -136,6 +141,8 @@ export function createEquipmentClasses(ARGON, { L5R5eSearchableButtonPanel }) {
         async _renderInner() {
             await super._renderInner();
             if (!this.item) return;
+            this.element.classList.add("l5r5e-palette-entry");
+            installHudButtonIcon(this.element, this.icon, "l5r5e-entry-icon");
             this.element.classList.toggle("l5r5e-readied", isReadiedWeapon(this.item));
             this.element.classList.toggle("l5r5e-equipped", !!this.item.system?.equipped);
             this.element.dataset.search = [this.item.name, itemSubtitle(this.item), getItemProperties(this.item).join(" ")].join(" ");
@@ -181,6 +188,7 @@ export function createEquipmentClasses(ARGON, { L5R5eSearchableButtonPanel }) {
         async _renderInner() {
             await super._renderInner();
             this.element.classList.add("l5r5e-palette-action", "l5r5e-action-equipment");
+            installHudButtonIcon(this.element, this.icon, "l5r5e-palette-icon");
             this.element.setAttribute("aria-label", game.i18n.localize(this.label));
             this.element.setAttribute("tabindex", "0");
         }

@@ -1,0 +1,364 @@
+/* Loaded after hud.css so these interaction fixes remain the final cascade. */
+.extended-combat-hud {
+    --l5r5e-movement-width: clamp(188px, 13vw, 224px);
+}
+
+.extended-combat-hud .action-hud {
+    z-index: 8;
+}
+
+.extended-combat-hud .l5r5e-action-identity {
+    isolation: isolate;
+    position: relative;
+    z-index: 3;
+}
+
+.extended-combat-hud .action-hud .actions-container .action-element.l5r5e-palette-action {
+    align-items: center;
+    background-image: none !important;
+    display: flex;
+    justify-content: flex-start;
+    padding: 0 42px 0 52px;
+    position: relative;
+}
+
+.extended-combat-hud .l5r5e-palette-action .l5r5e-palette-icon {
+    border: 0;
+    height: 30px;
+    left: 12px;
+    object-fit: contain;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 30px;
+}
+
+.extended-combat-hud .action-hud .actions-container .l5r5e-palette-action .action-element-title {
+    align-items: center;
+    display: flex;
+    height: 100%;
+    line-height: 1.1;
+    margin: 0;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.extended-combat-hud .action-hud .actions-container .action-element.l5r5e-palette-action::before {
+    bottom: 18%;
+    left: auto;
+    right: 32px;
+    top: 18%;
+}
+
+.extended-combat-hud .action-hud .actions-container .action-element.l5r5e-palette-action::after {
+    align-items: center;
+    content: ">";
+    display: flex;
+    font-size: 1rem;
+    height: 100%;
+    justify-content: center;
+    right: 10px;
+    top: 0;
+}
+
+.extended-combat-hud .action-hud .actions-container .l5r5e-action-group .action-element,
+.extended-combat-hud .l5r5e-profile-universal .l5r5e-action-group .action-element {
+    align-items: stretch;
+    background-image: none !important;
+    display: grid;
+    gap: 7px;
+    grid-template-rows: minmax(0, 1fr) minmax(2.35em, auto);
+    justify-items: center;
+    padding: 10px 7px 11px;
+}
+
+.extended-combat-hud .l5r5e-action-group .l5r5e-action-icon {
+    align-self: center;
+    border: 0;
+    height: clamp(38px, 3vw, 52px);
+    max-height: 72%;
+    object-fit: contain;
+    width: clamp(38px, 3vw, 52px);
+}
+
+.extended-combat-hud .action-hud .actions-container .l5r5e-action-group .action-element-title,
+.extended-combat-hud .l5r5e-profile-universal .l5r5e-action-group .action-element-title {
+    align-items: center;
+    align-self: end;
+    display: flex;
+    font-size: clamp(0.7rem, 0.75vw, 0.82rem);
+    justify-content: center;
+    line-height: 1.12;
+    margin: 0;
+    min-height: 2.35em;
+    overflow: visible;
+    text-align: center;
+    text-overflow: clip;
+    white-space: normal;
+}
+
+.extended-combat-hud .l5r5e-end-turn-slot .l5r5e-action-icon {
+    height: clamp(64px, 5vw, 84px);
+    width: clamp(64px, 5vw, 84px);
+}
+
+.extended-combat-hud .action-hud .actions-container .l5r5e-end-turn-slot .action-element {
+    align-items: center;
+    background-image: none !important;
+    display: grid;
+    gap: 0.7rem;
+    grid-template-rows: minmax(0, 1fr) auto;
+    justify-items: center;
+    padding: 16px 12px 18px;
+}
+
+.extended-combat-hud .action-hud .actions-container .l5r5e-end-turn-slot .action-element-title {
+    align-items: center;
+    display: flex;
+    justify-content: center;
+    line-height: 1.15;
+    margin: 0;
+    text-align: center;
+}
+
+.extended-combat-hud .action-hud > .features-container.l5r5e-palette-panel,
+.extended-combat-hud .action-hud > .features-container.l5r5e-palette-panel.is-spells {
+    align-items: stretch;
+    width: min(390px, 92vw);
+}
+
+.extended-combat-hud .l5r5e-palette-panel .l5r5e-palette-entry {
+    align-items: center;
+    background-image: none !important;
+    cursor: pointer;
+    display: grid !important;
+    flex: 0 0 31px;
+    gap: 0.45rem;
+    grid-template-columns: 1.05rem minmax(0, 1fr);
+    height: 31px !important;
+    justify-items: start;
+    min-height: 31px !important;
+    min-width: 0;
+    padding: 0.25rem 0.55rem !important;
+    pointer-events: auto;
+    position: relative;
+    width: 100% !important;
+    z-index: 1;
+}
+
+.extended-combat-hud .l5r5e-palette-panel .l5r5e-entry-icon {
+    border: 0;
+    height: 1.05rem;
+    max-height: 1.05rem;
+    object-fit: contain;
+    width: 1.05rem;
+}
+
+.extended-combat-hud .l5r5e-palette-panel .l5r5e-palette-entry :is(.action-element-title, .feature-element-title) {
+    align-items: center;
+    align-self: stretch;
+    display: flex;
+    font-size: 0.8rem;
+    line-height: 1rem;
+    margin: 0;
+    max-width: 100%;
+    min-width: 0;
+    overflow: hidden;
+    padding: 0;
+    text-align: left;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.extended-combat-hud .l5r5e-palette-panel .l5r5e-palette-entry.l5r5e-favorite {
+    padding-right: 1.8rem !important;
+}
+
+.extended-combat-hud .l5r5e-economy-pill.l5r5e-economy-movement {
+    flex-basis: var(--l5r5e-movement-width);
+    grid-template-columns: 28px minmax(72px, 1fr) minmax(64px, auto);
+    min-width: var(--l5r5e-movement-width);
+    overflow: visible;
+    width: var(--l5r5e-movement-width);
+}
+
+.extended-combat-hud .l5r5e-economy-movement .l5r5e-economy-label,
+.extended-combat-hud .l5r5e-economy-movement .l5r5e-economy-value {
+    overflow: visible;
+    text-overflow: clip;
+    white-space: nowrap;
+}
+
+.extended-combat-hud > .weapon-sets .weapon-set {
+    align-items: center;
+    padding-left: 42px;
+}
+
+.extended-combat-hud > .weapon-sets .weapon-set::before {
+    align-items: center;
+    border: 1px solid rgb(181 144 82 / 72%);
+    border-radius: 50%;
+    box-sizing: border-box;
+    display: flex;
+    height: 29px;
+    justify-content: center;
+    left: 7px;
+    line-height: 1;
+    padding: 0 0 1px;
+    text-align: center;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 29px;
+}
+
+.extended-combat-hud > .weapon-sets .weapon-set.active::before {
+    background: rgb(181 144 82 / 18%);
+    box-shadow: 0 0 8px rgb(181 144 82 / 30%);
+}
+
+.ech-tooltip-container:has(> .l5r5e-tooltip) {
+    background: transparent !important;
+    box-shadow: 0 8px 28px rgb(0 0 0 / 62%) !important;
+    height: auto !important;
+    max-height: min(84vh, 800px) !important;
+    max-width: min(640px, calc(100vw - 32px)) !important;
+    overflow: visible !important;
+    width: min(640px, calc(100vw - 32px)) !important;
+}
+
+.ech-tooltip-container > .l5r5e-tooltip {
+    background: #e8dcc1 !important;
+    border: 2px solid #8d6b39 !important;
+    border-radius: 3px;
+    color: #211b18 !important;
+    display: block;
+    height: auto;
+    max-height: min(84vh, 800px);
+    overflow: hidden;
+    width: 100%;
+}
+
+.ech-tooltip-container > .l5r5e-tooltip .ech-tooltip-header {
+    background: linear-gradient(180deg, #2b211b, #15110e) !important;
+    border: 0 !important;
+    border-bottom: 1px solid #b59052 !important;
+    color: #f5ecd9 !important;
+    padding: 0.8rem 1rem !important;
+}
+
+.ech-tooltip-container > .l5r5e-tooltip .ech-tooltip-header h2 {
+    color: #f5ecd9 !important;
+    font-family: var(--font-serif, serif);
+    font-size: 1.28rem;
+    line-height: 1.15;
+    margin: 0 !important;
+    text-align: left;
+}
+
+.ech-tooltip-container > .l5r5e-tooltip .ech-tooltip-body {
+    background: linear-gradient(145deg, #f4ecd9, #d8c8a8) !important;
+    border: 0 !important;
+    color: #211b18 !important;
+    line-height: 1.45;
+    max-height: min(68vh, 660px) !important;
+    overflow: auto;
+    padding: 1rem 1.15rem 1.1rem !important;
+}
+
+.ech-tooltip-container > .l5r5e-tooltip .ech-tooltip-subtitle {
+    background: #762b27 !important;
+    border: 1px solid #5b201d !important;
+    color: #f5ecd9 !important;
+    display: inline-block;
+    font-size: 0.88rem;
+    margin: 0 0 0.85rem !important;
+    padding: 0.3rem 0.65rem !important;
+    position: static !important;
+    transform: none !important;
+    width: auto !important;
+}
+
+.ech-tooltip-container > .l5r5e-tooltip .ech-tooltip-description {
+    color: #211b18 !important;
+    font-size: 0.95rem;
+    line-height: 1.5;
+    margin: 0 0 1rem !important;
+    max-height: none;
+    overflow: visible;
+    overflow-wrap: anywhere;
+    padding: 0 !important;
+    white-space: normal;
+}
+
+.ech-tooltip-container > .l5r5e-tooltip .ech-tooltip-description :is(p, ul, ol) {
+    margin: 0.45rem 0;
+}
+
+.ech-tooltip-container > .l5r5e-tooltip .ech-tooltip-details {
+    display: grid !important;
+    gap: 0.55rem;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    margin: 0.85rem 0 !important;
+}
+
+.ech-tooltip-container > .l5r5e-tooltip .ech-tooltip-details > div {
+    background: rgb(255 250 230 / 56%) !important;
+    border: 1px solid rgb(91 68 42 / 28%) !important;
+    display: grid !important;
+    gap: 0.2rem;
+    grid-template-columns: 1fr !important;
+    padding: 0.5rem 0.6rem !important;
+}
+
+.ech-tooltip-container > .l5r5e-tooltip .ech-tooltip-details > div > span {
+    color: #211b18 !important;
+    line-height: 1.25;
+    max-width: none !important;
+    overflow-wrap: anywhere;
+    text-align: left !important;
+}
+
+.ech-tooltip-container > .l5r5e-tooltip .ech-tooltip-details > div > span:first-child {
+    color: #762b27 !important;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.ech-tooltip-container > .l5r5e-tooltip .ech-tooltip-properties {
+    border-top: 1px solid rgb(91 68 42 / 28%);
+    color: #211b18 !important;
+    margin-top: 0.9rem;
+    padding-top: 0.75rem;
+}
+
+body:has(.extended-combat-hud:hover) #tooltip {
+    background: linear-gradient(145deg, #f4ecd9, #d8c8a8) !important;
+    border: 1px solid #8d6b39 !important;
+    box-shadow: 0 6px 20px rgb(0 0 0 / 52%) !important;
+    color: #211b18 !important;
+    font-size: 0.9rem;
+    line-height: 1.4;
+    max-width: min(480px, calc(100vw - 28px));
+    padding: 0.65rem 0.8rem !important;
+    white-space: normal;
+}
+
+@media (max-width: 1450px), (max-height: 900px) {
+    .extended-combat-hud {
+        --l5r5e-movement-width: 180px;
+    }
+
+    .extended-combat-hud .action-hud .actions-container .l5r5e-action-group .action-element {
+        gap: 4px;
+        padding: 7px 5px;
+    }
+
+    .extended-combat-hud .l5r5e-action-group .l5r5e-action-icon {
+        height: 36px;
+        width: 36px;
+    }
+}

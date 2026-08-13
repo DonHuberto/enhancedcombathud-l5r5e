@@ -1,5 +1,6 @@
 import { ACTION_ICONS, MODULE_ID, SKILL_CATEGORIES } from "./config.js";
 import { collectSkills } from "./data.js";
+import { bindHudPointerActivation, installHudButtonIcon } from "./hud-buttons.js";
 import { getSkillLabel, openGenericRoll, openSkillRoll } from "./rolls.js";
 import { withActionLock } from "./utils.js";
 
@@ -48,6 +49,7 @@ export function createSkillClasses(ARGON, { L5R5eSearchableAccordionPanel }) {
 
         async activateListeners(element) {
             await super.activateListeners(element);
+            bindHudPointerActivation(element, { onLeft: (event) => this._onLeftClick(event) });
             element.onkeydown = (event) => {
                 if (event.key !== "Enter" && event.key !== " ") return;
                 event.preventDefault();
@@ -59,7 +61,8 @@ export function createSkillClasses(ARGON, { L5R5eSearchableAccordionPanel }) {
 
         async _renderInner() {
             await super._renderInner();
-            this.element.classList.add("l5r5e-skill-entry");
+            this.element.classList.add("l5r5e-palette-entry", "l5r5e-skill-entry");
+            installHudButtonIcon(this.element, this.icon, "l5r5e-entry-icon");
             this.element.dataset.search = [game.i18n.localize(this.label), this.skill ? categoryLabel(this.skill.category) : ""].join(" ");
             this.element.setAttribute("aria-label", game.i18n.localize(this.label));
             this.element.setAttribute("tabindex", "0");
@@ -91,6 +94,7 @@ export function createSkillClasses(ARGON, { L5R5eSearchableAccordionPanel }) {
         async _renderInner() {
             await super._renderInner();
             this.element.classList.add("l5r5e-palette-action", "l5r5e-action-skills");
+            installHudButtonIcon(this.element, this.icon, "l5r5e-palette-icon");
             this.element.setAttribute("aria-label", game.i18n.localize(this.label));
             this.element.setAttribute("tabindex", "0");
         }

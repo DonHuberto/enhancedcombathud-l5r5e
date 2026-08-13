@@ -183,13 +183,12 @@ export function createPortraitPanel(ARGON) {
             const section = element("div", "l5r5e-resource-grid");
             const resources = getResourceData(this.actor.system);
             const values = [
-                ["fatigue", resources.fatigue.value, resources.fatigue.max, `${MODULE_ID}.resources.fatigue_tooltip`, true],
-                ["strife", resources.strife.value, resources.strife.max, `${MODULE_ID}.resources.strife_tooltip`, true],
-                ["void", resources.void.value, resources.void.max, `${MODULE_ID}.resources.void_tooltip`, false],
+                ["fatigue", resources.fatigue.value, resources.fatigue.max, true],
+                ["strife", resources.strife.value, resources.strife.max, true],
+                ["void", resources.void.value, resources.void.max, false],
             ];
-            for (const [id, value, max, tooltip, growsBeyondMax] of values) {
+            for (const [id, value, max, growsBeyondMax] of values) {
                 const tile = element("div", `l5r5e-resource l5r5e-resource-${id}`);
-                tile.dataset.tooltip = game.i18n.localize(tooltip);
                 tile.setAttribute("role", "progressbar");
                 tile.setAttribute("aria-valuemin", "0");
                 tile.setAttribute("aria-valuenow", String(value));
@@ -221,16 +220,15 @@ export function createPortraitPanel(ARGON) {
         #buildStats() {
             const section = element("div", "l5r5e-stat-list");
             const stats = [
-                ["focus", this.actor.system?.focus ?? 0, `${MODULE_ID}.resources.focus`, `${MODULE_ID}.resources.focus_tooltip`],
-                ["vigilance", this.actor.system?.vigilance ?? 0, `${MODULE_ID}.resources.vigilance`, `${MODULE_ID}.resources.vigilance_tooltip`],
-                ["honor", this.actor.system?.social?.honor ?? 0, "l5r5e.social.honor", `${MODULE_ID}.social.honor_tooltip`],
-                ["glory", this.actor.system?.social?.glory ?? 0, "l5r5e.social.glory", `${MODULE_ID}.social.glory_tooltip`],
-                ["status", this.actor.system?.social?.status ?? 0, "l5r5e.social.status", `${MODULE_ID}.social.status_tooltip`],
+                ["focus", this.actor.system?.focus ?? 0, `${MODULE_ID}.resources.focus`],
+                ["vigilance", this.actor.system?.vigilance ?? 0, `${MODULE_ID}.resources.vigilance`],
+                ["honor", this.actor.system?.social?.honor ?? 0, "l5r5e.social.honor"],
+                ["glory", this.actor.system?.social?.glory ?? 0, "l5r5e.social.glory"],
+                ["status", this.actor.system?.social?.status ?? 0, "l5r5e.social.status"],
             ];
-            for (const [id, rawValue, label, tooltip] of stats) {
+            for (const [id, rawValue, label] of stats) {
                 const value = Number(rawValue);
                 const tile = element("div", `l5r5e-stat-row l5r5e-stat-${id}`);
-                tile.dataset.tooltip = game.i18n.localize(tooltip);
                 const icon = element("img", "l5r5e-stat-icon");
                 icon.src = HUD_ICONS.stats[id];
                 icon.alt = "";
