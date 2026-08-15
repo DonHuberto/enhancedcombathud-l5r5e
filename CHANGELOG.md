@@ -1,5 +1,13 @@
 # Changelog
 
+## 2.0.14 - 2026-08-15
+
+- Make ordinary LMB on HUD techniques and equipment open a read-only preview, while ordinary RMB opens the editable document sheet.
+- Retain the prior HUD action routes behind Shift+LMB, and retain the equipment action menu behind Shift+RMB.
+- Open Drawer equipment and peculiarity documents in read-only mode instead of accidentally presenting edit forms.
+- Remove horizontal scrolling from long HUD tooltip content and cap vertical tooltip scrolling at one third of the viewport.
+- Add regression coverage for the HUD preview/edit gesture contract and tooltip overflow rules.
+
 ## 2.0.13 - 2026-08-15
 
 - Keep Ninjo and Giri popovers inside the viewport and stack both disclosures vertically instead of anchoring them on top of each other.

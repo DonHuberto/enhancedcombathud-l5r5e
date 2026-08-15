@@ -272,7 +272,7 @@
     background: transparent !important;
     box-shadow: 0 8px 28px rgb(0 0 0 / 62%) !important;
     height: auto !important;
-    max-height: min(84vh, 800px) !important;
+    max-height: min(333px, 33vh) !important;
     max-width: min(640px, calc(100vw - 32px)) !important;
     overflow: visible !important;
     width: min(640px, calc(100vw - 32px)) !important;
@@ -285,7 +285,7 @@
     color: #211b18 !important;
     display: block;
     height: auto;
-    max-height: min(84vh, 800px);
+    max-height: min(333px, 33vh);
     overflow: hidden;
     width: 100%;
 }
@@ -312,8 +312,10 @@
     border: 0 !important;
     color: #211b18 !important;
     line-height: 1.45;
-    max-height: min(68vh, 660px) !important;
-    overflow: auto;
+    max-height: min(250px, calc(33vh - 5rem)) !important;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overflow-wrap: anywhere;
     padding: 1rem 1.15rem 1.1rem !important;
 }
 

@@ -15,6 +15,9 @@ const actions = readFileSync(resolve(root, "scripts/actions.js"), "utf8");
 const identity = readFileSync(resolve(root, "scripts/identity.js"), "utf8");
 const palettes = readFileSync(resolve(root, "scripts/palettes.js"), "utf8");
 const skills = readFileSync(resolve(root, "scripts/skills.js"), "utf8");
+const techniques = readFileSync(resolve(root, "scripts/techniques.js"), "utf8");
+const equipment = readFileSync(resolve(root, "scripts/equipment.js"), "utf8");
+const drawer = readFileSync(resolve(root, "scripts/drawer.js"), "utf8");
 
 test("the corrected HUD preserves Argon's compensating width and two-tier layout", () => {
     assert.ok(correction.includes("max-width: none;"), "Argon's scaled width must not be clamped to 100vw");
@@ -109,6 +112,18 @@ test("all Argon HUD tooltips use the paper surface and readable detail grid", ()
     assert.match(fixes, /\.ech-tooltip-container > \.l5r5e-tooltip[\s\S]*?background:\s*#e8dcc1 !important/);
     assert.match(fixes, /\.ech-tooltip-details[\s\S]*?grid-template-columns:\s*repeat\(2, minmax\(0, 1fr\)\)/);
     assert.match(fixes, /body:has\(\.extended-combat-hud:hover\) #tooltip/);
+    assert.match(fixes, /max-height:\s*min\(333px, 33vh\) !important/);
+    assert.match(fixes, /overflow-x:\s*hidden/);
+    assert.match(fixes, /overflow-y:\s*auto/);
+});
+
+test("HUD documents use LMB preview and RMB edit without losing shifted actions", () => {
+    assert.match(techniques, /if \(!event\?\.shiftKey\) return this\.item\?\.sheet\?\.render\(\{ force: true, editable: false \}\)/);
+    assert.match(techniques, /editable:\s*true/);
+    assert.match(equipment, /if \(!event\?\.shiftKey\) return this\.item\?\.sheet\?\.render\(\{ force: true, editable: false \}\)/);
+    assert.match(equipment, /if \(!event\?\.shiftKey\) return this\.item\.sheet\.render\(\{ force: true, editable: true \}\)/);
+    assert.doesNotMatch(drawer, /item\.sheet\.render\(true\)/);
+    assert.match(drawer, /editable:\s*false/);
 });
 
 test("equipment uses system Conflict icons and the obsolete profile popup is absent", () => {

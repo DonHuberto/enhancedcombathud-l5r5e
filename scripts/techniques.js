@@ -95,7 +95,8 @@ export function createTechniqueClasses(ARGON, { L5R5eSearchableAccordionPanel })
             installDelayedHudTooltip(this);
         }
 
-        async _onLeftClick() {
+        async _onLeftClick(event) {
+            if (!event?.shiftKey) return this.item?.sheet?.render({ force: true, editable: false });
             const availability = getTechniqueAvailability(this.item, getProfile(this.actor));
             if (availability.usable) return openTechniqueRoll(this.actor, this.item);
             notify(availability.reason, "info");
@@ -112,7 +113,7 @@ export function createTechniqueClasses(ARGON, { L5R5eSearchableAccordionPanel })
                 );
                 return;
             }
-            this.item?.sheet?.render({ force: true, editable: false });
+            this.item?.sheet?.render({ force: true, editable: true });
         }
 
         async activateListeners(element) {

@@ -68,9 +68,10 @@ export function createEquipmentClasses(ARGON, { L5R5eSearchableButtonPanel }) {
         }
 
         async _onLeftClick(event) {
+            if (!event?.shiftKey) return this.item?.sheet?.render({ force: true, editable: false });
             if (this.item.type === "weapon") {
                 const grips = Object.keys(this.item.system?.grip_profiles ?? {});
-                if (event.shiftKey && grips.length > 1) {
+                if (event.altKey && grips.length > 1) {
                     const current = getCurrentGrip(this.item);
                     const next = grips[(grips.indexOf(current) + 1) % grips.length];
                     return setGrip(this.item, next);
@@ -83,8 +84,9 @@ export function createEquipmentClasses(ARGON, { L5R5eSearchableButtonPanel }) {
             return withActionLock(`equipment:${this.item.uuid}`, () => toggleEquipped(this.item));
         }
 
-        async _onRightClick() {
+        async _onRightClick(event) {
             if (!this.item) return false;
+            if (!event?.shiftKey) return this.item.sheet.render({ force: true, editable: true });
             const choices = [
                 { value: "view", label: game.i18n.localize(`${MODULE_ID}.equipment.menu_view`) },
                 {
@@ -156,8 +158,9 @@ export function createEquipmentClasses(ARGON, { L5R5eSearchableButtonPanel }) {
     }
 
     class L5R5eWeaponSetButton extends L5R5eEquipmentItemButton {
-        async _onLeftClick() {
+        async _onLeftClick(event) {
             if (!this.item) return;
+            if (!event?.shiftKey) return this.item.sheet.render({ force: true, editable: false });
             const profile = getProfile(this.actor);
             if (profile === "universal") {
                 notify(`${MODULE_ID}.notifications.strike_conflict_only`, "info");
