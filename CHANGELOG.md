@@ -1,5 +1,14 @@
 # Changelog
 
+## 2.0.13 - 2026-08-15
+
+- Keep Ninjo and Giri popovers inside the viewport and stack both disclosures vertically instead of anchoring them on top of each other.
+- Bound the Void readout, move condition warnings clear of the helper controls, and fit weapon-set artwork without cropping it.
+- Restore reliable pointer activation for Skills, Techniques and Equipment entries, including compact palette hit targets which Argon previously collapsed with a transform.
+- Delay action, skill, technique and equipment tooltips for three seconds, retain them for the complete hover, and replace raw activation objects with readable localized metadata.
+- Open HUD weapon, armor and technique documents as read-only previews and serialize portrait refreshes to prevent Argon's concurrent `innerHTML` update error.
+- Add regression coverage for delayed tooltip behavior, pointer routing, stacked identity popovers, bounded resources and corrected palette geometry.
+
 ## 2.0.12 - 2026-08-13
 
 - Replace action background artwork with dedicated DOM icons so icons and multiline labels keep separate, vertically balanced areas at every HUD scale, including End Turn.

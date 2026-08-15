@@ -13,6 +13,41 @@
     z-index: 3;
 }
 
+.extended-combat-hud .l5r5e-social-popovers {
+    bottom: calc(100% + 0.4rem);
+    display: flex;
+    flex-direction: column-reverse;
+    gap: 0.4rem;
+    left: 0;
+    max-width: calc(100vw - 2rem);
+    position: absolute;
+    width: min(430px, calc(100vw - 2rem));
+    z-index: 30;
+}
+
+.extended-combat-hud .l5r5e-social-popovers .l5r5e-social-popover {
+    inset: auto;
+    max-height: min(32vh, 260px);
+    position: static;
+    transform: none;
+    width: 100%;
+}
+
+.extended-combat-hud .l5r5e-resource-value {
+    justify-self: end;
+    margin-right: 4px;
+    max-width: 100%;
+}
+
+.extended-combat-hud .l5r5e-warnings {
+    bottom: calc(100% + 116px);
+    flex-direction: column;
+    left: calc(-1 * var(--l5r5e-large-tile) + 8px);
+    max-width: var(--l5r5e-large-tile);
+    right: auto;
+    width: var(--l5r5e-large-tile);
+}
+
 .extended-combat-hud .action-hud .actions-container .action-element.l5r5e-palette-action {
     align-items: center;
     background-image: none !important;
@@ -129,6 +164,17 @@
     width: min(390px, 92vw);
 }
 
+.extended-combat-hud .l5r5e-palette-panel.show,
+.extended-combat-hud .l5r5e-palette-panel.show .features-accordion,
+.extended-combat-hud .l5r5e-palette-panel.show .features-accordion-content {
+    pointer-events: auto;
+}
+
+.extended-combat-hud .l5r5e-palette-panel .features-accordion-content {
+    transform: none !important;
+    width: 100% !important;
+}
+
 .extended-combat-hud .l5r5e-palette-panel .l5r5e-palette-entry {
     align-items: center;
     background-image: none !important;
@@ -194,6 +240,10 @@
 .extended-combat-hud > .weapon-sets .weapon-set {
     align-items: center;
     padding-left: 42px;
+}
+
+.extended-combat-hud > .weapon-sets .weapon-set > .set {
+    background-size: contain !important;
 }
 
 .extended-combat-hud > .weapon-sets .weapon-set::before {

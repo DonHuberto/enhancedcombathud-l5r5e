@@ -1,7 +1,7 @@
 import { ACTION_ICONS, MODULE_ID } from "./config.js";
 import { prepareItem, throwItem } from "./actions.js";
 import { getEquippedArmor, getItemProperties, getWeapons, isReadiedWeapon } from "./data.js";
-import { bindHudPointerActivation, installHudButtonIcon } from "./hud-buttons.js";
+import { bindHudPointerActivation, installDelayedHudTooltip, installHudButtonIcon } from "./hud-buttons.js";
 import { openWeaponStrike } from "./rolls.js";
 import { getProfile } from "./state.js";
 import { dropItem, getCurrentGrip, setGrip, toggleEquipped, toggleReadied } from "./weapons.js";
@@ -63,6 +63,10 @@ export function createEquipmentClasses(ARGON, { L5R5eSearchableButtonPanel }) {
             return getEquipmentTooltip(this.item);
         }
 
+        async activateTooltipListeners() {
+            installDelayedHudTooltip(this);
+        }
+
         async _onLeftClick(event) {
             if (this.item.type === "weapon") {
                 const grips = Object.keys(this.item.system?.grip_profiles ?? {});
@@ -115,7 +119,7 @@ export function createEquipmentClasses(ARGON, { L5R5eSearchableButtonPanel }) {
                 choices,
             });
             if (!action) return false;
-            if (action === "view") return this.item.sheet.render(true);
+            if (action === "view") return this.item.sheet.render({ force: true, editable: false });
             if (action === "prepare") return prepareItem(this.actor, this.item);
             if (action === "drop") return dropItem(this.actor, this.item);
             if (action === "throw") return throwItem(this.actor, this.item);
@@ -157,7 +161,7 @@ export function createEquipmentClasses(ARGON, { L5R5eSearchableButtonPanel }) {
             const profile = getProfile(this.actor);
             if (profile === "universal") {
                 notify(`${MODULE_ID}.notifications.strike_conflict_only`, "info");
-                return this.item.sheet.render(true);
+                return this.item.sheet.render({ force: true, editable: false });
             }
             return openWeaponStrike(this.actor, this.item);
         }

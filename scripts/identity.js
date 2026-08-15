@@ -9,6 +9,7 @@ function element(tag, className, text) {
 
 export async function buildNinjoGiri(actor) {
     const section = element("div", "l5r5e-ninjo-giri l5r5e-action-identity");
+    const popovers = element("div", "l5r5e-social-popovers");
     for (const id of ["ninjo", "giri"]) {
         const raw = actor.system?.social?.[id] ?? "";
         if (!String(raw).trim()) continue;
@@ -30,9 +31,11 @@ export async function buildNinjoGiri(actor) {
         button.addEventListener("keydown", (event) => {
             if (event.key === "Escape") toggle(false);
         });
-        wrapper.append(button, popover);
+        wrapper.append(button);
+        popovers.append(popover);
         section.appendChild(wrapper);
     }
+    if (popovers.children.length) section.appendChild(popovers);
     section.classList.toggle("hidden", !section.children.length);
     return section;
 }

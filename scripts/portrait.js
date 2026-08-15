@@ -77,6 +77,18 @@ function effectDuration(effect) {
 
 export function createPortraitPanel(ARGON) {
     return class L5R5ePortraitPanel extends ARGON.PORTRAIT.PortraitPanel {
+        refresh() {
+            if (this._l5r5eRefreshPending) return;
+            this._l5r5eRefreshPending = true;
+            queueMicrotask(async () => {
+                try {
+                    await this.render();
+                } finally {
+                    this._l5r5eRefreshPending = false;
+                }
+            });
+        }
+
         get description() {
             const profile = getProfile(this.actor);
             const school = this.actor.system?.identity?.school;
@@ -336,7 +348,7 @@ export function createPortraitPanel(ARGON) {
                 .join(" · ");
             if (properties) details.appendChild(element("small", "l5r5e-weapon-properties", properties));
             card.append(image, details);
-            card.addEventListener("click", () => item?.sheet?.render({ force: true }));
+            card.addEventListener("click", () => item?.sheet?.render({ force: true, editable: false }));
             card.addEventListener("mouseenter", () => {
                 const api = tacticalGridApi();
                 if (!api?.rangeHighlight || !this.token || !canvas?.dimensions?.distance) return;
@@ -399,7 +411,7 @@ export function createPortraitPanel(ARGON) {
                     .join(", ");
                 details.append(physical, supernatural);
                 if (properties) details.appendChild(element("small", "l5r5e-armor-properties", properties));
-                row.addEventListener("click", () => armor.sheet.render(true));
+                row.addEventListener("click", () => armor.sheet.render({ force: true, editable: false }));
             }
             row.append(image, details);
             section.append(

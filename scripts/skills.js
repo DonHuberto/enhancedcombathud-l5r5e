@@ -1,6 +1,6 @@
 import { ACTION_ICONS, MODULE_ID, SKILL_CATEGORIES } from "./config.js";
 import { collectSkills } from "./data.js";
-import { bindHudPointerActivation, installHudButtonIcon } from "./hud-buttons.js";
+import { bindHudPointerActivation, installDelayedHudTooltip, installHudButtonIcon } from "./hud-buttons.js";
 import { getSkillLabel, openGenericRoll, openSkillRoll } from "./rolls.js";
 import { withActionLock } from "./utils.js";
 
@@ -38,6 +38,10 @@ export function createSkillClasses(ARGON, { L5R5eSearchableAccordionPanel }) {
                 description: game.i18n.localize(`${MODULE_ID}.skills.${this.skill ? "roll_tooltip" : "generic_tooltip"}`),
                 details: this.skill ? [{ label: `${MODULE_ID}.skills.rank`, value: this.skill.rank }] : [],
             };
+        }
+
+        async activateTooltipListeners() {
+            installDelayedHudTooltip(this);
         }
 
         async _onLeftClick() {

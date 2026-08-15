@@ -79,6 +79,16 @@ test("skills share the compact palette contract and have an explicit primary-cli
     assert.match(palettes, /addSearchUi\(this, "\.l5r5e-palette-entry"\)/);
     assert.match(fixes, /\.l5r5e-palette-entry[\s\S]*?height:\s*31px !important/);
     assert.match(fixes, /grid-template-columns:\s*1\.05rem minmax\(0, 1fr\)/);
+    assert.match(fixes, /\.features-accordion-content\s*\{[\s\S]*?transform:\s*none !important/);
+});
+
+test("identity popovers stack inside the viewport and resource values remain bounded", () => {
+    assert.match(identity, /l5r5e-social-popovers/);
+    assert.match(fixes, /\.l5r5e-social-popovers\s*\{[\s\S]*?flex-direction:\s*column-reverse/);
+    assert.match(fixes, /\.l5r5e-social-popovers \.l5r5e-social-popover\s*\{[\s\S]*?position:\s*static/);
+    assert.match(fixes, /\.l5r5e-resource-value\s*\{[\s\S]*?justify-self:\s*end/);
+    assert.match(fixes, /\.l5r5e-warnings\s*\{[\s\S]*?flex-direction:\s*column/);
+    assert.match(fixes, /left:\s*calc\(-1 \* var\(--l5r5e-large-tile\) \+ 8px\)/);
 });
 
 test("actions use dedicated icon nodes and movement reserves independent label/value space", () => {

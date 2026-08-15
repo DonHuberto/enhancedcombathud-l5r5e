@@ -18,12 +18,43 @@ export function installHudButtonIcon(element, source, className) {
 }
 
 export function bindHudPointerActivation(element, { onLeft, onRight } = {}) {
-    element.onmouseup = (event) => {
+    element.onmouseup = null;
+    element.onclick = (event) => {
         event.preventDefault();
         event.stopPropagation();
-        if (event.button === 0) return onLeft?.(event);
-        if (event.button === 2) return onRight?.(event);
-        return undefined;
+        return onLeft?.(event);
     };
-    element.oncontextmenu = (event) => event.preventDefault();
+    element.oncontextmenu = (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        return onRight?.(event);
+    };
+}
+
+export function installDelayedHudTooltip(component, delay = 3000) {
+    const element = component?.element;
+    if (!element) return;
+
+    const previous = element._l5r5eTooltipHandlers;
+    if (previous) {
+        element.removeEventListener("mouseenter", previous.enter);
+        element.removeEventListener("mouseleave", previous.leave);
+    }
+
+    let timer = null;
+    const enter = (event) => {
+        clearTimeout(timer);
+        timer = setTimeout(() => {
+            timer = null;
+            if (element.matches(":hover")) component._onTooltipMouseEnter(event);
+        }, delay);
+    };
+    const leave = (event) => {
+        clearTimeout(timer);
+        timer = null;
+        component._onTooltipMouseLeave(event);
+    };
+    element.addEventListener("mouseenter", enter);
+    element.addEventListener("mouseleave", leave);
+    element._l5r5eTooltipHandlers = { enter, leave };
 }

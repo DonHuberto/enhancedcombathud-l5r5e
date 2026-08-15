@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { bindHudPointerActivation, installHudButtonIcon } from "../scripts/hud-buttons.js";
+import { bindHudPointerActivation, installDelayedHudTooltip, installHudButtonIcon } from "../scripts/hud-buttons.js";
 
 function node(className = "") {
     const attributes = new Map();
@@ -17,6 +17,12 @@ function node(className = "") {
         },
         firstChild: null,
         ownerDocument: null,
+        listeners: new Map(),
+        addEventListener(type, listener) { this.listeners.set(type, listener); },
+        removeEventListener(type, listener) {
+            if (this.listeners.get(type) === listener) this.listeners.delete(type);
+        },
+        matches: () => true,
         querySelector(selector) {
             const wanted = selector.startsWith(".") ? selector.slice(1) : selector;
             return children.find((child) => child.className.split(/\s+/).includes(wanted)) ?? null;
@@ -58,28 +64,43 @@ test("explicit HUD icons are inserted before labels and reused on refresh", () =
     assert.equal(icon.src, "icons/new-strike.svg");
 });
 
-test("palette pointer activation routes primary and secondary mouse buttons exactly once", () => {
+test("palette pointer activation routes click and context menu exactly once", () => {
     const element = node();
     const calls = [];
     bindHudPointerActivation(element, {
         onLeft: () => calls.push("left"),
         onRight: () => calls.push("right"),
     });
-    const event = (button) => ({
-        button,
+    const event = () => ({
         prevented: false,
         stopped: false,
         preventDefault() { this.prevented = true; },
         stopPropagation() { this.stopped = true; },
     });
 
-    const left = event(0);
-    element.onmouseup(left);
-    const right = event(2);
-    element.onmouseup(right);
-    element.onmouseup(event(1));
+    const left = event();
+    element.onclick(left);
+    const right = event();
+    element.oncontextmenu(right);
 
     assert.deepEqual(calls, ["left", "right"]);
     assert.equal(left.prevented && left.stopped, true);
     assert.equal(right.prevented && right.stopped, true);
+});
+
+test("HUD tooltip waits for the configured delay and closes on mouse leave", async () => {
+    const element = node();
+    const calls = [];
+    const component = {
+        element,
+        _onTooltipMouseEnter: () => calls.push("open"),
+        _onTooltipMouseLeave: () => calls.push("close"),
+    };
+    installDelayedHudTooltip(component, 10);
+    element.listeners.get("mouseenter")({ type: "mouseenter" });
+    assert.deepEqual(calls, []);
+    await new Promise((resolve) => setTimeout(resolve, 15));
+    assert.deepEqual(calls, ["open"]);
+    element.listeners.get("mouseleave")({ type: "mouseleave" });
+    assert.deepEqual(calls, ["open", "close"]);
 });

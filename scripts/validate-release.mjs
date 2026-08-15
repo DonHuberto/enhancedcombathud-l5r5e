@@ -15,7 +15,7 @@ const base = "https://github.com/DonHuberto/enhancedcombathud-l5r5e";
 if (manifest.manifest !== `${base}/releases/latest/download/module.json`) failures.push("manifest URL is not stable");
 if (manifest.download !== `${base}/releases/download/v${manifest.version}/module.zip`) failures.push("download URL/tag/basename mismatch");
 if (!manifest.changelog?.endsWith("/CHANGELOG.md")) failures.push("public changelog URL is missing");
-if (manifest.relationships?.systems?.find(({ id }) => id === "l5r5e")?.compatibility?.minimum !== "1.14.115") failures.push("core minimum must be 1.14.115");
+if (manifest.relationships?.systems?.find(({ id }) => id === "l5r5e")?.compatibility?.minimum !== "1.14.116") failures.push("core minimum must be 1.14.116");
 
 const files = [];
 const walk = (directory) => {

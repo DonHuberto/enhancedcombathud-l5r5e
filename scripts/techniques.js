@@ -1,6 +1,6 @@
 import { ACTION_ICONS, MODULE_ID, TECHNIQUE_TYPES } from "./config.js";
 import { collectTechniques, getTechniqueType, techniqueRequiresCheck } from "./data.js";
-import { bindHudPointerActivation, installHudButtonIcon } from "./hud-buttons.js";
+import { bindHudPointerActivation, installDelayedHudTooltip, installHudButtonIcon } from "./hud-buttons.js";
 import { getTechniqueLabel, openTechniqueRoll } from "./rolls.js";
 import { getProfile } from "./state.js";
 import { enrichText, escapeHtml, getSourceLabel, notify } from "./utils.js";
@@ -26,18 +26,6 @@ export function getTechniqueAvailability(item, profile) {
         return { usable: false, uncertain: true, reason: `${MODULE_ID}.techniques.context_unknown` };
     }
     return { usable: true, uncertain: false, reason: null };
-}
-
-function metadataValue(value) {
-    if (value === null || value === undefined || value === "") return null;
-    if (Array.isArray(value)) return value.map(metadataValue).filter(Boolean).join(", ");
-    if (typeof value === "object") {
-        return Object.entries(value)
-            .filter(([, entry]) => entry !== false && entry !== null && entry !== undefined && entry !== "")
-            .map(([key, entry]) => (entry === true ? key : `${key}: ${entry}`))
-            .join(", ");
-    }
-    return String(value);
 }
 
 function localizedSkillList(value) {
@@ -72,20 +60,12 @@ export async function getTechniqueTooltip(item, actor) {
         },
     ];
 
-    const optionalDetails = {
-        action_types: item.system?.action_types ?? item.system?.actions,
-        activation: item.system?.activation,
-        conflict: item.system?.conflict_type ?? item.system?.conflict,
-        target: item.system?.target,
-        range: item.system?.range,
-        void_cost: item.system?.void_cost ?? item.system?.void,
-        effects: item.system?.effects,
-        opportunity: item.system?.opportunities ?? item.system?.opportunity,
-    };
-    for (const [key, raw] of Object.entries(optionalDetails)) {
-        const value = metadataValue(raw);
-        if (value) details.push({ label: `${MODULE_ID}.techniques.${key}`, value: escapeHtml(value) });
-    }
+    const actionTypes = item.system?.activation?.action_types ?? item.system?.action_types ?? [];
+    const localizedTypes = actionTypes
+        .filter((type) => typeof type === "string" && type)
+        .map((type) => game.i18n.localize(`${MODULE_ID}.action_types.${type}`))
+        .join(", ");
+    if (localizedTypes) details.push({ label: `${MODULE_ID}.techniques.action_types`, value: escapeHtml(localizedTypes) });
 
     return {
         title: escapeHtml(item.name),
@@ -111,6 +91,10 @@ export function createTechniqueClasses(ARGON, { L5R5eSearchableAccordionPanel })
             return getTechniqueTooltip(this.item, this.actor);
         }
 
+        async activateTooltipListeners() {
+            installDelayedHudTooltip(this);
+        }
+
         async _onLeftClick() {
             const availability = getTechniqueAvailability(this.item, getProfile(this.actor));
             if (availability.usable) return openTechniqueRoll(this.actor, this.item);
@@ -128,7 +112,7 @@ export function createTechniqueClasses(ARGON, { L5R5eSearchableAccordionPanel })
                 );
                 return;
             }
-            this.item?.sheet?.render(true);
+            this.item?.sheet?.render({ force: true, editable: false });
         }
 
         async activateListeners(element) {
