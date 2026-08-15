@@ -1,5 +1,13 @@
 # Changelog
 
+## 2.0.15 - 2026-08-15
+
+- Render Fatigue beyond Endurance and Strife beyond Composure with resource-specific fills exactly twenty percent darker than their normal green and red colors.
+- Reduce the HUD tooltip delay to 1500 ms and remove height clipping and scrollbars from Argon and native tooltip containers so descriptions remain fully visible.
+- Route ordinary LMB on HUD techniques, weapons, armor and Drawer documents to the system's formatted “To chat” preview while preserving RMB editing and shifted action gestures.
+- Require system 1.14.118 for the shared formatted-preview contract.
+- Add regression coverage for exact overflow colors, global popup expansion and true preview routing.
+
 ## 2.0.14 - 2026-08-15
 
 - Make ordinary LMB on HUD techniques and equipment open a read-only preview, while ordinary RMB opens the editable document sheet.

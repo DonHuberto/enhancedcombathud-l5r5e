@@ -3,7 +3,7 @@ import { collectTechniques, getTechniqueType, techniqueRequiresCheck } from "./d
 import { bindHudPointerActivation, installDelayedHudTooltip, installHudButtonIcon } from "./hud-buttons.js";
 import { getTechniqueLabel, openTechniqueRoll } from "./rolls.js";
 import { getProfile } from "./state.js";
-import { enrichText, escapeHtml, getSourceLabel, notify } from "./utils.js";
+import { enrichText, escapeHtml, getSourceLabel, notify, openDocumentPreview } from "./utils.js";
 
 const FAVORITES_FLAG = "favoriteTechniques";
 
@@ -96,7 +96,7 @@ export function createTechniqueClasses(ARGON, { L5R5eSearchableAccordionPanel })
         }
 
         async _onLeftClick(event) {
-            if (!event?.shiftKey) return this.item?.sheet?.render({ force: true, editable: false });
+            if (!event?.shiftKey) return openDocumentPreview(this.item);
             const availability = getTechniqueAvailability(this.item, getProfile(this.actor));
             if (availability.usable) return openTechniqueRoll(this.actor, this.item);
             notify(availability.reason, "info");

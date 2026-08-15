@@ -272,7 +272,7 @@
     background: transparent !important;
     box-shadow: 0 8px 28px rgb(0 0 0 / 62%) !important;
     height: auto !important;
-    max-height: min(333px, 33vh) !important;
+    max-height: none !important;
     max-width: min(640px, calc(100vw - 32px)) !important;
     overflow: visible !important;
     width: min(640px, calc(100vw - 32px)) !important;
@@ -285,8 +285,8 @@
     color: #211b18 !important;
     display: block;
     height: auto;
-    max-height: min(333px, 33vh);
-    overflow: hidden;
+    max-height: none;
+    overflow: visible;
     width: 100%;
 }
 
@@ -312,9 +312,8 @@
     border: 0 !important;
     color: #211b18 !important;
     line-height: 1.45;
-    max-height: min(250px, calc(33vh - 5rem)) !important;
-    overflow-x: hidden;
-    overflow-y: auto;
+    max-height: none !important;
+    overflow: visible;
     overflow-wrap: anywhere;
     padding: 1rem 1.15rem 1.1rem !important;
 }
@@ -387,6 +386,16 @@
     padding-top: 0.75rem;
 }
 
+/* Popups cannot be interacted with reliably while they are scrolling. Keep
+ * every Argon/native tooltip fully expanded and let long prose wrap instead. */
+.ech-tooltip-container,
+.ech-tooltip-container > *,
+#tooltip {
+    max-height: none !important;
+    overflow: visible !important;
+    scrollbar-width: none !important;
+}
+
 body:has(.extended-combat-hud:hover) #tooltip {
     background: linear-gradient(145deg, #f4ecd9, #d8c8a8) !important;
     border: 1px solid #8d6b39 !important;
@@ -397,6 +406,14 @@ body:has(.extended-combat-hud:hover) #tooltip {
     max-width: min(480px, calc(100vw - 28px));
     padding: 0.65rem 0.8rem !important;
     white-space: normal;
+}
+
+.extended-combat-hud .l5r5e-resource-orbs-fatigue .l5r5e-resource-orb.filled.over-limit {
+    background: radial-gradient(circle at 35% 30%, #98ad6f, #516a31 68%, #202c14);
+}
+
+.extended-combat-hud .l5r5e-resource-orbs-strife .l5r5e-resource-orb.filled.over-limit {
+    background: radial-gradient(circle at 35% 30%, #af5d53, #722621 68%, #2f0e0d);
 }
 
 @media (max-width: 1450px), (max-height: 900px) {

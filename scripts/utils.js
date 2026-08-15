@@ -6,6 +6,12 @@ export function canUpdate(document) {
     return !!document?.isOwner || !!game.user?.isGM;
 }
 
+export function openDocumentPreview(document) {
+    const preview = game.l5r5e?.HelpersL5r5e?.openDocumentPreview;
+    if (typeof preview === "function") return preview.call(game.l5r5e.HelpersL5r5e, document);
+    return document?.sheet?.render({ force: true, editable: false });
+}
+
 export function getTargetToken() {
     return Array.from(game.user?.targets ?? [])[0]?.document ?? null;
 }

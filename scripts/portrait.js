@@ -17,6 +17,7 @@ import {
     getKnownTargetData,
     getTargetRangeBand,
     getTargetToken,
+    openDocumentPreview,
     promptSelect,
 } from "./utils.js";
 
@@ -348,7 +349,7 @@ export function createPortraitPanel(ARGON) {
                 .join(" · ");
             if (properties) details.appendChild(element("small", "l5r5e-weapon-properties", properties));
             card.append(image, details);
-            card.addEventListener("click", () => item?.sheet?.render({ force: true, editable: false }));
+            card.addEventListener("click", () => openDocumentPreview(item));
             card.addEventListener("mouseenter", () => {
                 const api = tacticalGridApi();
                 if (!api?.rangeHighlight || !this.token || !canvas?.dimensions?.distance) return;
@@ -411,7 +412,7 @@ export function createPortraitPanel(ARGON) {
                     .join(", ");
                 details.append(physical, supernatural);
                 if (properties) details.appendChild(element("small", "l5r5e-armor-properties", properties));
-                row.addEventListener("click", () => armor.sheet.render({ force: true, editable: false }));
+                row.addEventListener("click", () => openDocumentPreview(armor));
             }
             row.append(image, details);
             section.append(

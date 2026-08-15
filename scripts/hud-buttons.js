@@ -31,7 +31,7 @@ export function bindHudPointerActivation(element, { onLeft, onRight } = {}) {
     };
 }
 
-export function installDelayedHudTooltip(component, delay = 3000) {
+export function installDelayedHudTooltip(component, delay = 1500) {
     const element = component?.element;
     if (!element) return;
 

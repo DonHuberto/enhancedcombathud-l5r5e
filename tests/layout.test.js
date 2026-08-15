@@ -18,6 +18,8 @@ const skills = readFileSync(resolve(root, "scripts/skills.js"), "utf8");
 const techniques = readFileSync(resolve(root, "scripts/techniques.js"), "utf8");
 const equipment = readFileSync(resolve(root, "scripts/equipment.js"), "utf8");
 const drawer = readFileSync(resolve(root, "scripts/drawer.js"), "utf8");
+const utils = readFileSync(resolve(root, "scripts/utils.js"), "utf8");
+const hudButtons = readFileSync(resolve(root, "scripts/hud-buttons.js"), "utf8");
 
 test("the corrected HUD preserves Argon's compensating width and two-tier layout", () => {
     assert.ok(correction.includes("max-width: none;"), "Argon's scaled width must not be clamped to 100vw");
@@ -108,22 +110,30 @@ test("resource and secondary-stat rows no longer request native tooltips", () =>
     assert.doesNotMatch(statsBlock, /dataset\.tooltip/);
 });
 
-test("all Argon HUD tooltips use the paper surface and readable detail grid", () => {
+test("all Argon HUD tooltips show complete content without scrollbars", () => {
     assert.match(fixes, /\.ech-tooltip-container > \.l5r5e-tooltip[\s\S]*?background:\s*#e8dcc1 !important/);
     assert.match(fixes, /\.ech-tooltip-details[\s\S]*?grid-template-columns:\s*repeat\(2, minmax\(0, 1fr\)\)/);
     assert.match(fixes, /body:has\(\.extended-combat-hud:hover\) #tooltip/);
-    assert.match(fixes, /max-height:\s*min\(333px, 33vh\) !important/);
-    assert.match(fixes, /overflow-x:\s*hidden/);
-    assert.match(fixes, /overflow-y:\s*auto/);
+    assert.match(fixes, /max-height:\s*none !important/);
+    assert.match(fixes, /overflow:\s*visible !important/);
+    assert.match(fixes, /\.ech-tooltip-container,[\s\S]*?#tooltip\s*\{[\s\S]*?scrollbar-width:\s*none !important;/);
+    assert.doesNotMatch(fixes.slice(fixes.indexOf(".ech-tooltip-container:has")), /overflow-y:\s*auto/);
+    assert.match(hudButtons, /installDelayedHudTooltip\(component, delay = 1500\)/);
 });
 
 test("HUD documents use LMB preview and RMB edit without losing shifted actions", () => {
-    assert.match(techniques, /if \(!event\?\.shiftKey\) return this\.item\?\.sheet\?\.render\(\{ force: true, editable: false \}\)/);
+    assert.match(utils, /openDocumentPreview/);
+    assert.match(techniques, /if \(!event\?\.shiftKey\) return openDocumentPreview\(this\.item\)/);
     assert.match(techniques, /editable:\s*true/);
-    assert.match(equipment, /if \(!event\?\.shiftKey\) return this\.item\?\.sheet\?\.render\(\{ force: true, editable: false \}\)/);
+    assert.match(equipment, /if \(!event\?\.shiftKey\) return openDocumentPreview\(this\.item\)/);
     assert.match(equipment, /if \(!event\?\.shiftKey\) return this\.item\.sheet\.render\(\{ force: true, editable: true \}\)/);
     assert.doesNotMatch(drawer, /item\.sheet\.render\(true\)/);
-    assert.match(drawer, /editable:\s*false/);
+    assert.match(drawer, /openDocumentPreview\(item\)/);
+});
+
+test("over-limit Fatigue and Strife use resource-specific twenty-percent darker fills", () => {
+    assert.match(fixes, /resource-orbs-fatigue \.l5r5e-resource-orb\.filled\.over-limit[\s\S]*?#98ad6f[\s\S]*?#516a31[\s\S]*?#202c14/);
+    assert.match(fixes, /resource-orbs-strife \.l5r5e-resource-orb\.filled\.over-limit[\s\S]*?#af5d53[\s\S]*?#722621[\s\S]*?#2f0e0d/);
 });
 
 test("equipment uses system Conflict icons and the obsolete profile popup is absent", () => {

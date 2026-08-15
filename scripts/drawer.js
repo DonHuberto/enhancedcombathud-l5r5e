@@ -1,7 +1,7 @@
 import { MODULE_ID, SKILL_CATEGORIES } from "./config.js";
 import { collectSkills, getItemProperties } from "./data.js";
 import { getSkillLabel, openGenericRoll, openSkillRoll } from "./rolls.js";
-import { enrichText, escapeHtml, getSourceLabel } from "./utils.js";
+import { enrichText, escapeHtml, getSourceLabel, openDocumentPreview } from "./utils.js";
 import { toggleEquipped, toggleReadied } from "./weapons.js";
 
 function categoryLabel(category) {
@@ -102,7 +102,7 @@ export function createDrawerClasses(ARGON) {
                     .map(
                         (item) =>
                             new L5R5eDrawerButton(
-                                [{ label: escapeHtml(item.name), onClick: () => item.sheet.render({ force: true, editable: false }) }],
+                                [{ label: escapeHtml(item.name), onClick: () => openDocumentPreview(item) }],
                                 () => itemTooltip(item),
                             ),
                     ),
@@ -119,7 +119,7 @@ export function createDrawerClasses(ARGON) {
                         : game.i18n.localize(`${MODULE_ID}.equipment.equipped`)
                     : game.i18n.localize(`${MODULE_ID}.equipment.stowed`);
                 const buttons = [
-                    { label: escapeHtml(item.name), onClick: () => item.sheet.render({ force: true, editable: false }) },
+                    { label: escapeHtml(item.name), onClick: () => openDocumentPreview(item) },
                     { label: state, onClick: () => toggleEquipped(item) },
                 ];
                 if (item.type === "weapon") {

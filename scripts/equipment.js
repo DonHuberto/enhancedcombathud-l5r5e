@@ -5,7 +5,7 @@ import { bindHudPointerActivation, installDelayedHudTooltip, installHudButtonIco
 import { openWeaponStrike } from "./rolls.js";
 import { getProfile } from "./state.js";
 import { dropItem, getCurrentGrip, setGrip, toggleEquipped, toggleReadied } from "./weapons.js";
-import { enrichText, escapeHtml, getSourceLabel, notify, promptSelect, withActionLock } from "./utils.js";
+import { enrichText, escapeHtml, getSourceLabel, notify, openDocumentPreview, promptSelect, withActionLock } from "./utils.js";
 
 function itemSubtitle(item) {
     if (item.type === "weapon") {
@@ -68,7 +68,7 @@ export function createEquipmentClasses(ARGON, { L5R5eSearchableButtonPanel }) {
         }
 
         async _onLeftClick(event) {
-            if (!event?.shiftKey) return this.item?.sheet?.render({ force: true, editable: false });
+            if (!event?.shiftKey) return openDocumentPreview(this.item);
             if (this.item.type === "weapon") {
                 const grips = Object.keys(this.item.system?.grip_profiles ?? {});
                 if (event.altKey && grips.length > 1) {
@@ -121,7 +121,7 @@ export function createEquipmentClasses(ARGON, { L5R5eSearchableButtonPanel }) {
                 choices,
             });
             if (!action) return false;
-            if (action === "view") return this.item.sheet.render({ force: true, editable: false });
+            if (action === "view") return openDocumentPreview(this.item);
             if (action === "prepare") return prepareItem(this.actor, this.item);
             if (action === "drop") return dropItem(this.actor, this.item);
             if (action === "throw") return throwItem(this.actor, this.item);
@@ -160,11 +160,11 @@ export function createEquipmentClasses(ARGON, { L5R5eSearchableButtonPanel }) {
     class L5R5eWeaponSetButton extends L5R5eEquipmentItemButton {
         async _onLeftClick(event) {
             if (!this.item) return;
-            if (!event?.shiftKey) return this.item.sheet.render({ force: true, editable: false });
+            if (!event?.shiftKey) return openDocumentPreview(this.item);
             const profile = getProfile(this.actor);
             if (profile === "universal") {
                 notify(`${MODULE_ID}.notifications.strike_conflict_only`, "info");
-                return this.item.sheet.render({ force: true, editable: false });
+                return openDocumentPreview(this.item);
             }
             return openWeaponStrike(this.actor, this.item);
         }
