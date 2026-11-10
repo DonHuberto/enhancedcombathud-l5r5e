@@ -101,6 +101,10 @@ test("actions use dedicated icon nodes and movement reserves independent label/v
     assert.match(fixes, /grid-template-rows:\s*minmax\(0, 1fr\) minmax\(2\.35em, auto\)/);
     assert.match(fixes, /\.l5r5e-end-turn-slot \.action-element[\s\S]*?grid-template-rows:\s*minmax\(0, 1fr\) auto/);
     assert.match(fixes, /\.l5r5e-economy-pill\.l5r5e-economy-movement[\s\S]*?min-width:\s*var\(--l5r5e-movement-width\)/);
+    assert.match(actions, /l5r5e-movement-reset/);
+    assert.match(actions, /reset\.disabled = !state\.resetAvailable/);
+    assert.match(fixes, /\.l5r5e-movement-reset[\s\S]*?background:\s*#551c17/);
+    assert.match(fixes, /\.l5r5e-movement-reset[\s\S]*?border:\s*3px double #bd6f52/);
 });
 
 test("resource and secondary-stat rows no longer request native tooltips", () => {
@@ -121,10 +125,12 @@ test("all Argon HUD tooltips show complete content without scrollbars", () => {
     assert.match(hudButtons, /installDelayedHudTooltip\(component, delay = 1500\)/);
 });
 
-test("HUD documents use LMB preview and RMB edit without losing shifted actions", () => {
+test("technique entries use LMB for rolls and RMB for read-only preview", () => {
     assert.match(utils, /openDocumentPreview/);
-    assert.match(techniques, /if \(!event\?\.shiftKey\) return openDocumentPreview\(this\.item\)/);
-    assert.match(techniques, /editable:\s*true/);
+    assert.match(techniques, /if \(availability\.usable\)\s*\{\s*return withActionLock\(`technique:\$\{this\.item\.uuid\}`,[\s\S]*?openTechniqueRoll\(this\.actor, this\.item\)/);
+    assert.match(techniques, /return openDocumentPreview\(this\.item\)/);
+    assert.doesNotMatch(techniques, /this\.item\?\.sheet\?\.render\(\{ force: true, editable: true \}\)/);
+    assert.match(techniques, /bindHudPointerActivation\(element, \{\s*onLeft: \(event\) => this\._onLeftClick\(event\),\s*onRight: \(event\) => this\._onRightClick\(event\)/);
     assert.match(equipment, /if \(!event\?\.shiftKey\) return openDocumentPreview\(this\.item\)/);
     assert.match(equipment, /if \(!event\?\.shiftKey\) return this\.item\.sheet\.render\(\{ force: true, editable: true \}\)/);
     assert.doesNotMatch(drawer, /item\.sheet\.render\(true\)/);

@@ -1,5 +1,5 @@
 import { MODULE_ID, SKILL_CATEGORIES, localize } from "./config.js";
-import { getTechniqueSkills, techniqueRequiresCheck } from "./data.js";
+import { getActiveWeaponProfile, getTechniqueSkills, techniqueRequiresCheck } from "./data.js";
 import { canUseActor } from "./state.js";
 import { getTargetToken, notify } from "./utils.js";
 
@@ -48,16 +48,29 @@ export function openTechniqueRoll(actor, technique) {
         return null;
     }
 
-    const actionId = String(technique.system?.activation?.action_id ?? "").trim() || null;
-    const actionTypes = technique.system?.activation?.action_types ?? [];
+    const rulesKey = String(technique.system?.rulesKey ?? "").trim().toLowerCase();
+    const actionId = String(technique.system?.activation?.action_id ?? "").trim() || (rulesKey === "path-to-inner-peace" ? rulesKey : null);
+    const configuredActionTypes = technique.system?.activation?.action_types ?? [];
+    const actionTypes = configuredActionTypes.length
+        ? configuredActionTypes
+        : rulesKey === "path-to-inner-peace" ? ["support"] : [];
+    const target = getTargetToken();
+    const rollContext = actionId ? { actionId } : {};
+    if (actionTypes.includes("attack") || technique.system?.activation?.weapon?.skill_mode === "active-profile") {
+        const { profile } = getActiveWeaponProfile(actor);
+        if (profile) rollContext.attackProfileSnapshot = foundry.utils.deepClone(profile);
+        rollContext.targetUuid = target?.uuid ?? null;
+        if (!skills.length && profile?.skillId) skills.push(profile.skillId);
+    }
     return openDicePicker(actor, {
         item: technique,
         ringId: technique.system?.ring || actor.system?.stance,
         difficulty: technique.system?.difficulty || 2,
         skillsList: skills.length ? skills.join(",") : SKILL_CATEGORIES.join(","),
-        actions: Object.fromEntries(actionTypes.map((type) => [type, true])),
+        actions: actionTypes.length ? Object.fromEntries(actionTypes.map((type) => [type, true])) : undefined,
         actionId,
-        rollContext: actionId ? { actionId } : undefined,
+        target,
+        rollContext: Object.keys(rollContext).length ? rollContext : undefined,
     });
 }
 

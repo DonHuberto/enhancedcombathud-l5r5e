@@ -82,7 +82,12 @@ export function getTurnState(actor) {
 }
 
 export function getActionDefinition(actionId) {
-    return game.l5r5e?.actionRegistry?.[actionId] ?? null;
+    const definition = game.l5r5e?.actionRegistry?.[actionId] ?? null;
+    if (!definition) return null;
+    // Assist is a Support action with no check in the HUD adapter. Keep the
+    // system registry untouched; the adapter applies the bonus to the target's
+    // next check when its Dice Picker is submitted.
+    return actionId === "assist" ? { ...definition, requiresCheck: false } : definition;
 }
 
 export function getActionSlot(actor, { actionId, requiresCheck, actionTypes } = {}) {

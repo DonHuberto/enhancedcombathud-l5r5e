@@ -1,4 +1,6 @@
 import { MODULE_ID } from "./config.js";
+import { getTargetRangeBand, createChatCard } from "./utils.js";
+import { createPendingAssistMutation } from "./assist.js";
 
 const CHANNEL = `module.${MODULE_ID}`;
 
@@ -18,6 +20,46 @@ async function handleRequest(request) {
     const combat = game.combats.get(request.combatId);
     if (!combat || !userOwnsActor(request.userId, request.actorId)) return;
     const duel = foundry.utils.deepClone(combat.getFlag(MODULE_ID, "duel") ?? {});
+
+    if (request.type === "assist") {
+        const actor = game.actors.get(request.actorId);
+        const scene = game.scenes.get(request.sceneId);
+        const sourceToken = scene?.tokens?.get(request.sourceTokenId);
+        const targetToken = scene?.tokens?.get(request.targetTokenId);
+        const combatant = combat.combatants.find((entry) => entry.actor?.id === actor?.id);
+        const range = getTargetRangeBand(sourceToken?.object, targetToken);
+        if (
+            !actor || !combat.started || combatant !== combat.combatant ||
+            sourceToken?.actor?.id !== actor.id || !targetToken?.actor ||
+            targetToken.actor.id === actor.id || range === null || range > 2
+        ) return;
+
+        const { pendingAssist, mutation } = createPendingAssistMutation(actor, targetToken.actor, targetToken);
+        const result = await game.l5r5e?.actions?.executeImmediate?.(combatant, {
+            context: {
+                actor,
+                actionId: "assist",
+                actionTypes: ["support"],
+                requiresCheck: false,
+                lifecycle: { combat },
+            },
+            mutations: [mutation],
+        });
+        if (!result?.ok) {
+            console.warn(`${MODULE_ID} | Remote Assist transaction failed`, result);
+            return;
+        }
+        await createChatCard({
+            actor,
+            title: game.i18n.localize(`${MODULE_ID}.actions.assist.label`),
+            body: game.i18n.format(`${MODULE_ID}.chat.assist_granted`, {
+                target: targetToken.name,
+                range,
+                dice: pendingAssist.bonusKeptDice,
+            }),
+        });
+        return;
+    }
 
     if (request.type === "clearFinishingBlow") {
         duel.finishingBlowActors = (duel.finishingBlowActors ?? []).filter((id) => id !== request.actorId);

@@ -34,7 +34,9 @@ export function turnEconomyView(state = {}) {
             available: !state.freeMovement?.used,
             used: Boolean(state.freeMovement?.used),
             remainingFields: Math.max(0, movementBudget - movementSpent),
-            remainingBands: Math.ceil(Math.max(0, movementBudget - movementSpent) / 3),
+            resetAvailable: Boolean(state.movementUndoAvailable) &&
+                (state.freeMovement?.movementIds?.length ?? 0) > 0 &&
+                Object.keys(state.reservations ?? {}).length === 0,
         },
     };
 }

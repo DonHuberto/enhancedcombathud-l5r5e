@@ -1,12 +1,20 @@
 # Changelog
 
+## 2.0.16 - 2026-11-10
+
+- Route HUD kata clicks into the system roll flow; use right-click for the read-only technique preview.
+- Add Assist as a no-roll Water action and carry its kept-die benefit to the recipient's next check, with an option to decline it.
+- Consume Water actions before the standard action and keep action usage synchronized with the core turn state.
+- Preserve attack target and weapon context for kata rolls, and expose HUD movement and reset eligibility from the core state.
+- Add Polish and English labels and regression coverage for Assist and the updated action routing.
+
 ## 2.0.15 - 2026-08-15
 
 - Render Fatigue beyond Endurance and Strife beyond Composure with resource-specific fills exactly twenty percent darker than their normal green and red colors.
 - Reduce the HUD tooltip delay to 1500 ms and remove height clipping and scrollbars from Argon and native tooltip containers so descriptions remain fully visible.
-- Route ordinary LMB on HUD techniques, weapons, armor and Drawer documents to the system's formatted “To chat” preview while preserving RMB editing and shifted action gestures.
+- Use ordinary LMB on rollable HUD techniques to open the system Dice Picker, with an action lock against duplicate activation; ordinary RMB opens the read-only technique preview. Weapon and armor preview routes remain unchanged.
 - Require system 1.14.118 for the shared formatted-preview contract.
-- Add regression coverage for exact overflow colors, global popup expansion and true preview routing.
+- Add regression coverage for technique activation and preview routing, exact overflow colors and global popup expansion.
 
 ## 2.0.14 - 2026-08-15
 

@@ -8,7 +8,7 @@ import { getIntrigueActions } from "../scripts/profiles/intrigue.js";
 import { getDuelActions } from "../scripts/profiles/duel.js";
 import { getSkirmishActions } from "../scripts/profiles/skirmish.js";
 import { getMassBattleActions } from "../scripts/profiles/mass-battle.js";
-import { openWeaponStrike } from "../scripts/rolls.js";
+import { openTechniqueRoll, openWeaponStrike } from "../scripts/rolls.js";
 import { executeImmediateAction, getActionDefinition } from "../scripts/state.js";
 import {
     classifyActionIds,
@@ -58,16 +58,26 @@ test("profile actions are registry-driven, omit Wait and group by check requirem
     assert.equal(ACTIONS_BY_PROFILE.skirmish.includes("wait"), false);
 });
 
-test("turn economy view exposes primary, Water extra action and movement bands", () => {
+test("turn economy view exposes movement in tiles and reset eligibility", () => {
     assert.deepEqual(turnEconomyView({
         primaryAction: { used: true },
         waterExtraAction: { available: true, used: false },
-        freeMovement: { budget: 7, spent: 2, used: false },
+        freeMovement: { budget: 7, spent: 2, used: false, movementIds: ["move-1"] },
+        movementUndoAvailable: true,
     }), {
         primary: { available: false, used: true },
         water: { available: true, used: false },
-        movement: { available: true, used: false, remainingFields: 5, remainingBands: 2 },
+        movement: { available: true, used: false, remainingFields: 5, resetAvailable: true },
     });
+});
+
+test("movement reset stays disabled while an action is reserved", () => {
+    const view = turnEconomyView({
+        freeMovement: { budget: 3, spent: 1, movementIds: ["move-1"] },
+        movementUndoAvailable: true,
+        reservations: { action: { reservationId: "action" } },
+    });
+    assert.equal(view.movement.resetAvailable, false);
 });
 
 test("palettes persist outside combat while conflict-only chrome does not", () => {
@@ -155,6 +165,38 @@ test("HUD Strike freezes active profile, target and stable action context", () =
     assert.notEqual(options.rollContext.attackProfileSnapshot, weapon.attackProfile);
 });
 
+test("HUD attack kata carries the active weapon profile and the selected target into the core roll", () => {
+    let options;
+    const targetDocument = { uuid: "Scene.scene.Token.target" };
+    const profile = { range: { minimum: 1, maximum: 2 }, damage: 4, deadliness: 5, skillId: "melee", itemUuid: "Actor.a.Item.katana" };
+    const weapon = { uuid: profile.itemUuid };
+    const actor = { id: "a", uuid: "Actor.a", type: "character", isOwner: true, system: { stance: "water" }, items: [weapon] };
+    const technique = {
+        type: "technique",
+        system: {
+            rulesKey: "heartpiercing-strike",
+            ring: "fire",
+            difficulty: 4,
+            activation: { requires_check: true, action_types: ["attack", "move"], weapon: { skill_mode: "active-profile" } },
+        },
+    };
+    globalThis.foundry = { utils: { deepClone: (value) => structuredClone(value) } };
+    globalThis.game = {
+        user: { isGM: true, targets: new Set([{ document: targetDocument }]) },
+        l5r5e: {
+            equipment: { getAttackProfiles: () => [profile] },
+            DicePickerDialog: class { constructor(value) { options = value; } render() {} },
+        },
+    };
+    assert.ok(openTechniqueRoll(actor, technique));
+    assert.equal(options.target, targetDocument);
+    assert.deepEqual(options.actions, { attack: true, move: true });
+    assert.equal(options.rollContext.targetUuid, targetDocument.uuid);
+    assert.deepEqual(options.rollContext.attackProfileSnapshot, profile);
+    assert.notEqual(options.rollContext.attackProfileSnapshot, profile);
+    assert.equal(options.skillsList, "melee");
+});
+
 test("checked actions are not consumed by module turn-state writes", () => {
     const actions = fs.readFileSync(new URL("../scripts/actions.js", import.meta.url), "utf8");
     const state = fs.readFileSync(new URL("../scripts/state.js", import.meta.url), "utf8");
@@ -162,7 +204,7 @@ test("checked actions are not consumed by module turn-state writes", () => {
     assert.equal(state.includes(`setFlag(MODULE_ID, LEGACY_TURN_FLAG`), false);
 });
 
-test("Throw Item reserves an improvised core intent and opens the system check", async () => {
+test("Throw Item preserves the configured improvised profile for non-weapon objects", async () => {
     const skirmish = fs.readFileSync(new URL("../scripts/profiles/skirmish.js", import.meta.url), "utf8");
     const duel = fs.readFileSync(new URL("../scripts/profiles/duel.js", import.meta.url), "utf8");
     assert.match(skirmish, /"throw_item"/);
@@ -204,6 +246,8 @@ test("Throw Item reserves an improvised core intent and opens the system check",
     };
     const equipment = {
         heldItems: () => [item],
+        throwableItems: () => [item],
+        isSoaringSliceWeapon: () => false,
         throw: (_actor, _item, options) => {
             assessedOptions = options;
             return intent;
@@ -232,6 +276,47 @@ test("Throw Item reserves an improvised core intent and opens the system check",
     assert.equal(pickerOptions.target, target);
     assert.equal(pickerOptions.rollContext.equipmentIntentId, "throw-1");
     assert.equal(pickerOptions.rollContext.targetUuid, targetActor.uuid);
+    assert.equal(pickerOptions.rollContext.targetTokenUuid, target.uuid);
+});
+
+test("Throw Item routes eligible one-handed weapons through the Soaring Slice profile", async () => {
+    const weapon = {
+        id: "knife-1",
+        uuid: "Actor.a.Item.knife-1",
+        type: "weapon",
+        name: "Concealable Knife",
+        system: { equipped: true, readied: false, properties: [{ rulesKey: "concealable" }] },
+        attackProfile: { grip: "one-handed", skillId: "melee", damage: 2, deadliness: 4 },
+    };
+    const items = [weapon];
+    items.get = (id) => items.find((entry) => entry.id === id);
+    const actor = { id: "a", uuid: "Actor.a", type: "character", isOwner: true, system: { stance: "water" }, items };
+    const targetActor = { uuid: "Actor.target" };
+    const target = { uuid: "Scene.scene.Token.target", actor: targetActor };
+    let assessedOptions;
+    let pickerOptions;
+    const intent = { ok: true, intentId: "throw-2", status: "assess", assessment: { roll: { actionId: "soaring-slice", skillId: "melee", difficulty: 2, rollContext: { equipmentIntentId: "throw-2", throwMode: "soaring-slice" } } } };
+    const equipment = {
+        throwableItems: () => [weapon],
+        isSoaringSliceWeapon: (item) => item === weapon,
+        throw: (_actor, _item, options) => { assessedOptions = options; return intent; },
+        confirm: (value) => ({ ...value, status: "confirmed" }),
+        reserve: async (value) => ({ ...value, status: "reserved" }),
+        cancel: async () => {},
+    };
+    globalThis.foundry = { utils: { deepClone: (value) => structuredClone(value) } };
+    globalThis.game = {
+        settings: { get: (_namespace, key) => key === "enableImprovisedThrowAction" },
+        user: { isGM: false, targets: new Set([{ document: target }]) },
+        l5r5e: { equipment, DicePickerDialog: class { constructor(options) { pickerOptions = options; } render() {} } },
+    };
+
+    assert.equal(await throwItem(actor), true);
+    assert.deepEqual(assessedOptions, { mode: "soaring-slice", trackIndividual: true });
+    assert.equal(pickerOptions.actionId, "soaring-slice");
+    assert.equal(pickerOptions.skillId, "melee");
+    assert.equal(pickerOptions.rollContext.throwMode, "soaring-slice");
+    assert.equal(pickerOptions.rollContext.targetTokenUuid, target.uuid);
 });
 
 test("HUD layout keeps the portrait clear and exposes persistent equipment cards", () => {

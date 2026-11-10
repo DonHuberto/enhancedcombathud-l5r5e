@@ -4,6 +4,7 @@ import { createDrawerClasses } from "./drawer.js";
 import { createEquipmentClasses } from "./equipment.js";
 import { createTechniqueClasses } from "./techniques.js";
 import { createActionPanels } from "./actions.js";
+import { registerAssistDicePicker } from "./assist.js";
 import { createSearchablePanelClasses } from "./palettes.js";
 import { createSkillClasses } from "./skills.js";
 import { createWeaponSetsClass } from "./weapons.js";
@@ -67,10 +68,6 @@ Hooks.once("init", () => {
         if (SUPPORTED_ACTOR_TYPES.includes(ui.ARGON?._actor?.type)) ui.ARGON.refresh();
     }, 60);
 
-    Hooks.on("updateActor", (actor) => refreshBoundHud(actor));
-    Hooks.on("createActiveEffect", (effect) => refreshBoundHud(effect));
-    Hooks.on("updateActiveEffect", (effect) => refreshBoundHud(effect));
-    Hooks.on("deleteActiveEffect", (effect) => refreshBoundHud(effect));
     Hooks.on("updateCombatant", (combatant) => refreshBoundHud(combatant.actor));
     Hooks.on("l5r5e.turnStateChanged", (combatant) => refreshBoundHud(combatant?.actor));
 
@@ -106,6 +103,7 @@ Hooks.once("ready", async () => {
         return;
     }
     registerSocket();
+    registerAssistDicePicker();
     await ensureCombatProfileSnapshot();
     await clearLegacyTurnState(game.combat);
 

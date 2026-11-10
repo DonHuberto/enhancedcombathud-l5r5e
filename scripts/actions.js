@@ -26,10 +26,12 @@ import {
     notify,
     promptText,
     promptSelect,
+    getTargetRangeBand,
     withActionLock,
 } from "./utils.js";
 import { chooseWeapon, executeEquipmentIntent } from "./weapons.js";
 import { requestGm } from "./socket.js";
+import { createPendingAssistMutation } from "./assist.js";
 import { clearPersuadePending, markPersuadePending } from "./profiles/intrigue.js";
 import { executeDuelAction, isFinishingBlowAvailable } from "./profiles/duel.js";
 import { executeMassBattleAction } from "./profiles/mass-battle.js";
@@ -211,7 +213,9 @@ function improvisedThrowEnabled() {
 }
 
 function isThrowItemVisible(actor) {
-    return improvisedThrowEnabled() && (game.l5r5e?.equipment?.heldItems(actor) ?? []).length > 0;
+    const equipment = game.l5r5e?.equipment;
+    const throwableItems = equipment?.throwableItems?.(actor) ?? equipment?.heldItems?.(actor) ?? [];
+    return improvisedThrowEnabled() && throwableItems.length > 0;
 }
 
 export async function throwItem(actor, selectedItem = null) {
@@ -226,7 +230,7 @@ export async function throwItem(actor, selectedItem = null) {
         return false;
     }
     if (!improvisedThrowEnabled()) return false;
-    const throwable = equipment.heldItems(actor);
+    const throwable = equipment.throwableItems?.(actor) ?? equipment.heldItems(actor);
     if (!throwable.length) {
         notify(`${MODULE_ID}.notifications.no_throwable_item`, "warn");
         return false;
@@ -241,7 +245,8 @@ export async function throwItem(actor, selectedItem = null) {
     const item = actor.items.get(itemId);
     if (!item) return false;
 
-    const assessed = equipment.throw(actor, item, { mode: "improvised", trackIndividual: true });
+    const mode = equipment.isSoaringSliceWeapon?.(item) ? "soaring-slice" : "improvised";
+    const assessed = equipment.throw(actor, item, { mode, trackIndividual: true });
     if (!assessed.ok) {
         notify(`${MODULE_ID}.notifications.throw_blocked`, "warn", { reason: assessed.assessment?.code ?? "blocked" });
         return false;
@@ -262,6 +267,7 @@ export async function throwItem(actor, selectedItem = null) {
         rollContext: {
             ...foundry.utils.deepClone(roll.rollContext),
             targetUuid: target.actor?.uuid ?? target.uuid,
+            targetTokenUuid: target.uuid,
         },
     });
     if (!dialog) {
@@ -324,13 +330,76 @@ async function maneuver(actor) {
     return success;
 }
 
+function boundTokenForActor(actor) {
+    const token = ui.ARGON?._token;
+    if (token?.actor?.uuid === actor?.uuid) return token;
+    return canvas.tokens?.controlled?.find((entry) => entry.actor?.uuid === actor?.uuid) ?? null;
+}
+
+function assistTarget(actor) {
+    const target = getTargetToken();
+    if (!target) return { target: null, code: "no_target" };
+    if (!target.actor || target.actor.uuid === actor?.uuid) return { target, code: "invalid_target" };
+    const distance = getTargetRangeBand(boundTokenForActor(actor), target);
+    if (distance === null || distance > 2) return { target, code: "out_of_range" };
+    return { target, distance };
+}
+
+const ASSIST_NOTIFICATION_KEYS = Object.freeze({
+    no_target: `${MODULE_ID}.notifications.assist_no_target`,
+    invalid_target: `${MODULE_ID}.notifications.assist_invalid_target`,
+    out_of_range: `${MODULE_ID}.notifications.assist_out_of_range`,
+});
+
+function assistNotificationKey(code) {
+    return ASSIST_NOTIFICATION_KEYS[code] ?? ASSIST_NOTIFICATION_KEYS.invalid_target;
+}
+
 async function assist(actor) {
-    return openActionRoll(actor, {
-        skillsList: "artisan,martial,scholar,social,trade",
-        actions: { support: true },
-        actionId: "assist",
-        rollContext: { actionId: "assist" },
-        target: getTargetToken(),
+    const { target, distance, code } = assistTarget(actor);
+    if (code) {
+        notify(assistNotificationKey(code), "warn");
+        return false;
+    }
+    if (!getActionSlot(actor, { actionId: "assist", requiresCheck: false, actionTypes: ["support"] })) {
+        notify(`${MODULE_ID}.notifications.no_action`, "warn");
+        return false;
+    }
+
+    return withActionLock(`assist:${actor.uuid}:${target.actor.uuid}`, async () => {
+        const sourceToken = boundTokenForActor(actor);
+        if (!sourceToken) {
+            notify(assistNotificationKey("out_of_range"), "warn");
+            return false;
+        }
+        if (!game.user.isGM) {
+            const requested = requestGm("assist", actor, {
+                sceneId: target.parent?.id,
+                sourceTokenId: sourceToken.document.id,
+                targetTokenId: target.id,
+            });
+            if (!requested) notify(`${MODULE_ID}.notifications.no_active_gm`, "warn");
+            return requested;
+        }
+        const { pendingAssist, mutation } = createPendingAssistMutation(actor, target.actor, target);
+        const result = await executeImmediateAction(actor, "assist", {
+            mutations: [mutation],
+        });
+        if (!result.ok) {
+            console.warn(`${MODULE_ID} | Assist transaction failed`, result);
+            notify(`${MODULE_ID}.notifications.no_action`, "warn");
+            return false;
+        }
+        await createChatCard({
+            actor,
+            title: game.i18n.localize(`${MODULE_ID}.actions.assist.label`),
+            body: game.i18n.format(`${MODULE_ID}.chat.assist_granted`, {
+                target: target.name,
+                range: distance,
+                dice: pendingAssist.bonusKeptDice,
+            }),
+        });
+        return true;
     });
 }
 
@@ -429,6 +498,10 @@ export function actionAvailability(actor, actionId) {
     }
     if (actionId === "throw_item" && !isThrowItemVisible(actor)) {
         return { enabled: false, reason: `${MODULE_ID}.notifications.no_throwable_item` };
+    }
+    if (actionId === "assist") {
+        const { code } = assistTarget(actor);
+        if (code) return { enabled: false, reason: assistNotificationKey(code) };
     }
     const finishingBlow = actionId === "strike" && isFinishingBlowAvailable(actor);
     if (!finishingBlow && !ACTION_EXEMPT_ACTIONS.has(actionId)) {
@@ -553,8 +626,12 @@ export function createActionPanels(ARGON, { L5R5eEquipmentPanelButton }, { L5R5e
             async _getButtons() {
                 if (getProfile(this.actor) !== profile) return [];
                 const uiState = profileUiState(profile, { activeTurn: getCombatant(this.actor) === game.combat?.combatant });
+                const actionRegistry = {
+                    ...game.l5r5e?.actionRegistry,
+                    assist: getActionDefinition("assist"),
+                };
                 const actionIds = resolveProfileActionIds(
-                    game.l5r5e?.actionRegistry,
+                    actionRegistry,
                     profile,
                     ACTIONS_BY_PROFILE[profile] ?? [],
                 ).filter(
@@ -573,7 +650,11 @@ export function createActionPanels(ARGON, { L5R5eEquipmentPanelButton }, { L5R5e
                 this.element.classList.add("l5r5e-action-layout", `l5r5e-profile-${profile}`);
                 const uiState = profileUiState(profile);
                 const actionIds = this._buttons.map((button) => button.actionId).filter((id) => id && id !== "end_turn");
-                const groups = classifyActionIds(game.l5r5e?.actionRegistry, actionIds);
+                const actionRegistry = {
+                    ...game.l5r5e?.actionRegistry,
+                    assist: getActionDefinition("assist"),
+                };
+                const groups = classifyActionIds(actionRegistry, actionIds);
                 const byActionId = new Map(this._buttons.filter((button) => button.actionId).map((button) => [button.actionId, button]));
                 const paletteButtons = this._buttons.filter((button) => button.id?.startsWith?.("l5r5e-"));
                 const endTurn = byActionId.get("end_turn");
@@ -603,7 +684,7 @@ export function createActionPanels(ARGON, { L5R5eEquipmentPanelButton }, { L5R5e
                         if (id === "water" && this.actor.system?.stance !== "water") continue;
                         const status = state.used ? "used" : state.available ? "available" : "unavailable";
                         const value = id === "movement"
-                            ? game.i18n.format(`${MODULE_ID}.turn.movement_value`, { value: state.remainingBands })
+                            ? game.i18n.format(`${MODULE_ID}.turn.movement_value`, { value: state.remainingFields })
                             : String(state.available && !state.used ? 1 : 0);
                         const pill = element("div", `l5r5e-economy-pill l5r5e-economy-${id} ${status}`);
                         const icon = element("img", "l5r5e-economy-icon");
@@ -614,6 +695,30 @@ export function createActionPanels(ARGON, { L5R5eEquipmentPanelButton }, { L5R5e
                             element("span", "l5r5e-economy-label", game.i18n.localize(`${MODULE_ID}.turn.${id}`)),
                             element("strong", "l5r5e-economy-value", value),
                         );
+                        if (id === "movement") {
+                            const reset = element("button", "l5r5e-movement-reset", "↺");
+                            reset.type = "button";
+                            reset.disabled = !state.resetAvailable;
+                            reset.setAttribute("aria-label", game.i18n.localize(`${MODULE_ID}.turn.reset_movement`));
+                            reset.title = game.i18n.localize(`${MODULE_ID}.turn.reset_movement`);
+                            reset.addEventListener("click", async (event) => {
+                                event.preventDefault();
+                                event.stopPropagation();
+                                if (reset.disabled) return;
+                                const combatant = getCombatant(this.actor);
+                                const tokenDocument = combatant?.token;
+                                const movement = game.l5r5e?.movement;
+                                if (!combatant || !tokenDocument || !movement?.undoMovement) {
+                                    notify(`${MODULE_ID}.notifications.movement_reset_unavailable`, "warn");
+                                    return;
+                                }
+                                const result = await movement.undoMovement(combatant, tokenDocument);
+                                if (!result.ok) {
+                                    notify(`${MODULE_ID}.notifications.movement_reset_unavailable`, "warn");
+                                }
+                            });
+                            pill.appendChild(reset);
+                        }
                         (id === "movement" ? noCheckEconomy : checkEconomy).appendChild(pill);
                     }
                 }

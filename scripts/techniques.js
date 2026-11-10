@@ -3,7 +3,7 @@ import { collectTechniques, getTechniqueType, techniqueRequiresCheck } from "./d
 import { bindHudPointerActivation, installDelayedHudTooltip, installHudButtonIcon } from "./hud-buttons.js";
 import { getTechniqueLabel, openTechniqueRoll } from "./rolls.js";
 import { getProfile } from "./state.js";
-import { enrichText, escapeHtml, getSourceLabel, notify, openDocumentPreview } from "./utils.js";
+import { enrichText, escapeHtml, getSourceLabel, notify, openDocumentPreview, withActionLock } from "./utils.js";
 
 const FAVORITES_FLAG = "favoriteTechniques";
 
@@ -96,9 +96,10 @@ export function createTechniqueClasses(ARGON, { L5R5eSearchableAccordionPanel })
         }
 
         async _onLeftClick(event) {
-            if (!event?.shiftKey) return openDocumentPreview(this.item);
             const availability = getTechniqueAvailability(this.item, getProfile(this.actor));
-            if (availability.usable) return openTechniqueRoll(this.actor, this.item);
+            if (availability.usable) {
+                return withActionLock(`technique:${this.item.uuid}`, () => openTechniqueRoll(this.actor, this.item));
+            }
             notify(availability.reason, "info");
             return null;
         }
@@ -113,13 +114,13 @@ export function createTechniqueClasses(ARGON, { L5R5eSearchableAccordionPanel })
                 );
                 return;
             }
-            this.item?.sheet?.render({ force: true, editable: true });
+            return openDocumentPreview(this.item);
         }
 
         async activateListeners(element) {
             await super.activateListeners(element);
             bindHudPointerActivation(element, {
-                onLeft: (event) => this._onPreLeftClick(event),
+                onLeft: (event) => this._onLeftClick(event),
                 onRight: (event) => this._onRightClick(event),
             });
             element.onkeydown = (event) => {
